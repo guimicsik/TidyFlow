@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "presetName": "Default Clean",
+  "isBuiltIn": true,
+  "version": "1.0",
+  "settings": {
+    "usePrefixNumbering": true,
+    "deleteEmptyFolders": true,
+    "saveProjectBefore": true,
+    "reduceProject": false,
+    "unusedFolderName": "Nunca Usadas"
+  },
+  "tree": [
+    {
+      "id": "node_output",
+      "name": "Output",
+      "label": 9,
+      "rules": {
+        "types": ["MainComp"],
+        "extensions": [],
+        "groupByMainComp": false,
+        "handlePsdBundles": false,
+        "groupSubfoldersByExt": false,
+        "catchOthers": false,
+        "nameFilter": "",
+        "nameFilterMode": "contains"
+      },
+      "children": []
+    },
+    {
+      "id": "node_assets",
+      "name": "Assets",
+      "label": 0,
+      "rules": {
+        "types": [],
+        "extensions": [],
+        "groupByMainComp": false,
+        "handlePsdBundles": false,
+        "groupSubfoldersByExt": false,
+        "catchOthers": false,
+        "nameFilter": "",
+        "nameFilterMode": "contains"
+      },
+      "children": [
+        {
+          "id": "node_precomps",
+          "name": "PreComps",
+          "label": 5,
+          "rules": {
+            "types": ["PreComps"],
+            "extensions": [],
+            "groupByMainComp": true,
+            "handlePsdBundles": false,
+            "groupSubfoldersByExt": false,
+            "catchOthers": false,
+            "nameFilter": "",
+            "nameFilterMode": "contains"
+          },
+          "children": []
+        },
+        {
+          "id": "node_images",
+          "name": "Images",
+          "label": 4,
+          "rules": {
+            "types": ["StillImages"],
+            "extensions": [
+              "psd", "psb", "pdd", "ai", "eps", "ps", "pdf", "png", "jpg", "jpeg", "jpe",
+              "tif", "tiff", "bmp", "rle", "dib", "gif", "exr", "sxr", "mxr", "tga", "vda",
+              "icb", "vst", "hdr", "rgbe", "xyze", "heif", "heic", "svg",
+              "iff", "tdi", "sgi", "rgb", "bw", "pic", "rla", "rpf", "ei", "raw", "crw",
+              "cr2", "cr3", "nef", "nrw", "arw", "srf", "sr2", "raf", "orf", "rw2", "pef",
+              "x3f", "erf", "kdc", "dcr", "mos", "mrw", "iiq", "3fr", "fff", "srw",
+              "gpr", "dxo", "arq", "rwl", "mfw", "mef"
+            ],
+            "groupByMainComp": false,
+            "handlePsdBundles": true,
+            "groupSubfoldersByExt": true,
+            "catchOthers": true,
+            "nameFilter": "",
+            "nameFilterMode": "contains"
+          },
+          "children": []
+        },
+        {
+          "id": "node_footages",
+          "name": "Footages",
+          "label": 6,
+          "rules": {
+            "types": ["Videos", "ImageSequences", "DataFiles"],
+            "extensions": [
+              "mp4", "m4v", "mov", "qt", "prores", "avi", "mkv", "webm", "mxf", "mpg",
+              "mpeg", "m1v", "mpv", "m2p", "m2v", "m2t", "m2ts", "mts", "ts", "vob",
+              "3gp", "3g2", "amc", "dv", "wmv", "asf", "flv", "f4v", "r3d", "ari",
+              "braw", "crm", "cin", "dpx", "dng", "hevc", "h264", "264", "ogv", "cine",
+              "yuv", "dnxhd", "dnxhr",
+              "obj", "gltf", "glb", "fbx", "c4d",
+              "json", "mgjson", "csv", "tsv", "jsx", "bvh",
+              "prproj", "aep", "aepx", "aet", "exr", "png", "tga", "tif", "tiff", "jpg", "jpeg"
+            ],
+            "groupByMainComp": false,
+            "handlePsdBundles": false,
+            "groupSubfoldersByExt": true,
+            "catchOthers": true,
+            "nameFilter": "",
+            "nameFilterMode": "contains"
+          },
+          "children": []
+        },
+        {
+          "id": "node_audios",
+          "name": "Audios",
+          "label": 7,
+          "rules": {
+            "types": ["Audios"],
+            "extensions": [
+              "wav", "bwf", "mp3", "mpa", "mpe", "aac", "m4a", "aif", "aiff",
+              "flac", "ogg", "wma", "mka"
+            ],
+            "groupByMainComp": false,
+            "handlePsdBundles": false,
+            "groupSubfoldersByExt": true,
+            "catchOthers": true,
+            "nameFilter": "",
+            "nameFilterMode": "contains"
+          },
+          "children": []
+        },
+        {
+          "id": "node_solids",
+          "name": "Solids",
+          "label": 0,
+          "rules": {
+            "types": ["Solids"],
+            "extensions": [],
+            "groupByMainComp": false,
+            "handlePsdBundles": false,
+            "groupSubfoldersByExt": false,
+            "catchOthers": false,
+            "nameFilter": "",
+            "nameFilterMode": "contains"
+          },
+          "children": []
+        }
+      ]
+    }
+  ]
+}
+

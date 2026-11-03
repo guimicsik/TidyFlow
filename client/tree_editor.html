@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>AE Organizer — Preset Builder & Estrutura de Pastas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Top Bar - Gestão de Presets */
+    .top-bar {
+      background-color: #252525;
+      border-bottom: 1px solid #333333;
+      padding: 10px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .preset-selector-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .preset-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #9a9a9a;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .select-input, .text-input {
+      background-color: #181818;
+      color: #e0e0e0;
+      border: 1px solid #3c3c3c;
+      border-radius: 3px;
+      padding: 5px 8px;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .select-input:focus, .text-input:focus {
+      border-color: #1473e6;
+    }
+
+    #presetSelect {
+      flex: 1;
+      max-width: 240px;
+      height: 28px;
+    }
+
+    .badge-builtin {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background-color: #2d3846;
+      color: #7abaff;
+      border: 1px solid #3b4d63;
+      white-space: nowrap;
+    }
+
+    .badge-unsaved {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background-color: #44341b;
+      color: #f3b855;
+      border: 1px solid #614922;
+      white-space: nowrap;
+      display: none;
+    }
+
+    .preset-actions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      border: 1px solid #3e3e3e;
+      background-color: #2e2e2e;
+      color: #d4d4d4;
+      transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+      outline: none;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      background-color: #3a3a3a;
+      border-color: #525252;
+      color: #ffffff;
+    }
+
+    .btn:active:not(:disabled) {
+      background-color: #242424;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .btn-primary {
+      background-color: #1473e6;
+      border-color: #1473e6;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: #0d66d0;
+      border-color: #0d66d0;
+    }
+
+    .btn-danger {
+      background-color: #3a2323;
+      border-color: #5c3030;
+      color: #f28b8b;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background-color: #4d2828;
+      border-color: #7a3b3b;
+      color: #ffb3b3;
+    }
+
+    .btn-icon {
+      padding: 0 7px;
+      min-width: 26px;
+      height: 24px;
+      font-size: 12px;
+    }
+
+    /* Settings Strip */
+    .settings-bar {
+      background-color: #222222;
+      border-bottom: 1px solid #2f2f2f;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .settings-toggles {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .toggle-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      font-size: 11px;
+      color: #b4b4b4;
+    }
+
+    .toggle-container:hover {
+      color: #ffffff;
+    }
+
+    .toggle-container input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: relative;
+      display: inline-block;
+      width: 26px;
+      height: 14px;
+      background-color: #383838;
+      border-radius: 14px;
+      transition: background-color 0.15s;
+      flex-shrink: 0;
+    }
+
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      height: 10px;
+      width: 10px;
+      left: 2px;
+      bottom: 2px;
+      background-color: #9a9a9a;
+      border-radius: 50%;
+      transition: transform 0.15s, background-color 0.15s;
+    }
+
+    .toggle-container input:checked + .toggle-slider {
+      background-color: #1473e6;
+    }
+
+    .toggle-container input:checked + .toggle-slider::before {
+      transform: translateX(12px);
+      background-color: #ffffff;
+    }
+
+    .unused-folder-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #9a9a9a;
+    }
+
+    .unused-folder-group input {
+      width: 125px;
+      height: 24px;
+      font-size: 11px;
+    }
+
+    /* Tree Header & Editor Area */
+    .tree-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 14px;
+      overflow: hidden;
+      gap: 8px;
+    }
+
+    .tree-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .tree-toolbar-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9a9a9a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tree-scroll-area {
+      flex: 1;
+      background-color: #181818;
+      border: 1px solid #2e2e2e;
+      border-radius: 4px;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    /* Tree Nodes */
+    .tree-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tree-children {
+      list-style: none;
+      margin-left: 22px;
+      padding-left: 10px;
+      border-left: 1px dashed #383838;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .tree-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #232323;
+      border: 1px solid #303030;
+      border-radius: 3px;
+      padding: 5px 8px;
+      transition: border-color 0.12s, background-color 0.12s, opacity 0.12s, transform 0.12s;
+      position: relative;
+    }
+
+    .tree-row:hover {
+      border-color: #444444;
+      background-color: #272727;
+    }
+
+    .drag-handle {
+      cursor: grab;
+      color: #666666;
+      font-size: 13px;
+      line-height: 1;
+      padding: 2px 3px;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+      transition: color 0.12s, background-color 0.12s;
+      flex-shrink: 0;
+    }
+
+    .drag-handle:hover {
+      color: #ffffff;
+      background-color: #333333;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .tree-row.dragging {
+      opacity: 0.45;
+      border-style: dashed;
+      border-color: #1473e6;
+    }
+
+    .tree-row.drag-over-before {
+      border-top: 2px solid #1473e6 !important;
+      background-color: #1a2533;
+    }
+
+    .tree-row.drag-over-after {
+      border-bottom: 2px solid #1473e6 !important;
+      background-color: #1a2533;
+    }
+
+    .tree-row.drag-over-inside {
+      border: 2px dashed #4ec978 !important;
+      background-color: #1b2e21;
+    }
+
+    .collapse-btn {
+      width: 16px;
+      height: 16px;
+      border: none;
+      background: transparent;
+      color: #888888;
+      cursor: pointer;
+      font-size: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .collapse-btn:hover {
+      color: #ffffff;
+    }
+
+    .collapse-btn.empty {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Color Label Dot */
+    .label-swatch-btn {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      cursor: pointer;
+      flex-shrink: 0;
+      position: relative;
+      transition: transform 0.1s;
+    }
+
+    .label-swatch-btn:hover {
+      transform: scale(1.12);
+      border-color: #ffffff;
+    }
+
+    .prefix-preview {
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      color: #7abaff;
+      background-color: #1c2736;
+      padding: 2px 4px;
+      border-radius: 2px;
+      flex-shrink: 0;
+      border: 1px solid #2d3e54;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .prefix-preview:hover {
+      border-color: #1473e6;
+      filter: brightness(1.15);
+    }
+
+    .prefix-preview.prefix-off {
+      color: #777777;
+      background-color: #242424;
+      border-color: #383838;
+      text-decoration: none;
+      opacity: 0.7;
+    }
+
+    .prefix-preview.prefix-off:hover {
+      color: #b0b0b0;
+      border-color: #555555;
+      opacity: 1;
+    }
+
+    .folder-name-input {
+      background-color: #1b1b1b;
+      color: #e8e8e8;
+      border: 1px solid #363636;
+      border-radius: 3px;
+      padding: 3px 7px;
+      font-size: 12px;
+      font-weight: 500;
+      width: 145px;
+      min-width: 95px;
+      outline: none;
+    }
+
+    .folder-name-input:focus {
+      border-color: #1473e6;
+      background-color: #141414;
+    }
+
+    /* Rule Pills */
+    .rules-summary-btn {
+      flex: 1;
+      min-height: 24px;
+      background-color: #1d1d1d;
+      border: 1px dashed #3a3a3a;
+      border-radius: 3px;
+      padding: 2px 7px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+
+    .rules-summary-btn:hover {
+      border-color: #1473e6;
+      background-color: #222933;
+    }
+
+    .rule-pill {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 2px;
+      background-color: #2f353d;
+      color: #b8d4f2;
+      border: 1px solid #3f4a56;
+      white-space: nowrap;
+    }
+
+    .rule-pill.pill-ext {
+      background-color: #2b332c;
+      color: #9cd6a4;
+      border-color: #3a4b3d;
+    }
+
+    .rule-pill.pill-fallback {
+      background-color: #3d3122;
+      color: #f0bc74;
+      border-color: #57442c;
+    }
+
+    .rule-pill.pill-name {
+      background-color: #382a3d;
+      color: #dda5f0;
+      border-color: #503a57;
+    }
+
+    .rule-empty-hint {
+      font-size: 10px;
+      color: #6f6f6f;
+      font-style: italic;
+    }
+
+    .row-actions {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .row-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 3px;
+      border: 1px solid #383838;
+      background-color: #2b2b2b;
+      color: #bdbdbd;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.12s, color 0.12s;
+    }
+
+    .row-btn:hover:not(:disabled) {
+      background-color: #3c3c3c;
+      color: #ffffff;
+    }
+
+    .row-btn.add-child:hover {
+      background-color: #1b4b27;
+      border-color: #2e7d41;
+      color: #85e89d;
+    }
+
+    .row-btn.remove-node:hover {
+      background-color: #4f2323;
+      border-color: #823636;
+      color: #ff9c9c;
+    }
+
+    /* Footer */
+    .footer-bar {
+      background-color: #252525;
+      border-top: 1px solid #333333;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #editorStatus {
+      font-size: 11px;
+      color: #9a9a9a;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #editorStatus.success { color: #4ec978; }
+    #editorStatus.error { color: #f26d6d; }
+    #editorStatus.warning { color: #e5a93c; }
+
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Color Label Popover Menu */
+    .label-popover {
+      position: fixed;
+      z-index: 999;
+      background-color: #262626;
+      border: 1px solid #484848;
+      border-radius: 4px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+      padding: 6px;
+      width: 195px;
+      max-height: 310px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .label-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 7px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      color: #d4d4d4;
+    }
+
+    .label-option:hover, .label-option.active {
+      background-color: #1473e6;
+      color: #ffffff;
+    }
+
+    .label-option-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      flex-shrink: 0;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.68);
+      z-index: 900;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: #242424;
+      border: 1px solid #424242;
+      border-radius: 5px;
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
+      overflow: hidden;
+    }
+
+    .modal-card.modal-sm {
+      max-width: 380px;
+    }
+
+    .modal-header {
+      padding: 11px 14px;
+      background-color: #2b2b2b;
+      border-bottom: 1px solid #383838;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .modal-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #ececec;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-body {
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-footer {
+      padding: 10px 14px;
+      background-color: #2b2b2b;
+      border-top: 1px solid #383838;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .rule-section {
+      background-color: #1c1c1c;
+      border: 1px solid #2e2e2e;
+      border-radius: 4px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .rule-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9a9a9a;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .types-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      color: #d0d0d0;
+      cursor: pointer;
+    }
+
+    .check-item input[type="checkbox"] {
+      accent-color: #1473e6;
+      cursor: pointer;
+    }
+
+    /* Extensions Tag Manager */
+    .ext-presets-bar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .ext-preset-btn {
+      font-size: 10px;
+      padding: 2px 7px;
+      height: 22px;
+    }
+
+    .ext-add-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ext-add-row input {
+      flex: 1;
+      height: 26px;
+    }
+
+    .ext-tags-box {
+      background-color: #151515;
+      border: 1px solid #2c2c2c;
+      border-radius: 3px;
+      padding: 7px;
+      min-height: 64px;
+      max-height: 130px;
+      overflow-y: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-Content: flex-start;
+    }
+
+    .ext-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      background-color: #29323c;
+      color: #a8d1ff;
+      border: 1px solid #3a4959;
+    }
+
+    .ext-tag button {
+      border: none;
+      background: transparent;
+      color: #88a8cc;
+      cursor: pointer;
+      font-size: 12px;
+      line-height: 1;
+      padding: 0 1px;
+    }
+
+    .ext-tag button:hover {
+      color: #ff8b8b;
+    }
+
+    .name-filter-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .name-filter-row select {
+      width: 165px;
+      height: 28px;
+    }
+
+    .name-filter-row input {
+      flex: 1;
+      height: 28px;
+    }
+
+    /* Responsividade para larguras estreitas */
+    @media (max-width: 640px) {
+      .top-bar {
+        padding: 6px 10px;
+        gap: 6px;
+      }
+      .preset-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .settings-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 6px 10px;
+      }
+      .tree-workspace {
+        padding: 8px 10px;
+      }
+      .tree-row {
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .folder-name-input {
+        width: 110px;
+      }
+      .rules-summary-btn {
+        min-width: 100%;
+        order: 10;
+      }
+      .row-actions {
+        margin-left: auto;
+      }
+      .footer-bar {
+        padding: 8px 10px;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .footer-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra Superior: Seleção e Ações de Preset -->
+  <div class="top-bar">
+    <div class="preset-selector-group">
+      <span class="preset-label">Preset:</span>
+      <select id="presetSelect" class="select-input"></select>
+      <span id="badgeBuiltIn" class="badge-builtin">Padrão de Fábrica</span>
+      <span id="badgeUnsaved" class="badge-unsaved">Não salvo*</span>
+    </div>
+
+    <div class="preset-actions">
+      <button type="button" id="btnSavePreset" class="btn btn-primary" title="Salvar alterações no preset atual">Salvar</button>
+      <button type="button" id="btnSaveAsPreset" class="btn" title="Salvar estrutura como um novo Preset">Salvar Como Novo...</button>
+      <button type="button" id="btnResetDefault" class="btn" title="Restaurar o preset padrão de fábrica">Reset Default</button>
+      <button type="button" id="btnImportJson" class="btn" title="Importar arquivo .json de preset">Importar JSON</button>
+      <button type="button" id="btnExportJson" class="btn" title="Exportar preset atual para .json">Exportar JSON</button>
+      <button type="button" id="btnOpenPresetsFolder" class="btn" title="Abrir pasta de Presets no Explorer/Finder">Abrir Pasta</button>
+      <button type="button" id="btnDeletePreset" class="btn btn-danger" title="Excluir este preset de usuário">Excluir</button>
+      <input type="file" id="hiddenFileInput" accept=".json,application/json" style="display: none;">
+    </div>
+  </div>
+
+  <!-- Barra de Configurações do Preset -->
+  <div class="settings-bar">
+    <div class="settings-toggles">
+      <label class="toggle-container" title="Adiciona automaticamente 01_, 02_, 03_ nas pastas da árvore que possuírem arquivos, pulando categorias vazias">
+        <input type="checkbox" id="chkUsePrefixNumbering" checked>
+        <span class="toggle-slider"></span>
+        <span>Numeração Sequencial (01_, 02_...)</span>
+      </label>
+
+      <label class="toggle-container" title="Remove pastas que ficarem vazias após a organização">
+        <input type="checkbox" id="chkDeleteEmptyFolders" checked>
+        <span class="toggle-slider"></span>
+        <span>Deletar Pastas Vazias</span>
+      </label>
+    </div>
+
+    <div class="unused-folder-group">
+      <span>Pasta Não Usadas:</span>
+      <input type="text" id="inpUnusedFolderName" class="text-input" value="Nunca Usadas" placeholder="Nunca Usadas">
+    </div>
+  </div>
+
+  <!-- Área Principal: Editor Visual da Árvore de Pastas -->
+  <div class="tree-workspace">
+    <div class="tree-toolbar">
+      <span class="tree-toolbar-title">Estrutura da Árvore de Pastas (Clique na cor para Label AE • Clique nas regras para filtrar)</span>
+      <button type="button" id="btnAddTopFolder" class="btn btn-primary">+ Add Top Folder</button>
+    </div>
+
+    <div id="treeScrollArea" class="tree-scroll-area">
+      <ul id="treeRootList" class="tree-list"></ul>
+    </div>
+  </div>
+
+  <!-- Barra Inferior: Status e Ações Finais -->
+  <div class="footer-bar">
+    <div id="editorStatus">Pronto. Configure as pastas e regras do preset.</div>
+    <div class="footer-actions">
+      <button type="button" id="btnRunNow" class="btn btn-primary" title="Salva o preset e executa a organização imediatamente no projeto aberto">Salvar e Organizar Agora</button>
+      <button type="button" id="btnCloseModal" class="btn">Fechar</button>
+    </div>
+  </div>
+
+  <!-- Popover Flutuante de Seleção de Color Label (0 a 16) -->
+  <div id="labelPopover" class="label-popover"></div>
+
+  <!-- Modal: Configuração de Regras e Filtros da Pasta -->
+  <div id="rulesModalBackdrop" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span id="rulesModalSwatch" class="label-option-dot"></span>
+          <span id="rulesModalTitleText">Regras e Filtros da Pasta</span>
+        </div>
+        <button type="button" id="btnCloseRulesModalX" class="btn btn-icon">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- 1. Tipos Nativos do AE -->
+        <div class="rule-section">
+          <div class="rule-section-title">1. Tipos Nativos do After Effects</div>
+          <div class="types-grid">
+            <label class="check-item">
+              <input type="checkbox" class="rule-type-chk" value="MainComp">
+              <span>Composição Principal (MainComp / Output)</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" class="rule-type-chk" value="PreComps">
+              <span>Pré-Composições (Pre-Comps)</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" class="rule-type-chk" value="StillImages">
+              <span>Imagens Estáticas (Images)</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" class="rule-type-chk" value="Videos">
+              <span>Vídeos / Footages</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" class="rule-type-chk" value="ImageSequences">
+              <span>Sequências de Imagem (PNG/EXR Seq)</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" class="rule-type-chk" value="Audios">
+              <span>Áudios (WAV, MP3...)</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" class="rule-type-chk" value="Solids">
+              <span>Sólidos (SolidSource)</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" class="rule-type-chk" value="DataFiles">
+              <span>Dados / 3D / Projetos (.json, .c4d, .obj...)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 2. Comportamento de Subpastas e Fallback -->
+        <div class="rule-section">
+          <div class="rule-section-title">2. Subpastas Automáticas e Comportamento Especial</div>
+          <label class="check-item">
+            <input type="checkbox" id="chkRuleGroupExt">
+            <span>Criar subpastas automáticas por extensão (ex: <code>PNG/</code>, <code>MP4/</code>, <code>WAV/</code>)</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="chkRuleGroupByMainComp">
+            <span>Agrupar Pré-Composições em subpastas por Composição Principal e <code>Geral/</code></span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="chkRulePsdBundles">
+            <span>Preservar pacotes de camadas PSD / AI (isolar pré-comps internas na pasta do PSD)</span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="chkRuleCatchOthers">
+            <span>Pasta Coringa / Fallback (<code>OTHERS</code>) — absorver itens das categorias marcadas que não baterem em nenhuma extensão explícita</span>
+          </label>
+        </div>
+
+        <!-- 3. Filtro por Extensões -->
+        <div class="rule-section">
+          <div class="rule-section-title">3. Filtro de Extensões Permitidas</div>
+          <div class="ext-presets-bar">
+            <span style="font-size: 10px; color: #888;">Preencher pacote:</span>
+            <button type="button" class="btn ext-preset-btn" data-pack="Images">+ Imagens</button>
+            <button type="button" class="btn ext-preset-btn" data-pack="Videos">+ Vídeos</button>
+            <button type="button" class="btn ext-preset-btn" data-pack="ImageSequences">+ Seq. Imagem</button>
+            <button type="button" class="btn ext-preset-btn" data-pack="Audios">+ Áudios</button>
+            <button type="button" class="btn ext-preset-btn" data-pack="DataFiles">+ Dados/3D</button>
+            <button type="button" id="btnClearAllExts" class="btn ext-preset-btn btn-danger">Limpar Todas</button>
+          </div>
+
+          <div class="ext-add-row">
+            <input type="text" id="inpNewExtension" class="text-input" placeholder="Adicionar extensão (ex: exr, braw, c4d, webp) e pressione Enter ou [+]">
+            <button type="button" id="btnAddExtension" class="btn btn-primary">[+] Adicionar</button>
+          </div>
+
+          <div id="extTagsContainer" class="ext-tags-box"></div>
+        </div>
+
+        <!-- 4. Filtro por Nome / Regex -->
+        <div class="rule-section">
+          <div class="rule-section-title">4. Filtro por Nomenclatura (Assets by Name — Opcional)</div>
+          <div class="name-filter-row">
+            <select id="selNameFilterMode" class="select-input">
+              <option value="contains">Contém texto (ex: _matte)</option>
+              <option value="regex">Expressão Regular (Regex)</option>
+            </select>
+            <input type="text" id="inpNameFilter" class="text-input" placeholder="Ex: _matte, _vfx, ^RENDER_ (deixe vazio para ignorar)">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btnCancelRulesModal" class="btn">Cancelar</button>
+        <button type="button" id="btnApplyRulesModal" class="btn btn-primary">Aplicar Regras na Pasta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Salvar Como Novo Preset -->
+  <div id="saveAsModalBackdrop" class="modal-backdrop">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <div class="modal-title">Salvar Como Novo Preset</div>
+      </div>
+      <div class="modal-body">
+        <label style="font-size: 11px; color: #b4b4b4;">Digite o nome do novo perfil (ex: Motion Design, VFX Pipeline):</label>
+        <input type="text" id="inpSaveAsName" class="text-input" placeholder="Meu Preset Customizado">
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnCancelSaveAs" class="btn">Cancelar</button>
+        <button type="button" id="btnConfirmSaveAs" class="btn btn-primary">Criar e Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmação (Exclusão de Pasta / Preset / Reset) -->
+  <div id="confirmModalBackdrop" class="modal-backdrop">
+    <div class="modal-card modal-sm">
+      <div class="modal-header">
+        <div id="confirmModalTitle" class="modal-title">Confirmar Ação</div>
+      </div>
+      <div class="modal-body">
+        <p id="confirmModalMessage" style="font-size: 12px; color: #d4d4d4; line-height: 1.45;"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnCancelConfirm" class="btn">Cancelar</button>
+        <button type="button" id="btnAcceptConfirm" class="btn btn-danger">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      try {
+        if (window.opener) {
+          if (!window.__adobe_cep__ && window.opener.__adobe_cep__) {
+            window.__adobe_cep__ = window.opener.__adobe_cep__;
+          }
+          if (!window.cep && window.opener.cep) {
+            window.cep = window.opener.cep;
+          }
+          if (!window.cep_node && window.opener.cep_node) {
+            window.cep_node = window.opener.cep_node;
+          }
+          if (typeof window.require === "undefined" && typeof window.opener.require === "function") {
+            window.require = window.opener.require;
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script src="CSInterface.js"></script>
+  <script src="PresetManager.js"></script>
+  <script src="tree_editor.js"></script>
+</body>
+</html>
+

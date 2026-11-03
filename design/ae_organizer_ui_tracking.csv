@@ -1,0 +1,62 @@
+Tela / Painel;Grupo / Seção;Elemento Visual;ID / Nome da Camada (Layer);Tipo de Elemento;O que ele faz / Função;Status de Design
+Painel Principal;Header;AE Organizer Tab;tabAEOrganizer;Tab;"Aba de identificação da extensão no After Effects";Completo
+Painel Principal;Header;Properties Tab;tabProperties;Tab;"Aba secundária nativa do After Effects";Completo
+Painel Principal;Presets;Barra de Preset;presetBar;Container;"Container com borda que agrupa a seleção de presets";Completo
+Painel Principal;Presets;Dropdown Preset;presetSelect;Select / Dropdown;"Lista e seleciona o preset de estrutura de pastas";Completo
+Painel Principal;Presets;Botão Editar Preset;btnOpenPresetBuilder;Botão Compacto;"Abre a janela secundária do Preset Builder";Completo
+Painel Principal;Ações Principais;Organizar Projeto;btnOrganize;Botão Tile (Primário);"Executa a organização completa das composições selecionadas e suas dependências";Completo
+Painel Principal;Ações Principais;Criar estrutura de pastas;btnCreateStructure;Botão Tile (Secundário);"Cria a árvore de pastas vazia no painel Project do AE";Completo
+Painel Principal;Ações Principais;Apenas Midias;btnMediaOnly;Botão Tile (Secundário);"Organiza apenas mídias e footages importados, sem mover composições";Completo
+Painel Principal;Ações Principais;Verificar composições;btnCheckComps;Botão Tile (Secundário);"Varre as composições e gera relatório de uso e arquivos offline";Completo
+Painel Principal;Opções / Toggles;Numeração Sequencial;chkPrefixNumbering;Switch / Toggle;"Adiciona numeração sequencial (01_, 02_...) apenas às pastas com arquivos";Completo
+Painel Principal;Opções / Toggles;Salvar projeto antes;chkSaveProject;Switch / Toggle;"Força o salvamento do arquivo .aep antes de organizar";Completo
+Painel Principal;Opções / Toggles;Reduce Project;chkReduceProject;Switch / Toggle;"Deleta do projeto todos os arquivos não utilizados nas composições selecionadas";Completo
+Painel Principal;Opções / Toggles;Delete Empty folders.;chkDeleteEmptyFolders;Switch / Toggle;"Remove pastas que ficarem vazias ao final do processo";Completo
+Preset Builder;Gestão de Presets;Dropdown Preset;presetSelect;Select / Dropdown;"Alterna entre os presets disponíveis salvos";Completo
+Preset Builder;Gestão de Presets;Badge Padrão de Fábrica;badgeBuiltIn;Badge / Tag;"Indica se o preset é nativo de fábrica (somente leitura)";Completo
+Preset Builder;Gestão de Presets;Salvar;btnSavePreset;Botão (Primário);"Salva as alterações do preset customizado atual";Completo
+Preset Builder;Gestão de Presets;Salvar Como Novo...;btnSaveAsPreset;Botão (Secundário);"Duplica a estrutura criando um novo preset customizado";Completo
+Preset Builder;Gestão de Presets;Reset Default;btnResetDefault;Botão (Secundário);"Restaura os valores originais do preset de fábrica";Completo
+Preset Builder;Gestão de Presets;Importar JSON;btnImportPreset;Botão (Secundário);"Carrega arquivo externo .json de preset";Completo
+Preset Builder;Gestão de Presets;Exportar JSON;btnExportPreset;Botão (Secundário);"Exporta o preset selecionado em arquivo .json";Completo
+Preset Builder;Gestão de Presets;Abrir Pasta;btnOpenPresetsFolder;Botão (Secundário);"Abre a pasta local de presets no Windows Explorer";Completo
+Preset Builder;Gestão de Presets;Excluir;btnDeletePreset;Botão (Danger / Alerta);"Remove o preset customizado selecionado";Completo
+Preset Builder;Configurações Globais;Numeração Sequencial;chkGlobalPrefixNumbering;Switch / Toggle;"Define o padrão do preset para numeração 01_, 02_";Completo
+Preset Builder;Configurações Globais;Deletar Pastas Vazias;chkGlobalDeleteEmptyFolders;Switch / Toggle;"Define o padrão do preset para limpar pastas vazias";Completo
+Preset Builder;Configurações Globais;Pasta Não Usadas;inputUnusedFolderName;Campo de Texto;"Nome da pasta que receberá itens órfãos/não usados (ex: Nunca Usadas)";Completo
+Preset Builder;Toolbar da Árvore;+ Add Top Folder;btnAddTopFolder;Botão (Primário);"Insere uma nova pasta raiz na árvore do preset";Completo
+Preset Builder;Linha da Árvore;Alça de Arraste (Drag Handle);dragHandle;Ícone Drag;"6 pontinhos para arrastar e reorganizar a ordem das pastas";Completo
+Preset Builder;Linha da Árvore;Cor da Etiqueta (Label AE);folderLabelColor;Color Chip;"Abre o seletor das 16 cores de label do After Effects";Completo
+Preset Builder;Linha da Árvore;Badge do Prefixo;folderPrefix;Badge;"Exibe o número sequencial calculado (ex: 01_, 02_)";Completo
+Preset Builder;Linha da Árvore;Nome da Pasta;folderNameInput;Campo de Texto;"Nome digitado para a pasta (Output, Assets, PreComps, etc.)";Completo
+Preset Builder;Linha da Árvore;Pílula Resumo de Regras;folderRulesSummary;Pill / Botão;"Exibe resumo e abre o modal de configuração de regras e filtros";Completo
+Preset Builder;Linha da Árvore;Mover para Cima;btnMoveUp;Botão Ícone (↑);"Sobe a pasta uma linha na hierarquia";Completo
+Preset Builder;Linha da Árvore;Mover para Baixo;btnMoveDown;Botão Ícone (↓);"Desce a pasta uma linha na hierarquia";Completo
+Preset Builder;Linha da Árvore;Adicionar Subpasta;btnAddSubFolder;Botão Ícone (+);"Cria uma pasta filha/subpasta dentro da pasta atual";Completo
+Preset Builder;Linha da Árvore;Excluir Pasta;btnDeleteFolder;Botão Ícone (−);"Remove a pasta da estrutura do preset";Completo
+Modal Regras e Filtros;Header;Fechar Modal;btnModalClose;Botão Ícone (✕);"Fecha o modal descartando alterações não salvas";Completo
+Modal Regras e Filtros;Tipos Nativos AE;Composição Principal;chkType_MainComp;Checkbox;"Filtra Composições Principais / Output para esta pasta";Completo
+Modal Regras e Filtros;Tipos Nativos AE;Pré-Composições;chkType_PreComp;Checkbox;"Filtra Pré-Composições (Pre-Comps) para esta pasta";Completo
+Modal Regras e Filtros;Tipos Nativos AE;Imagens Estáticas;chkType_Images;Checkbox;"Filtra imagens fixas (PNG, JPG, PSD, AI...)";Completo
+Modal Regras e Filtros;Tipos Nativos AE;Vídeos / Footages;chkType_Footages;Checkbox;"Filtra clipes de vídeo (MP4, MOV, MXF...)";Completo
+Modal Regras e Filtros;Tipos Nativos AE;Sequências de Imagem;chkType_Sequences;Checkbox;"Filtra sequências numeradas (PNG Seq, EXR Seq...)";Completo
+Modal Regras e Filtros;Tipos Nativos AE;Áudios;chkType_Audios;Checkbox;"Filtra arquivos sonoros (WAV, MP3, AAC...)";Completo
+Modal Regras e Filtros;Tipos Nativos AE;Sólidos;chkType_Solids;Checkbox;"Filtra pastas de sólidos nativos do After Effects";Completo
+Modal Regras e Filtros;Tipos Nativos AE;Dados / 3D / Projetos;chkType_Data;Checkbox;"Filtra JSON, C4D, OBJ, projetos de tracking";Completo
+Modal Regras e Filtros;Subpastas e Comportamento;Subpastas por Extensão;chkAutoSubfolderExt;Checkbox;"Cria automaticamente subpastas por extensão (PNG/, MP4/, etc.)";Completo
+Modal Regras e Filtros;Subpastas e Comportamento;Agrupar Pré-Comps por MainComp;chkGroupPrecompsByMain;Checkbox;"Organiza pré-comps dentro de subpastas nomeadas pela Comp Principal";Completo
+Modal Regras e Filtros;Subpastas e Comportamento;Preservar Pacotes PSD/AI;chkPreserveLayerBundles;Checkbox;"Isola pré-comps de arquivos PSD/AI na pasta do próprio arquivo";Completo
+Modal Regras e Filtros;Subpastas e Comportamento;Pasta Coringa / Fallback (OTHERS);chkFallbackOthers;Checkbox;"Absorve qualquer item das categorias marcadas que sobrar";Completo
+Modal Regras e Filtros;Extensões Permitidas;Pacote + Imagens;btnPackImages;Botão Tag;"Preenche automaticamente extensões comuns de imagem";Completo
+Modal Regras e Filtros;Extensões Permitidas;Pacote + Vídeos;btnPackVideos;Botão Tag;"Preenche automaticamente extensões de vídeo";Completo
+Modal Regras e Filtros;Extensões Permitidas;Pacote + Seq. Imagem;btnPackSeq;Botão Tag;"Preenche automaticamente extensões de sequências";Completo
+Modal Regras e Filtros;Extensões Permitidas;Pacote + Áudios;btnPackAudios;Botão Tag;"Preenche automaticamente extensões de áudio";Completo
+Modal Regras e Filtros;Extensões Permitidas;Pacote + Dados/3D;btnPackData;Botão Tag;"Preenche automaticamente extensões de 3D e dados";Completo
+Modal Regras e Filtros;Extensões Permitidas;Limpar Todas;btnClearExtensions;Botão Tag (Danger);"Limpa a lista de extensões cadastradas";Completo
+Modal Regras e Filtros;Extensões Permitidas;Input Nova Extensão;inputNewExtension;Campo de Texto;"Campo para digitar extensão customizada (ex: braw, c4d)";Completo
+Modal Regras e Filtros;Extensões Permitidas;[+] Adicionar;btnAddExtension;Botão (Primário);"Adiciona a extensão digitada à lista de filtros";Completo
+Modal Regras e Filtros;Extensões Permitidas;Área de Tags de Extensões;extensionTagsContainer;Container / Box;"Exibe as tags ativas com botão de exclusão individual";Completo
+Modal Regras e Filtros;Nomenclatura;Modo de Correspondência;selectNameMatchMode;Select / Dropdown;"Modo de filtro de texto (Contém texto, Começa com, Termina com, Regex)";Completo
+Modal Regras e Filtros;Nomenclatura;Palavras-Chave;inputNameKeywords;Campo de Texto;"Termos de busca por nome (ex: _matte, _vfx, RENDER)";Completo
+Modal Regras e Filtros;Footer;Cancelar;btnModalCancel;Botão (Secundário);"Descarta edições e fecha o modal";Completo
+Modal Regras e Filtros;Footer;Aplicar Regras na Pasta;btnModalApply;Botão (Primário);"Salva as regras para a pasta selecionada e fecha o modal";Completo

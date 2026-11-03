@@ -1,0 +1,672 @@
+(function (global) {
+  "use strict";
+
+  var DEFAULT_PRESET_NAME = "Default Clean";
+  var STORAGE_KEY_ACTIVE = "ae_organizer_active_preset";
+  var STORAGE_KEY_USER_PRESETS = "ae_organizer_user_presets_map";
+  var STORAGE_KEY_DEFAULT_OVERRIDES = "ae_organizer_default_settings";
+
+  // 16 Color Labels nativos do After Effects + None (0)
+  var AE_LABELS = [
+    { index: 0, name: "None", ptName: "Nenhum (None)", color: "#585858" },
+    { index: 1, name: "Red", ptName: "1. Red (Vermelho)", color: "#b53838" },
+    { index: 2, name: "Yellow", ptName: "2. Yellow (Amarelo)", color: "#e4d84c" },
+    { index: 3, name: "Aqua", ptName: "3. Aqua (Água)", color: "#a9cbc7" },
+    { index: 4, name: "Pink", ptName: "4. Pink (Rosa)", color: "#e5bcc9" },
+    { index: 5, name: "Lavender", ptName: "5. Lavender (Lavanda)", color: "#a9a9ca" },
+    { index: 6, name: "Peach", ptName: "6. Peach (Pêssego)", color: "#e7c19e" },
+    { index: 7, name: "Seafoam", ptName: "7. Seafoam (Espuma)", color: "#b3c7b3" },
+    { index: 8, name: "Blue", ptName: "8. Blue (Azul)", color: "#677de0" },
+    { index: 9, name: "Green", ptName: "9. Green (Verde)", color: "#4aa44c" },
+    { index: 10, name: "Purple", ptName: "10. Purple (Roxo)", color: "#8e2c9a" },
+    { index: 11, name: "Orange", ptName: "11. Orange (Laranja)", color: "#e8920d" },
+    { index: 12, name: "Brown", ptName: "12. Brown (Marrom)", color: "#7f452a" },
+    { index: 13, name: "Magenta", ptName: "13. Magenta ( Fúcsia)", color: "#f46dd6" },
+    { index: 14, name: "Cyan", ptName: "14. Cyan (Ciano)", color: "#3da2a5" },
+    { index: 15, name: "Sandstone", ptName: "15. Sandstone (Arenito)", color: "#a89677" },
+    { index: 16, name: "Dark Green", ptName: "16. Dark Green (Verde Escuro)", color: "#1e401e" }
+  ];
+
+  var DEFAULT_EXTENSIONS = {
+    Images: [
+      "psd", "psb", "pdd", "ai", "eps", "ps", "pdf", "png", "jpg", "jpeg", "jpe",
+      "tif", "tiff", "bmp", "rle", "dib", "gif", "exr", "sxr", "mxr", "tga", "vda",
+      "icb", "vst", "hdr", "rgbe", "xyze", "heif", "heic", "svg",
+      "iff", "tdi", "sgi", "rgb", "bw", "pic", "rla", "rpf", "ei", "raw", "crw",
+      "cr2", "cr3", "nef", "nrw", "arw", "srf", "sr2", "raf", "orf", "rw2", "pef",
+      "x3f", "erf", "kdc", "dcr", "mos", "mrw", "iiq", "3fr", "fff", "srw",
+      "gpr", "dxo", "arq", "rwl", "mfw", "mef"
+    ],
+    Videos: [
+      "mp4", "m4v", "mov", "qt", "prores", "avi", "mkv", "webm", "mxf", "mpg",
+      "mpeg", "m1v", "mpv", "m2p", "m2v", "m2t", "m2ts", "mts", "ts", "vob",
+      "3gp", "3g2", "amc", "dv", "wmv", "asf", "flv", "f4v", "r3d", "ari",
+      "braw", "crm", "cin", "dpx", "dng", "hevc", "h264", "264", "ogv", "cine",
+      "yuv", "dnxhd", "dnxhr"
+    ],
+    Audios: [
+      "wav", "bwf", "mp3", "mpa", "mpe", "aac", "m4a", "aif", "aiff",
+      "flac", "ogg", "wma", "mka"
+    ],
+    DataFiles: [
+      "obj", "gltf", "glb", "fbx", "c4d",
+      "json", "mgjson", "csv", "tsv", "jsx", "bvh",
+      "prproj", "aep", "aepx", "aet"
+    ],
+    ImageSequences: [
+      "png", "exr", "tga", "tif", "tiff", "jpg", "jpeg", "dpx", "cin", "iff", "hdr"
+    ]
+  };
+
+  function getFactoryPresetObject() {
+    return {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "presetName": DEFAULT_PRESET_NAME,
+      "isBuiltIn": true,
+      "version": "1.0",
+      "settings": {
+        "usePrefixNumbering": true,
+        "deleteEmptyFolders": true,
+        "saveProjectBefore": true,
+        "reduceProject": false,
+        "unusedFolderName": "Nunca Usadas"
+      },
+      "tree": [
+        {
+          "id": "node_output",
+          "name": "Output",
+          "label": 9,
+          "rules": {
+            "types": ["MainComp"],
+            "extensions": [],
+            "groupByMainComp": false,
+            "handlePsdBundles": false,
+            "groupSubfoldersByExt": false,
+            "catchOthers": false,
+            "nameFilter": "",
+            "nameFilterMode": "contains"
+          },
+          "children": []
+        },
+        {
+          "id": "node_assets",
+          "name": "Assets",
+          "label": 0,
+          "rules": {
+            "types": [],
+            "extensions": [],
+            "groupByMainComp": false,
+            "handlePsdBundles": false,
+            "groupSubfoldersByExt": false,
+            "catchOthers": false,
+            "nameFilter": "",
+            "nameFilterMode": "contains"
+          },
+          "children": [
+            {
+              "id": "node_precomps",
+              "name": "PreComps",
+              "label": 5,
+              "rules": {
+                "types": ["PreComps"],
+                "extensions": [],
+                "groupByMainComp": true,
+                "handlePsdBundles": false,
+                "groupSubfoldersByExt": false,
+                "catchOthers": false,
+                "nameFilter": "",
+                "nameFilterMode": "contains"
+              },
+              "children": []
+            },
+            {
+              "id": "node_images",
+              "name": "Images",
+              "label": 4,
+              "rules": {
+                "types": ["StillImages"],
+                "extensions": DEFAULT_EXTENSIONS.Images.slice(),
+                "groupByMainComp": false,
+                "handlePsdBundles": true,
+                "groupSubfoldersByExt": true,
+                "catchOthers": true,
+                "nameFilter": "",
+                "nameFilterMode": "contains"
+              },
+              "children": []
+            },
+            {
+              "id": "node_footages",
+              "name": "Footages",
+              "label": 6,
+              "rules": {
+                "types": ["Videos", "ImageSequences", "DataFiles"],
+                "extensions": DEFAULT_EXTENSIONS.Videos
+                  .concat(DEFAULT_EXTENSIONS.DataFiles)
+                  .concat(["exr", "png", "tga", "tif", "tiff", "jpg", "jpeg"]),
+                "groupByMainComp": false,
+                "handlePsdBundles": false,
+                "groupSubfoldersByExt": true,
+                "catchOthers": true,
+                "nameFilter": "",
+                "nameFilterMode": "contains"
+              },
+              "children": []
+            },
+            {
+              "id": "node_audios",
+              "name": "Audios",
+              "label": 7,
+              "rules": {
+                "types": ["Audios"],
+                "extensions": DEFAULT_EXTENSIONS.Audios.slice(),
+                "groupByMainComp": false,
+                "handlePsdBundles": false,
+                "groupSubfoldersByExt": true,
+                "catchOthers": true,
+                "nameFilter": "",
+                "nameFilterMode": "contains"
+              },
+              "children": []
+            },
+            {
+              "id": "node_solids",
+              "name": "Solids",
+              "label": 0,
+              "rules": {
+                "types": ["Solids"],
+                "extensions": [],
+                "groupByMainComp": false,
+                "handlePsdBundles": false,
+                "groupSubfoldersByExt": false,
+                "catchOthers": false,
+                "nameFilter": "",
+                "nameFilterMode": "contains"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  function deepClone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function getNodeRequire() {
+    if (global.cep_node && typeof global.cep_node.require === "function") {
+      return global.cep_node.require;
+    }
+    if (typeof require === "function") {
+      return require;
+    }
+    return null;
+  }
+
+  function sanitizeFileName(name) {
+    return String(name || "preset")
+      .trim()
+      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+      .replace(/\s+/g, "_");
+  }
+
+  function normalizeNode(node, indexSeed) {
+    var rules = (node && node.rules) || {};
+    var rawExts = Array.isArray(rules.extensions) ? rules.extensions : [];
+    var cleanExts = [];
+    var seenExt = {};
+    for (var i = 0; i < rawExts.length; i++) {
+      var ext = String(rawExts[i] || "").trim().replace(/^\.+/, "").toLowerCase();
+      if (ext && !seenExt[ext]) {
+        seenExt[ext] = true;
+        cleanExts.push(ext);
+      }
+    }
+
+    var rawTypes = Array.isArray(rules.types) ? rules.types : [];
+    var cleanTypes = [];
+    for (var t = 0; t < rawTypes.length; t++) {
+      var tp = String(rawTypes[t] || "").trim();
+      if (tp && cleanTypes.indexOf(tp) === -1) {
+        cleanTypes.push(tp);
+      }
+    }
+
+    var labelNum = parseInt(node && node.label, 10);
+    if (isNaN(labelNum) || labelNum < 0 || labelNum > 16) {
+      labelNum = 0;
+    }
+
+    var children = Array.isArray(node && node.children) ? node.children : [];
+    var normalizedChildren = [];
+    for (var c = 0; c < children.length; c++) {
+      normalizedChildren.push(normalizeNode(children[c], indexSeed + "_" + c));
+    }
+
+    return {
+      id: (node && node.id) ? String(node.id) : ("node_" + Date.now() + "_" + indexSeed),
+      name: (node && node.name && String(node.name).trim()) ? String(node.name).trim() : "Nova Pasta",
+      label: labelNum,
+      useNumbering: (node && node.useNumbering !== undefined) ? Boolean(node.useNumbering) : true,
+      rules: {
+        types: cleanTypes,
+        extensions: cleanExts,
+        groupByMainComp: Boolean(rules.groupByMainComp),
+        handlePsdBundles: Boolean(rules.handlePsdBundles),
+        groupSubfoldersByExt: Boolean(rules.groupSubfoldersByExt),
+        catchOthers: Boolean(rules.catchOthers),
+        nameFilter: rules.nameFilter ? String(rules.nameFilter) : "",
+        nameFilterMode: rules.nameFilterMode === "regex" ? "regex" : "contains"
+      },
+      children: normalizedChildren
+    };
+  }
+
+  function normalizePreset(presetObj) {
+    var base = getFactoryPresetObject();
+    if (!presetObj || typeof presetObj !== "object") {
+      return base;
+    }
+
+    var pName = presetObj.presetName ? String(presetObj.presetName).trim() : DEFAULT_PRESET_NAME;
+    var isDefault = (pName === DEFAULT_PRESET_NAME || Boolean(presetObj.isBuiltIn));
+    var s = presetObj.settings || {};
+
+    var treeArr = Array.isArray(presetObj.tree) ? presetObj.tree : base.tree;
+    var normTree = [];
+    for (var i = 0; i < treeArr.length; i++) {
+      normTree.push(normalizeNode(treeArr[i], String(i)));
+    }
+
+    return {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      presetName: pName,
+      isBuiltIn: isDefault && pName === DEFAULT_PRESET_NAME,
+      version: String(presetObj.version || "1.0"),
+      settings: {
+        usePrefixNumbering: s.usePrefixNumbering !== undefined ? Boolean(s.usePrefixNumbering) : true,
+        deleteEmptyFolders: s.deleteEmptyFolders !== undefined ? Boolean(s.deleteEmptyFolders) : true,
+        saveProjectBefore: s.saveProjectBefore !== undefined ? Boolean(s.saveProjectBefore) : true,
+        reduceProject: s.reduceProject !== undefined ? Boolean(s.reduceProject) : false,
+        unusedFolderName: (s.unusedFolderName && String(s.unusedFolderName).trim()) ? String(s.unusedFolderName).trim() : "Nunca Usadas"
+      },
+      tree: normTree
+    };
+  }
+
+  function PresetManager(csInterfaceInstance) {
+    this.csInterface = csInterfaceInstance || (typeof CSInterface !== "undefined" ? new CSInterface() : null);
+    this.req = getNodeRequire();
+    this.fs = this.req ? this.req("fs") : null;
+    this.path = this.req ? this.req("path") : null;
+    this.childProcess = this.req ? this.req("child_process") : null;
+  }
+
+  PresetManager.AE_LABELS = AE_LABELS;
+  PresetManager.DEFAULT_PRESET_NAME = DEFAULT_PRESET_NAME;
+  PresetManager.DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS;
+
+  PresetManager.prototype.getLabelInfo = function (labelIndex) {
+    var idx = parseInt(labelIndex, 10);
+    if (isNaN(idx) || idx < 0 || idx > 16) idx = 0;
+    return AE_LABELS[idx] || AE_LABELS[0];
+  };
+
+  PresetManager.prototype.getPresetsFolderPath = function () {
+    if (!this.csInterface || !this.path) return null;
+    try {
+      var userData = this.csInterface.getSystemPath(SystemPath.USER_DATA);
+      if (!userData) return null;
+      var folder = this.path.join(userData, "AE_Organizer", "presets");
+      if (this.fs && !this.fs.existsSync(folder)) {
+        this.fs.mkdirSync(folder, { recursive: true });
+      }
+      return folder;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  PresetManager.prototype.getDefaultPresetFromBundle = function () {
+    try {
+      if (this.csInterface && this.fs && this.path) {
+        var extPath = this.csInterface.getSystemPath(SystemPath.EXTENSION);
+        var defaultFilePath = this.path.join(extPath, "client", "presets", "default_preset.json");
+        if (this.fs.existsSync(defaultFilePath)) {
+          var raw = this.fs.readFileSync(defaultFilePath, "utf8");
+          var parsed = JSON.parse(raw);
+          return normalizePreset(parsed);
+        }
+      }
+    } catch (e) {}
+    return getFactoryPresetObject();
+  };
+
+  PresetManager.prototype.getDefaultPreset = function () {
+    var base = this.getDefaultPresetFromBundle();
+    try {
+      var savedSettingsStr = localStorage.getItem(STORAGE_KEY_DEFAULT_OVERRIDES);
+      if (savedSettingsStr) {
+        var savedSettings = JSON.parse(savedSettingsStr);
+        if (savedSettings && typeof savedSettings === "object") {
+          if (savedSettings.usePrefixNumbering !== undefined) {
+            base.settings.usePrefixNumbering = Boolean(savedSettings.usePrefixNumbering);
+          }
+          if (savedSettings.deleteEmptyFolders !== undefined) {
+            base.settings.deleteEmptyFolders = Boolean(savedSettings.deleteEmptyFolders);
+          }
+          if (savedSettings.saveProjectBefore !== undefined) {
+            base.settings.saveProjectBefore = Boolean(savedSettings.saveProjectBefore);
+          }
+          if (savedSettings.reduceProject !== undefined) {
+            base.settings.reduceProject = Boolean(savedSettings.reduceProject);
+          }
+        }
+      }
+    } catch (e) {}
+    return base;
+  };
+
+  PresetManager.prototype.resetDefaultPreset = function () {
+    try {
+      localStorage.removeItem(STORAGE_KEY_DEFAULT_OVERRIDES);
+    } catch (e) {}
+    return this.getDefaultPresetFromBundle();
+  };
+
+  PresetManager.prototype._loadLocalStorageMap = function () {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY_USER_PRESETS);
+      if (raw) {
+        var map = JSON.parse(raw);
+        if (map && typeof map === "object") return map;
+      }
+    } catch (e) {}
+    return {};
+  };
+
+  PresetManager.prototype._saveLocalStorageMap = function (map) {
+    try {
+      localStorage.setItem(STORAGE_KEY_USER_PRESETS, JSON.stringify(map || {}));
+    } catch (e) {}
+  };
+
+  PresetManager.prototype.listPresets = function () {
+    var result = [
+      {
+        presetName: DEFAULT_PRESET_NAME,
+        isBuiltIn: true
+      }
+    ];
+    var seen = {};
+    seen[DEFAULT_PRESET_NAME.toLowerCase()] = true;
+
+    // 1. Ler do diretório de presets do usuário no disco
+    var dir = this.getPresetsFolderPath();
+    if (dir && this.fs && this.path) {
+      try {
+        var files = this.fs.readdirSync(dir);
+        for (var i = 0; i < files.length; i++) {
+          var file = files[i];
+          if (/\.json$/i.test(file)) {
+            var fullPath = this.path.join(dir, file);
+            try {
+              var data = JSON.parse(this.fs.readFileSync(fullPath, "utf8"));
+              if (data && data.presetName && !seen[String(data.presetName).toLowerCase()]) {
+                seen[String(data.presetName).toLowerCase()] = true;
+                result.push({
+                  presetName: String(data.presetName),
+                  isBuiltIn: false,
+                  filePath: fullPath
+                });
+              }
+            } catch (readErr) {}
+          }
+        }
+      } catch (dirErr) {}
+    }
+
+    // 2. Fallback / complemento do localStorage
+    var localMap = this._loadLocalStorageMap();
+    for (var key in localMap) {
+      if (localMap.hasOwnProperty(key)) {
+        var p = localMap[key];
+        if (p && p.presetName && !seen[String(p.presetName).toLowerCase()]) {
+          seen[String(p.presetName).toLowerCase()] = true;
+          result.push({
+            presetName: String(p.presetName),
+            isBuiltIn: false
+          });
+        }
+      }
+    }
+
+    return result;
+  };
+
+  PresetManager.prototype.loadPreset = function (presetName) {
+    if (!presetName || presetName === DEFAULT_PRESET_NAME) {
+      return this.getDefaultPreset();
+    }
+
+    var dir = this.getPresetsFolderPath();
+    if (dir && this.fs && this.path) {
+      try {
+        var expectedFile = this.path.join(dir, sanitizeFileName(presetName) + ".json");
+        if (this.fs.existsSync(expectedFile)) {
+          var parsed = JSON.parse(this.fs.readFileSync(expectedFile, "utf8"));
+          return normalizePreset(parsed);
+        }
+        // Procurar por presetName interno caso o nome do arquivo seja diferente
+        var files = this.fs.readdirSync(dir);
+        for (var i = 0; i < files.length; i++) {
+          if (/\.json$/i.test(files[i])) {
+            var full = this.path.join(dir, files[i]);
+            try {
+              var item = JSON.parse(this.fs.readFileSync(full, "utf8"));
+              if (item && String(item.presetName).toLowerCase() === String(presetName).toLowerCase()) {
+                return normalizePreset(item);
+              }
+            } catch (err2) {}
+          }
+        }
+      } catch (e) {}
+    }
+
+    var localMap = this._loadLocalStorageMap();
+    if (localMap[presetName]) {
+      return normalizePreset(localMap[presetName]);
+    }
+
+    return this.getDefaultPreset();
+  };
+
+  PresetManager.prototype.getActivePresetName = function () {
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY_ACTIVE);
+      if (saved) {
+        var list = this.listPresets();
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].presetName === saved) {
+            return saved;
+          }
+        }
+      }
+    } catch (e) {}
+    return DEFAULT_PRESET_NAME;
+  };
+
+  PresetManager.prototype.setActivePresetName = function (presetName) {
+    var nameToSave = presetName || DEFAULT_PRESET_NAME;
+    try {
+      localStorage.setItem(STORAGE_KEY_ACTIVE, nameToSave);
+    } catch (e) {}
+    this.notifyPresetsUpdated(nameToSave);
+  };
+
+  PresetManager.prototype.getActivePreset = function () {
+    var activeName = this.getActivePresetName();
+    return this.loadPreset(activeName);
+  };
+
+  PresetManager.prototype.savePreset = function (presetObj) {
+    var normalized = normalizePreset(presetObj);
+
+    if (normalized.presetName === DEFAULT_PRESET_NAME) {
+      // O preset Default não tem sua árvore sobrescrita, mas salvamos preferências de toggle se o usuário mudar no painel
+      try {
+        localStorage.setItem(STORAGE_KEY_DEFAULT_OVERRIDES, JSON.stringify(normalized.settings));
+      } catch (e) {}
+      this.notifyPresetsUpdated(DEFAULT_PRESET_NAME);
+      return normalized;
+    }
+
+    normalized.isBuiltIn = false;
+
+    // 1. Salvar em disco via Node.js
+    var dir = this.getPresetsFolderPath();
+    if (dir && this.fs && this.path) {
+      try {
+        var filePath = this.path.join(dir, sanitizeFileName(normalized.presetName) + ".json");
+        this.fs.writeFileSync(filePath, JSON.stringify(normalized, null, 2), "utf8");
+      } catch (e) {}
+    }
+
+    // 2. Salvar cópia em localStorage
+    var map = this._loadLocalStorageMap();
+    map[normalized.presetName] = normalized;
+    this._saveLocalStorageMap(map);
+
+    this.setActivePresetName(normalized.presetName);
+    return normalized;
+  };
+
+  PresetManager.prototype.deletePreset = function (presetName) {
+    if (!presetName || presetName === DEFAULT_PRESET_NAME) {
+      throw new Error("O preset padrão de fábrica não pode ser excluído.");
+    }
+
+    var dir = this.getPresetsFolderPath();
+    if (dir && this.fs && this.path) {
+      try {
+        var expectedFile = this.path.join(dir, sanitizeFileName(presetName) + ".json");
+        if (this.fs.existsSync(expectedFile)) {
+          this.fs.unlinkSync(expectedFile);
+        } else {
+          var files = this.fs.readdirSync(dir);
+          for (var i = 0; i < files.length; i++) {
+            if (/\.json$/i.test(files[i])) {
+              var full = this.path.join(dir, files[i]);
+              try {
+                var item = JSON.parse(this.fs.readFileSync(full, "utf8"));
+                if (item && String(item.presetName).toLowerCase() === String(presetName).toLowerCase()) {
+                  this.fs.unlinkSync(full);
+                }
+              } catch (e2) {}
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    var map = this._loadLocalStorageMap();
+    if (map[presetName]) {
+      delete map[presetName];
+      this._saveLocalStorageMap(map);
+    }
+
+    if (this.getActivePresetName() === presetName) {
+      this.setActivePresetName(DEFAULT_PRESET_NAME);
+    } else {
+      this.notifyPresetsUpdated(this.getActivePresetName());
+    }
+    return true;
+  };
+
+  PresetManager.prototype.exportPresetToFile = function (presetObj, targetFilePath) {
+    if (!this.fs) {
+      throw new Error("Sistema de arquivos indisponível.");
+    }
+    var normalized = normalizePreset(presetObj);
+    this.fs.writeFileSync(targetFilePath, JSON.stringify(normalized, null, 2), "utf8");
+    return true;
+  };
+
+  PresetManager.prototype.importPresetFromJsonString = function (jsonStr) {
+    var parsed = JSON.parse(jsonStr);
+    if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.tree)) {
+      throw new Error("Arquivo JSON inválido: propriedade 'tree' não encontrada.");
+    }
+    if (!parsed.presetName || parsed.presetName === DEFAULT_PRESET_NAME) {
+      parsed.presetName = (parsed.presetName || "Preset Importado") + " (Importado)";
+    }
+    parsed.isBuiltIn = false;
+    return this.savePreset(parsed);
+  };
+
+  PresetManager.prototype.openPresetsFolder = function () {
+    var dir = this.getPresetsFolderPath();
+    if (!dir) {
+      return false;
+    }
+
+    try {
+      if (this.childProcess) {
+        var isWin = navigator.platform.toLowerCase().indexOf("win") !== -1;
+        if (isWin) {
+          this.childProcess.exec('explorer "' + dir.replace(/\//g, "\\") + '"');
+          return true;
+        } else {
+          this.childProcess.exec('open "' + dir + '"');
+          return true;
+        }
+      }
+    } catch (e) {}
+
+    return false;
+  };
+
+  PresetManager.prototype.notifyPresetsUpdated = function (activePresetName) {
+    try {
+      if (global.opener && typeof global.opener.onPresetBuilderUpdated === "function") {
+        global.opener.onPresetBuilderUpdated(activePresetName || this.getActivePresetName());
+      }
+    } catch (e0) {}
+    try {
+      if (this.csInterface && typeof CSEvent !== "undefined") {
+        var evt = new CSEvent("com.organizer.ae.presetsUpdated", "APPLICATION");
+        evt.data = JSON.stringify({ activePreset: activePresetName || this.getActivePresetName() });
+        this.csInterface.dispatchEvent(evt);
+      }
+    } catch (e) {}
+  };
+
+  PresetManager.prototype.createEmptyNode = function (name, label, useNumbering) {
+    return {
+      id: "node_" + Date.now() + "_" + Math.floor(Math.random() * 10000),
+      name: name || "Nova Pasta",
+      label: label !== undefined ? label : 0,
+      useNumbering: useNumbering !== undefined ? Boolean(useNumbering) : true,
+      rules: {
+        types: [],
+        extensions: [],
+        groupByMainComp: false,
+        handlePsdBundles: false,
+        groupSubfoldersByExt: false,
+        catchOthers: false,
+        nameFilter: "",
+        nameFilterMode: "contains"
+      },
+      children: []
+    };
+  };
+
+  PresetManager.prototype.clonePreset = function (presetObj) {
+    return deepClone(normalizePreset(presetObj));
+  };
+
+  global.PresetManager = PresetManager;
+})(window);
+
