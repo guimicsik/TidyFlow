@@ -1,7 +1,15 @@
 (function () {
   var csInterface = new CSInterface();
   var presetManager = new PresetManager(csInterface);
+  var isPPro = presetManager.isPremierePro();
+  var hostAppName = presetManager.getHostDisplayName();
+  var compWordPlural = isPPro ? "Sequências" : "Composições";
+  var compWordLowerPlural = isPPro ? "sequências" : "composições";
+  var compWordSingular = isPPro ? "sequência" : "composição";
 
+  var headerTitle = document.getElementById("headerTitle");
+  var noticeText = document.getElementById("noticeText");
+  var btnCheckCompsLabel = document.getElementById("btnCheckCompsLabel");
   var presetSelect = document.getElementById("presetSelect");
   var btnOpenPresetBuilder = document.getElementById("btnOpenPresetBuilder");
   var btnOrganize = document.getElementById("btnOrganize");
@@ -14,7 +22,43 @@
   var chkDeleteEmptyFolders = document.getElementById("chkDeleteEmptyFolders");
   var statusMsg = document.getElementById("statusMsg");
 
+  if (isPPro) {
+    document.title = "PPro Organizer";
+    if (headerTitle) headerTitle.textContent = "PPro Organizer";
+    if (noticeText) {
+      noticeText.textContent = "Selecione as sequências no painel Project antes de organizar.";
+    }
+    if (btnCheckCompsLabel) {
+      btnCheckCompsLabel.textContent = "Verificar sequências";
+    }
+    if (chkReduceProject && chkReduceProject.parentElement) {
+      chkReduceProject.parentElement.title =
+        "Reduzir o projeto e deletar arquivos não usados nas sequências selecionadas";
+    }
+  }
+
   var activePreset = presetManager.getActivePreset();
+
+  function loadOrReloadHostScripts(callback) {
+    try {
+      if (window.__adobe_cep__) {
+        var extPath = csInterface.getSystemPath(SystemPath.EXTENSION);
+        var hostDir = (extPath + "/host").replace(/\\/g, "/");
+        var routerPath = hostDir + "/organizer.jsx";
+        var scriptCmd =
+          '$.evalFile("' +
+          routerPath +
+          '"); if ($.global.organizerLoadEngine) { $.global.organizerLoadEngine("' +
+          hostDir +
+          '"); }';
+        csInterface.evalScript(scriptCmd, function (res) {
+          if (typeof callback === "function") callback(res);
+        });
+        return;
+      }
+    } catch (e) {}
+    if (typeof callback === "function") callback();
+  }
 
   function setStatus(text, type) {
     statusMsg.textContent = text || "";
@@ -128,14 +172,12 @@
 
   if (btnOpenPresetBuilder) {
     btnOpenPresetBuilder.addEventListener("click", function () {
-      // 1. Tentar solicitar abertura via CEP requestOpenExtension (se registrada pelo After Effects)
       try {
         if (window.__adobe_cep__) {
           csInterface.requestOpenExtension("com.organizer.ae.editor", "");
         }
       } catch (e1) {}
 
-      // 2. Se já houver uma janela aberta do CEF popup, dar foco nela
       try {
         if (floatingEditorWin && !floatingEditorWin.closed) {
           floatingEditorWin.focus();
@@ -143,7 +185,6 @@
         }
       } catch (eFocus) {}
 
-      // 3. Abrir janela flutuante nativa do CEF independente com dimensões dedicadas
       var winFeatures = "width=740,height=640,resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no";
       try {
         floatingEditorWin = window.open("tree_editor.html", "AEOrganizerPresetBuilder", winFeatures);
@@ -153,7 +194,6 @@
         }
       } catch (e2) {}
 
-      // 4. Se o CEF estiver bloqueando URLs relativas em popup, tentar caminho absoluto file:///
       try {
         var extPath = csInterface.getSystemPath(SystemPath.EXTENSION);
         if (extPath) {
@@ -171,7 +211,6 @@
     syncPresetsAndToggles();
   };
 
-  // Escutar eventos de atualização vindos da janela modal do Preset Builder
   try {
     csInterface.addEventListener("com.organizer.ae.presetsUpdated", function () {
       syncPresetsAndToggles();
@@ -203,7 +242,7 @@
         setBusy(false);
 
         if (!result || result === "EvalScript error.") {
-          setStatus("Erro ao executar script no After Effects.", "error");
+          setStatus("Erro ao executar script no " + hostAppName + ".", "error");
           return;
         }
 
@@ -217,7 +256,7 @@
             var projectSaved = response.projectSaved;
 
             var summaryParts = [
-              "Composições: " + movedComps,
+              compWordPlural + ": " + movedComps,
               "Mídias: " + movedFootages
             ];
             if (reducedCount > 0) {
@@ -236,14 +275,14 @@
             );
           } else {
             var errMsg = (response && response.error) || "Falha desconhecida.";
-            if (errMsg.indexOf("Nenhuma composi") !== -1) {
-              setStatus("Nenhuma composição selecionada.", "warning");
+            if (errMsg.indexOf("Nenhuma composi") !== -1 || errMsg.indexOf("Nenhuma sequ") !== -1) {
+              setStatus("Nenhuma " + compWordSingular + " selecionada.", "warning");
             } else {
               setStatus("Erro: " + errMsg, "error");
             }
           }
         } catch (e) {
-          setStatus("Resposta inválida do After Effects.", "error");
+          setStatus("Resposta inválida do " + hostAppName + ".", "error");
         }
       }
     );
@@ -270,7 +309,7 @@
           setBusy(false);
 
           if (!result || result === "EvalScript error.") {
-            setStatus("Erro ao executar script no After Effects.", "error");
+            setStatus("Erro ao executar script no " + hostAppName + ".", "error");
             return;
           }
 
@@ -301,7 +340,7 @@
               setStatus("Erro: " + errMsg, "error");
             }
           } catch (e) {
-            setStatus("Resposta inválida do After Effects.", "error");
+            setStatus("Resposta inválida do " + hostAppName + ".", "error");
           }
         }
       );
@@ -315,7 +354,7 @@
   if (btnCheckComps) {
     btnCheckComps.addEventListener("click", function () {
       setBusy(true);
-      setStatus("Verificando composições...", "");
+      setStatus("Verificando " + compWordLowerPlural + "...", "");
 
       activePreset = presetManager.getActivePreset();
 
@@ -327,7 +366,7 @@
           setBusy(false);
 
           if (!result || result === "EvalScript error.") {
-            setStatus("Erro ao executar script no After Effects.", "error");
+            setStatus("Erro ao executar script no " + hostAppName + ".", "error");
             return;
           }
 
@@ -344,7 +383,7 @@
                 "Nunca Usadas";
 
               if (moved === 0) {
-                setStatus("Nenhuma composição vazia ou não utilizada encontrada.", "success");
+                setStatus("Nenhuma " + compWordSingular + " vazia ou não utilizada encontrada.", "success");
               } else {
                 var details = [];
                 if (emptyCount > 0) {
@@ -355,9 +394,12 @@
                 }
                 var detailsStr = details.length > 0 ? " (" + details.join(", ") + ")" : "";
 
+                var movedLabel = isPPro ? "sequência(s)" : "composição(ões)";
                 setStatus(
                   moved +
-                    " composição(ões) movida(s) para '" +
+                    " " +
+                    movedLabel +
+                    " movida(s) para '" +
                     unusedFolderLabel +
                     "'" +
                     detailsStr +
@@ -370,7 +412,7 @@
               setStatus("Erro: " + errMsg, "error");
             }
           } catch (e) {
-            setStatus("Resposta inválida do After Effects.", "error");
+            setStatus("Resposta inválida do " + hostAppName + ".", "error");
           }
         }
       );
@@ -385,24 +427,13 @@
 
     if (isCtrlR || isF5) {
       event.preventDefault();
-
-      var extPath = csInterface.getSystemPath(SystemPath.EXTENSION);
-      var jsxPath = (extPath + "/host/organizer.jsx").replace(/\\/g, "/");
-
-      csInterface.evalScript('$.evalFile("' + jsxPath + '")', function () {
+      loadOrReloadHostScripts(function () {
         window.location.reload();
       });
     }
   });
 
-  // Garantir que a versão mais recente do host/organizer.jsx esteja avaliada ao inicializar o painel
-  try {
-    if (window.__adobe_cep__) {
-      var extPathInit = csInterface.getSystemPath(SystemPath.EXTENSION);
-      var jsxPathInit = (extPathInit + "/host/organizer.jsx").replace(/\\/g, "/");
-      csInterface.evalScript('$.evalFile("' + jsxPathInit + '")');
-    }
-  } catch (e) {}
-
+  // Garantir que a versão mais recente de host/organizer.jsx + motor AEFT/PPRO esteja avaliada ao inicializar
+  loadOrReloadHostScripts();
   syncPresetsAndToggles();
 })();

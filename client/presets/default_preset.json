@@ -65,7 +65,7 @@
           "rules": {
             "types": ["StillImages"],
             "extensions": [
-              "psd", "psb", "pdd", "ai", "eps", "ps", "pdf", "png", "jpg", "jpeg", "jpe",
+              "psd", "psb", "pdd", "ai", "eps", "ps", "pdf", "png", "jpg", "jpeg", "jpe", "webp",
               "tif", "tiff", "bmp", "rle", "dib", "gif", "exr", "sxr", "mxr", "tga", "vda",
               "icb", "vst", "hdr", "rgbe", "xyze", "heif", "heic", "svg",
               "iff", "tdi", "sgi", "rgb", "bw", "pic", "rla", "rpf", "ei", "raw", "crw",
@@ -96,7 +96,9 @@
               "yuv", "dnxhd", "dnxhr",
               "obj", "gltf", "glb", "fbx", "c4d",
               "json", "mgjson", "csv", "tsv", "jsx", "bvh",
-              "prproj", "aep", "aepx", "aet", "exr", "png", "tga", "tif", "tiff", "jpg", "jpeg"
+              "prproj", "aep", "aepx", "aet",
+              "mogrt", "srt", "vtt", "scc", "stl", "xml", "edl", "aaf", "omf", "cube", "look",
+              "exr", "png", "tga", "tif", "tiff", "jpg", "jpeg"
             ],
             "groupByMainComp": false,
             "handlePsdBundles": false,

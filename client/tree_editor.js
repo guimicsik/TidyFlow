@@ -3,6 +3,49 @@
 
   var csInterface = new CSInterface();
   var presetManager = new PresetManager(csInterface);
+  var isPPro = presetManager.isPremierePro();
+  var hostAppName = presetManager.getHostDisplayName();
+
+  if (isPPro) {
+    document.title = "PPro Organizer — Preset Builder & Estrutura de Pastas";
+    var treeToolbarTitle = document.getElementById("treeToolbarTitle");
+    if (treeToolbarTitle) {
+      treeToolbarTitle.textContent =
+        "Estrutura da Árvore de Pastas (Clique na cor para Label PPro • Clique nas regras para filtrar)";
+    }
+    var ruleSectionHostTitle = document.getElementById("ruleSectionHostTitle");
+    if (ruleSectionHostTitle) {
+      ruleSectionHostTitle.textContent = "1. Tipos Nativos do Premiere Pro";
+    }
+    var lblTypeMainComp = document.getElementById("lblTypeMainComp");
+    if (lblTypeMainComp) {
+      lblTypeMainComp.textContent = "Sequência Principal (MainComp / Output)";
+    }
+    var lblTypePreComps = document.getElementById("lblTypePreComps");
+    if (lblTypePreComps) {
+      lblTypePreComps.textContent = "Sequências Aninhadas / Multicam (Pre-Comps)";
+    }
+    var lblTypeSolids = document.getElementById("lblTypeSolids");
+    if (lblTypeSolids) {
+      lblTypeSolids.textContent = "Itens Sintéticos (Color Matte, Adjustment Layer, Black Video...)";
+    }
+    var lblTypeDataFiles = document.getElementById("lblTypeDataFiles");
+    if (lblTypeDataFiles) {
+      lblTypeDataFiles.textContent = "Dados / MOGRT / Legendas / XML (.mogrt, .srt, .xml...)";
+    }
+    var lblRuleGroupByMainComp = document.getElementById("lblRuleGroupByMainComp");
+    if (lblRuleGroupByMainComp) {
+      lblRuleGroupByMainComp.innerHTML =
+        "Agrupar Sequências Aninhadas em subpastas por Sequência Principal e <code>Geral/</code>";
+    }
+    var lblRulePsdBundles = document.getElementById("chkRulePsdBundles")
+      ? document.getElementById("lblRulePsdBundles")
+      : null;
+    if (lblRulePsdBundles) {
+      lblRulePsdBundles.textContent =
+        "Preservar pacotes de camadas PSD / AI (isolar sequências internas na Bin do PSD)";
+    }
+  }
 
   // Elementos DOM - Barra Superior
   var presetSelect = document.getElementById("presetSelect");
@@ -165,14 +208,14 @@
     var pills = [];
 
     var typeLabels = {
-      MainComp: "Comp Principal",
-      PreComps: "Pre-Comps",
+      MainComp: isPPro ? "Seq. Principal" : "Comp Principal",
+      PreComps: isPPro ? "Nested Seqs" : "Pre-Comps",
       StillImages: "Images",
       Videos: "Videos",
       ImageSequences: "Img Seq",
       Audios: "Audios",
-      Solids: "Solids",
-      DataFiles: "Data/3D"
+      Solids: isPPro ? "Sintéticos/Solids" : "Solids",
+      DataFiles: isPPro ? "Data/MOGRT" : "Data/3D"
     };
 
     var types = Array.isArray(rules.types) ? rules.types : [];
@@ -381,13 +424,13 @@
           });
           row.appendChild(collapseBtn);
 
-          // 2. Seletor de Color Label do After Effects (0 a 16)
+          // 2. Seletor de Color Label do Host (0 a 16)
           var labelInfo = presetManager.getLabelInfo(node.label);
           var swatchBtn = document.createElement("button");
           swatchBtn.type = "button";
           swatchBtn.className = "label-swatch-btn";
           swatchBtn.style.backgroundColor = labelInfo.color;
-          swatchBtn.title = "Cor no After Effects: " + labelInfo.ptName;
+          swatchBtn.title = "Cor no " + hostAppName + ": " + labelInfo.ptName;
           swatchBtn.addEventListener("click", function (ev) {
             ev.stopPropagation();
             openColorLabelPopover(node.id, swatchBtn);
@@ -585,7 +628,7 @@
     if (!found) return;
 
     labelPopover.innerHTML = "";
-    var labels = PresetManager.AE_LABELS;
+    var labels = presetManager.getLabelsList();
     for (var i = 0; i < labels.length; i++) {
       (function (lbl) {
         var item = document.createElement("div");
@@ -1064,7 +1107,7 @@
       presetManager.savePreset(currentPreset);
     }
 
-    setStatus("Organizando projeto no After Effects...", "");
+    setStatus("Organizando projeto no " + hostAppName + "...", "");
     btnRunNow.disabled = true;
 
     var scriptCall =
@@ -1075,15 +1118,17 @@
     csInterface.evalScript(scriptCall, function (result) {
       btnRunNow.disabled = false;
       if (!result || result === "EvalScript error.") {
-        setStatus("Erro ao executar organização no After Effects.", "error");
+        setStatus("Erro ao executar organização no " + hostAppName + ".", "error");
         return;
       }
 
       try {
         var response = JSON.parse(result);
         if (response && response.success) {
+          var unitLabel = isPPro ? "Sequências: " : "Comps: ";
           setStatus(
-            "Projeto organizado! (Comps: " +
+            "Projeto organizado! (" +
+              unitLabel +
               (response.movedComps || 0) +
               ", Mídias: " +
               (response.movedFootages || 0) +
@@ -1094,15 +1139,15 @@
           );
         } else {
           var errMsg = (response && response.error) || "Falha ao organizar.";
-          if (errMsg.indexOf("Nenhuma composi") !== -1) {
-            // Caso não tenha comp selecionada, pergunta ou roda apenas mídias
-            setStatus("Selecione a Composição Principal no painel Project (ou use 'Apenas Mídias' no painel).", "warning");
+          if (errMsg.indexOf("Nenhuma composi") !== -1 || errMsg.indexOf("Nenhuma sequ") !== -1) {
+            var targetLabel = isPPro ? "Sequência Principal" : "Composição Principal";
+            setStatus("Selecione a " + targetLabel + " no painel Project (ou use 'Apenas Mídias' no painel).", "warning");
           } else {
             setStatus("Erro: " + errMsg, "error");
           }
         }
       } catch (e) {
-        setStatus("Resposta inválida do After Effects.", "error");
+        setStatus("Resposta inválida do " + hostAppName + ".", "error");
       }
     });
   });
@@ -1123,6 +1168,27 @@
     }
   });
 
+  function loadOrReloadHostScripts(callback) {
+    try {
+      if (window.__adobe_cep__) {
+        var extPath = csInterface.getSystemPath(SystemPath.EXTENSION);
+        var hostDir = (extPath + "/host").replace(/\\/g, "/");
+        var routerPath = hostDir + "/organizer.jsx";
+        var scriptCmd =
+          '$.evalFile("' +
+          routerPath +
+          '"); if ($.global.organizerLoadEngine) { $.global.organizerLoadEngine("' +
+          hostDir +
+          '"); }';
+        csInterface.evalScript(scriptCmd, function (res) {
+          if (typeof callback === "function") callback(res);
+        });
+        return;
+      }
+    } catch (e) {}
+    if (typeof callback === "function") callback();
+  }
+
   window.addEventListener("keydown", function (event) {
     var isCtrlR =
       (event.ctrlKey || event.metaKey) &&
@@ -1131,25 +1197,13 @@
 
     if (isCtrlR || isF5) {
       event.preventDefault();
-      try {
-        var extPath = csInterface.getSystemPath(SystemPath.EXTENSION);
-        var jsxPath = (extPath + "/host/organizer.jsx").replace(/\\/g, "/");
-        csInterface.evalScript('$.evalFile("' + jsxPath + '")', function () {
-          window.location.reload();
-        });
-      } catch (e) {
+      loadOrReloadHostScripts(function () {
         window.location.reload();
-      }
+      });
     }
   });
 
-  try {
-    if (window.__adobe_cep__) {
-      var extPathInit = csInterface.getSystemPath(SystemPath.EXTENSION);
-      var jsxPathInit = (extPathInit + "/host/organizer.jsx").replace(/\\/g, "/");
-      csInterface.evalScript('$.evalFile("' + jsxPathInit + '")');
-    }
-  } catch (e) {}
+  loadOrReloadHostScripts();
 
   // Inicialização
   var initialPresetName = presetManager.getActivePresetName();

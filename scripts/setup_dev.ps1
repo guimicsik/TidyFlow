@@ -137,10 +137,11 @@ Write-Host "  Setup $c_concluido com sucesso!                           " -Foreg
 Write-Host "============================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "$c_Proximos passos:" -ForegroundColor White
-Write-Host "  1. Reinicie o Adobe After Effects (caso $c_ja esteja aberto)."
-Write-Host "  2. No After Effects, abra o painel em:"
+Write-Host "  1. Reinicie o Adobe After Effects ou o Premiere Pro 22.x+ (caso $c_ja estejam abertos)."
+Write-Host "  2. No After Effects ou Premiere Pro, abra o painel em:"
 Write-Host "       - PT-BR: Janela > Extens$c_oes > AE Organizer" -ForegroundColor Cyan
 Write-Host "       - EN-US: Window > Extensions > AE Organizer" -ForegroundColor Cyan
 Write-Host "  3. Para inspecionar o console do painel (DevTools):"
-Write-Host "       - Abra o Google Chrome e acesse: http://localhost:$DebugPort" -ForegroundColor Cyan
+Write-Host "       - After Effects : http://localhost:8089 (Editor: 8090)" -ForegroundColor Cyan
+Write-Host "       - Premiere Pro  : http://localhost:8091 (Editor: 8092)" -ForegroundColor Cyan
 Write-Host ""

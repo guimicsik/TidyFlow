@@ -103,9 +103,9 @@ AE_File_Organizer/
 │   └── presets/
 │       └── default_preset.json # Preset padrão de fábrica
 └── host/
-    ├── bridge.jsx          # Roteador unificado de Host (detecta AEFT vs PPRO)
+    ├── organizer.jsx       # Roteador unificado de Host (detecta AEFT vs PPRO)
     ├── aeft_organizer.jsx  # Motor específico do After Effects (CompItem, FolderItem)
-    └── ppro_organizer.jsx  # Motor específico do Premiere Pro (ProjectItem, Bin, Sequence)
+    └── ppro_organizer.jsx  # Motor específico do Premiere Pro 22.x+ (ProjectItem, Bin, Sequence)
 ```
 
 ---
@@ -249,40 +249,22 @@ AE_File_Organizer/
 Para manter **1 único codebase** onde qualquer atualização de UI, regras ou presets funcione simultaneamente nos dois programas sem retrabalho:
 
 ### 6.1 Unificação no `CSXS/manifest.xml`
-O CEP suporta múltiplos hosts sob a mesma extensão. Adicionamos o Premiere (`PPRO`) ao lado do After Effects (`AEFT`):
+O CEP suporta múltiplos hosts sob a mesma extensão. O Premiere Pro 22.x+ (`PPRO`) opera lado a lado com o After Effects (`AEFT`):
 ```xml
 <HostList>
   <Host Name="AEFT" Version="[16.0,99.9]" />
-  <Host Name="PPRO" Version="[13.0,99.9]" />
+  <Host Name="PPRO" Version="[22.0,99.9]" />
 </HostList>
 ```
 
 ### 6.2 Frontend 100% Compartilhado (Client-Side)
-- O HTML, CSS, `tree_editor.html`, `PresetManager.js` e a lógica de eventos são idênticos.
+- O HTML, CSS, `tree_editor.html`, `PresetManager.js` e a lógica de eventos são idênticos e compartilham a mesma pasta de presets em disco (`%APPDATA%/AE_Organizer/presets`).
 - O painel consulta o ID do host via `csInterface.getHostEnvironment().appId`:
-  - Se for `"AEFT"`, exibe termos como *"Composições"* e labels do After Effects.
-  - Se for `"PPRO"`, exibe termos como *"Sequências"* e mapeia os color labels do Premiere.
+  - Se for `"AEFT"`, exibe termos como *"Composições"* e os 16 labels do After Effects.
+  - Se for `"PPRO"`, exibe termos como *"Sequências"* e mapeia de forma bijetora (1:1) os 16 color labels do Premiere Pro (`0..15`).
 
-### 6.3 Camada de Abstração ExtendScript (Host-Side)
-O frontend sempre chama a mesma função abstrata:
-```javascript
-csInterface.evalScript("$.global.organizerRouter.organizeProject('" + mainItemId + "', '" + presetJson + "')");
-```
-No arquivo `host/bridge.jsx`:
-```javascript
-$.global.organizerRouter = {
-    isAE: function() { return (typeof app.project.items !== "undefined"); },
-    isPPro: function() { return (typeof app.project.rootItem !== "undefined"); },
-
-    organizeProject: function(mainItemId, presetJson) {
-        if (this.isAE()) {
-            return $.global.aeft_organizeWithPreset(mainItemId, presetJson);
-        } else {
-            return $.global.ppro_organizeWithPreset(mainItemId, presetJson);
-        }
-    }
-};
-```
+### 6.3 Camada de Abstração ExtendScript (`host/organizer.jsx`)
+O frontend sempre chama as mesmas funções globais (`$.global.organizeWithPreset`, `$.global.createPresetFolderStructure`, `$.global.checkUnusedComps`), e o roteador em `host/organizer.jsx` direciona automaticamente para `aeft_organizer.jsx` ou `ppro_organizer.jsx`.
 
 ### 6.4 Mapeamento de APIs entre After Effects e Premiere Pro
 

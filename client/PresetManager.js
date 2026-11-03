@@ -21,15 +21,57 @@
     { index: 10, name: "Purple", ptName: "10. Purple (Roxo)", color: "#8e2c9a" },
     { index: 11, name: "Orange", ptName: "11. Orange (Laranja)", color: "#e8920d" },
     { index: 12, name: "Brown", ptName: "12. Brown (Marrom)", color: "#7f452a" },
-    { index: 13, name: "Magenta", ptName: "13. Magenta ( Fúcsia)", color: "#f46dd6" },
+    { index: 13, name: "Magenta", ptName: "13. Magenta (Fúcsia)", color: "#f46dd6" },
     { index: 14, name: "Cyan", ptName: "14. Cyan (Ciano)", color: "#3da2a5" },
     { index: 15, name: "Sandstone", ptName: "15. Sandstone (Arenito)", color: "#a89677" },
     { index: 16, name: "Dark Green", ptName: "16. Dark Green (Verde Escuro)", color: "#1e401e" }
   ];
 
+  // 16 Color Labels nativos do Premiere Pro (0..15) mapeados 1:1 para os mesmos slots (1..16) do Preset
+  // Slot 0 = Padrão (não sobrescreve a cor da Bin no Premiere)
+  var PPRO_LABELS_BY_SLOT = {
+    0: { index: 0, pproIndex: -1, name: "Default", ptName: "Padrão (Sem alteração)", color: "#585858" },
+    1: { index: 1, pproIndex: 0, name: "Violet", ptName: "1. Violet (Violeta)", color: "#7b45a0" },
+    11: { index: 11, pproIndex: 1, name: "Iris", ptName: "2. Iris (Íris)", color: "#5273b8" },
+    7: { index: 7, pproIndex: 2, name: "Caribbean", ptName: "3. Caribbean (Caribe)", color: "#2ba58b" },
+    5: { index: 5, pproIndex: 3, name: "Lavender", ptName: "4. Lavender (Lavanda)", color: "#9f79c1" },
+    3: { index: 3, pproIndex: 4, name: "Cerulean", ptName: "5. Cerulean (Cerúleo)", color: "#3297c9" },
+    16: { index: 16, pproIndex: 5, name: "Forest", ptName: "6. Forest (Floresta)", color: "#2d7a47" },
+    4: { index: 4, pproIndex: 6, name: "Rose", ptName: "7. Rose (Rosa)", color: "#d85888" },
+    6: { index: 6, pproIndex: 7, name: "Mango", ptName: "8. Mango (Manga)", color: "#de8735" },
+    10: { index: 10, pproIndex: 8, name: "Purple", ptName: "9. Purple (Roxo)", color: "#8c3899" },
+    8: { index: 8, pproIndex: 9, name: "Blue", ptName: "10. Blue (Azul)", color: "#3c59c9" },
+    14: { index: 14, pproIndex: 10, name: "Teal", ptName: "11. Teal (Azul-petróleo)", color: "#278287" },
+    13: { index: 13, pproIndex: 11, name: "Magenta", ptName: "12. Magenta", color: "#c942a8" },
+    15: { index: 15, pproIndex: 12, name: "Tan", ptName: "13. Tan (Arenito)", color: "#a89273" },
+    9: { index: 9, pproIndex: 13, name: "Green", ptName: "14. Green (Verde)", color: "#44a248" },
+    12: { index: 12, pproIndex: 14, name: "Brown", ptName: "15. Brown (Marrom)", color: "#7d4a2d" },
+    2: { index: 2, pproIndex: 15, name: "Yellow", ptName: "16. Yellow (Amarelo)", color: "#d8c53b" }
+  };
+
+  var PPRO_LABELS_ORDERED = [
+    PPRO_LABELS_BY_SLOT[0],
+    PPRO_LABELS_BY_SLOT[1],
+    PPRO_LABELS_BY_SLOT[11],
+    PPRO_LABELS_BY_SLOT[7],
+    PPRO_LABELS_BY_SLOT[5],
+    PPRO_LABELS_BY_SLOT[3],
+    PPRO_LABELS_BY_SLOT[16],
+    PPRO_LABELS_BY_SLOT[4],
+    PPRO_LABELS_BY_SLOT[6],
+    PPRO_LABELS_BY_SLOT[10],
+    PPRO_LABELS_BY_SLOT[8],
+    PPRO_LABELS_BY_SLOT[14],
+    PPRO_LABELS_BY_SLOT[13],
+    PPRO_LABELS_BY_SLOT[15],
+    PPRO_LABELS_BY_SLOT[9],
+    PPRO_LABELS_BY_SLOT[12],
+    PPRO_LABELS_BY_SLOT[2]
+  ];
+
   var DEFAULT_EXTENSIONS = {
     Images: [
-      "psd", "psb", "pdd", "ai", "eps", "ps", "pdf", "png", "jpg", "jpeg", "jpe",
+      "psd", "psb", "pdd", "ai", "eps", "ps", "pdf", "png", "jpg", "jpeg", "jpe", "webp",
       "tif", "tiff", "bmp", "rle", "dib", "gif", "exr", "sxr", "mxr", "tga", "vda",
       "icb", "vst", "hdr", "rgbe", "xyze", "heif", "heic", "svg",
       "iff", "tdi", "sgi", "rgb", "bw", "pic", "rla", "rpf", "ei", "raw", "crw",
@@ -51,7 +93,8 @@
     DataFiles: [
       "obj", "gltf", "glb", "fbx", "c4d",
       "json", "mgjson", "csv", "tsv", "jsx", "bvh",
-      "prproj", "aep", "aepx", "aet"
+      "prproj", "aep", "aepx", "aet",
+      "mogrt", "srt", "vtt", "scc", "stl", "xml", "edl", "aaf", "omf", "cube", "look"
     ],
     ImageSequences: [
       "png", "exr", "tga", "tif", "tiff", "jpg", "jpeg", "dpx", "cin", "iff", "hdr"
@@ -305,12 +348,41 @@
   }
 
   PresetManager.AE_LABELS = AE_LABELS;
+  PresetManager.PPRO_LABELS = PPRO_LABELS_ORDERED;
+  PresetManager.PPRO_LABELS_BY_SLOT = PPRO_LABELS_BY_SLOT;
   PresetManager.DEFAULT_PRESET_NAME = DEFAULT_PRESET_NAME;
   PresetManager.DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS;
+
+  PresetManager.prototype.getHostAppId = function () {
+    try {
+      if (this.csInterface && typeof this.csInterface.getHostEnvironment === "function") {
+        var env = this.csInterface.getHostEnvironment();
+        if (env && env.appId) {
+          return String(env.appId).toUpperCase();
+        }
+      }
+    } catch (e) {}
+    return "AEFT";
+  };
+
+  PresetManager.prototype.isPremierePro = function () {
+    return this.getHostAppId() === "PPRO";
+  };
+
+  PresetManager.prototype.getHostDisplayName = function () {
+    return this.isPremierePro() ? "Premiere Pro" : "After Effects";
+  };
+
+  PresetManager.prototype.getLabelsList = function () {
+    return this.isPremierePro() ? PPRO_LABELS_ORDERED : AE_LABELS;
+  };
 
   PresetManager.prototype.getLabelInfo = function (labelIndex) {
     var idx = parseInt(labelIndex, 10);
     if (isNaN(idx) || idx < 0 || idx > 16) idx = 0;
+    if (this.isPremierePro()) {
+      return PPRO_LABELS_BY_SLOT[idx] || PPRO_LABELS_BY_SLOT[0];
+    }
     return AE_LABELS[idx] || AE_LABELS[0];
   };
 

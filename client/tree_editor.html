@@ -907,7 +907,7 @@
   <!-- Área Principal: Editor Visual da Árvore de Pastas -->
   <div class="tree-workspace">
     <div class="tree-toolbar">
-      <span class="tree-toolbar-title">Estrutura da Árvore de Pastas (Clique na cor para Label AE • Clique nas regras para filtrar)</span>
+      <span id="treeToolbarTitle" class="tree-toolbar-title">Estrutura da Árvore de Pastas (Clique na cor para Label AE • Clique nas regras para filtrar)</span>
       <button type="button" id="btnAddTopFolder" class="btn btn-primary">+ Add Top Folder</button>
     </div>
 
@@ -940,17 +940,17 @@
       </div>
 
       <div class="modal-body">
-        <!-- 1. Tipos Nativos do AE -->
+        <!-- 1. Tipos Nativos do Host -->
         <div class="rule-section">
-          <div class="rule-section-title">1. Tipos Nativos do After Effects</div>
+          <div id="ruleSectionHostTitle" class="rule-section-title">1. Tipos Nativos do After Effects</div>
           <div class="types-grid">
             <label class="check-item">
               <input type="checkbox" class="rule-type-chk" value="MainComp">
-              <span>Composição Principal (MainComp / Output)</span>
+              <span id="lblTypeMainComp">Composição Principal (MainComp / Output)</span>
             </label>
             <label class="check-item">
               <input type="checkbox" class="rule-type-chk" value="PreComps">
-              <span>Pré-Composições (Pre-Comps)</span>
+              <span id="lblTypePreComps">Pré-Composições (Pre-Comps)</span>
             </label>
             <label class="check-item">
               <input type="checkbox" class="rule-type-chk" value="StillImages">
@@ -970,11 +970,11 @@
             </label>
             <label class="check-item">
               <input type="checkbox" class="rule-type-chk" value="Solids">
-              <span>Sólidos (SolidSource)</span>
+              <span id="lblTypeSolids">Sólidos (SolidSource)</span>
             </label>
             <label class="check-item">
               <input type="checkbox" class="rule-type-chk" value="DataFiles">
-              <span>Dados / 3D / Projetos (.json, .c4d, .obj...)</span>
+              <span id="lblTypeDataFiles">Dados / 3D / Projetos (.json, .c4d, .obj...)</span>
             </label>
           </div>
         </div>
@@ -988,11 +988,11 @@
           </label>
           <label class="check-item">
             <input type="checkbox" id="chkRuleGroupByMainComp">
-            <span>Agrupar Pré-Composições em subpastas por Composição Principal e <code>Geral/</code></span>
+            <span id="lblRuleGroupByMainComp">Agrupar Pré-Composições em subpastas por Composição Principal e <code>Geral/</code></span>
           </label>
           <label class="check-item">
             <input type="checkbox" id="chkRulePsdBundles">
-            <span>Preservar pacotes de camadas PSD / AI (isolar pré-comps internas na pasta do PSD)</span>
+            <span id="lblRulePsdBundles">Preservar pacotes de camadas PSD / AI (isolar pré-comps internas na pasta do PSD)</span>
           </label>
           <label class="check-item">
             <input type="checkbox" id="chkRuleCatchOthers">
