@@ -1,10 +1,10 @@
-# PROJECT ORGANIZER (After Effects & Premiere Pro)
+# TIDYFLOW (After Effects & Premiere Pro)
 ## Master Blueprint & Arquitetura Técnica Unificada
 
 ---
 
 ## 1. Visão Geral do Projeto
-O **Project Organizer** é uma extensão Adobe CEP (*Common Extensibility Platform*) desenvolvida para automatizar a triagem, hierarquização e organização do painel de projetos da Creative Cloud.
+O **TidyFlow** é uma extensão Adobe CEP (*Common Extensibility Platform*) desenvolvida para automatizar a triagem, hierarquização e organização do painel de projetos da Creative Cloud.
 
 O sistema resolve a desorganização em projetos de qualquer complexidade:
 - Agrupa mídias por extensão, formato e categoria (vídeo, áudio, imagens estáticas, sequências de render).
@@ -12,31 +12,69 @@ O sistema resolve a desorganização em projetos de qualquer complexidade:
 - Preserva contêineres nativos de camadas (como importações de PSD e AI).
 - Possui um motor dinâmico baseado em **Presets JSON** com um **Editor Visual Flutuante (*Preset Builder*)**.
 - Suporta rótulos de cores nativos (*Color Labels*), prefixação ordinal inteligente e criação de árvore de pastas limpa (*scaffolding*).
+- Oferece **Snapshot & Rollback**: qualquer organização pode ser revertida ao estado exato anterior (pastas recriadas, itens devolvidos ao pai original, labels restaurados).
+- Interface desktop redesenhada no **Figma** com design system dedicado (`index.css` / `tree_editor.css`), painel compacto de 360×440 px e janela modeless para o editor de presets.
+- Identidade unificada sob a marca **TidyFlow** (`com.tidyflow` / `com.tidyflow.editor`), com compartilhamento total de UI e presets entre After Effects e Premiere Pro.
 
 ---
 
 ## 2. Pilares de Funcionalidade
 
 ### 2.1 Presets e Editor Visual (*Preset Builder*)
-- **Preset Padrão (*Default Clean*):** Arquivo base embutido, protegido contra deleção acidental, com opção de restauração instantânea.
-- **Perfis Personalizados:** Permite criar taxonomias para fluxos específicos (ex: *Motion Graphics*, *VFX Pipeline*, *Social Media*, *Edição Bruta de TV*).
-- **Editor Modeless (Janela Flutuante):** `tree_editor.html` permite gerenciar nós de pastas:
-  - Adicionar pastas no nível raiz e subpastas aninhadas em qualquer profundidade.
-  - Seleção visual imediata de **Color Labels** (0 a 16).
-  - Modal de configuração de filtros: tipos aceitos (`MainComp`, `PreComps`, `StillImages`, `Videos`, `Audios`, `Solids`, `ImageSequences`, `DataFiles`), tags de extensão (`.mp4`, `.exr`, `.wav`, etc.), agrupamento automático em subpastas maiúsculas (`groupSubfoldersByExt`) e tratamento de pacotes PSD/AI.
-- **Persistência Híbrida:** Salva as configurações via Node.js `fs` no diretório de usuário da máquina, mantendo fallback resiliente via `localStorage`.
+- **Preset Padrão (*Default Clean*):** Arquivo base embutido (`client/presets/default_preset.json`), protegido contra deleção acidental (`isBuiltIn` bloqueia Excluir/sobrescrita), com **Reset Default** para restauração instantânea.
+- **Perfis Personalizados:** Permite criar taxonomias para fluxos específicos (ex: *Motion Graphics*, *VFX Pipeline*, *Social Media*, *Edição Bruta de TV*) via **Salvar Novo** ou **Importar Preset**.
+- **Editor Modeless (Janela Flutuante):** `tree_editor.html` é aberto em janela separada (740×640) por `requestOpenExtension("com.tidyflow.editor")`, com fallback para `window.open("tree_editor.html")` e, por último, para a URL `file:///` absoluta da extensão. Recursos atuais:
+  - **Árvore visual arrastável (drag & drop):** o handle de cada pasta move o nó com zonas de drop de *25% superior = antes*, *50% central = dentro da pasta* e *25% inferior = depois*, com bloqueio de mover uma pasta para dentro de si mesma (`isDescendantOf`).
+  - Criar pastas no nível raiz (`+ Add Top Folder`) e subpastas aninhadas em qualquer profundidade; renomear, excluir (modal de confirmação) e colapsar/expandir nós.
+  - **Popover de Color Labels:** o swatch abre um popover ancorado com os **17 slots (0 a 16)**, traduzidos por host (`AE_LABELS` vs `PPRO_LABELS_BY_SLOT`).
+  - **Modal de Regras e Filtros em 4 seções:**
+    1. **Tipos Permitidos:** `MainComp`, `PreComps`, `StillImages`, `Videos`, `ImageSequences`, `Audios`, `Solids`, `DataFiles` (rótulos e tooltips trocados automaticamente para *Sequências* no Premiere).
+    2. **Subpastas e Comportamento:** `groupSubfoldersByExt` (*Subpastas por Extensão*), `groupBySourceFolder` (*Pasta de Origem*), `groupByMainComp` (*Agrupar por Comp/Seq Principal*), `handlePsdBundles` (*Isolar PSD/AI*) e `catchOthers` (*Pasta OTHERS – Fallback*).
+    3. **Pacotes de Extensão:** botões de pacote (Imagens, Vídeos, Áudios, Dados/3D) que marcam vários formatos de uma vez, mais campo livre `[+] Adicionar` e chips removíveis com `×`.
+    4. **Filtro por Nomenclatura:** tags de palavras separadas por `,` ou `;`, gravadas em `rules.nameFilter` (modo `contains`, case-insensitive). Qualquer item cujo nome contenha uma das palavras é enviado direto para aquela pasta.
+  - **Barra superior de ações:** `Salvar`, `Salvar Novo` (modal de nome que clona o preset atual), `Reset Default`, `Importar Preset` / `Exportar Preset` (via `cep.fs.showOpenDialogEx` / `showSaveDialogEx`, com fallback por `FileReader` e download), `Abrir Pasta Local` (abre a pasta de presets no Explorer/Finder) e `Excluir` (indisponível em presets de fábrica).
+  - **Badges de estado:** `Padrão de Fábrica` e `Não salvo*` (dirty flag recalculada a cada edição).
+  - **Rodapé:** `Salvar e Organizar Agora` (`btnRunNow`), que salva o preset e dispara a organização sem fechar o editor, e `Fechar`.
+- **Persistência Híbrida:** grava via Node.js `fs` em `%APPDATA%/TidyFlow/presets`, com **migração única** de `%APPDATA%/AE_Organizer/presets` (flag `ae_organizer_presets_migrated`) e fallback resiliente via `localStorage` quando `fs`/`path` não estão disponíveis. A exclusão limpa o arquivo nas **duas** pastas (nova e legada), evitando que presets removidos ressuscitem na migração.
+- **Sincronização com o Painel Principal:** `notifyPresetsUpdated()` avisa via `window.opener`/`window.parent` (`onPresetBuilderUpdated`) **e** dispara o CSEvent `com.tidyflow.presetsUpdated`; o painel escuta o evento, o `focus` da janela e re-sincroniza preset ativo + toggles.
 
 ### 2.2 Modos de Execução do Painel
-1. **Organize Project (`btnOrganize`):** Realiza a organização completa de comps/sequências, pré-comps/aninhamentos, footages, áudios, imagens, sólidos e contêineres PSD/AI.
-2. **Create Structure (`btnCreateStructure`):** Cria fisicamente no painel do projeto a estrutura vazia de pastas/bins com seus respectivos Color Labels sem mover ou alterar nenhum asset existente.
-3. **Media Only (`btnMediaOnly`):** Move exclusivamente arquivos de footage, áudio, imagens e sólidos para suas respectivas pastas, deixando composições e sequências intactas onde o usuário as posicionou.
-4. **Verificar Comps / Limpeza (`btnCheckComps`):** Identifica e isola em pasta dedicada (`Nunca Usadas`) itens vazios ou composições que não estão vinculadas nem ativas no fluxo de entrega.
+1. **Organize Project (`btnOrganize`):** chama `$.global.organizeWithPreset("selection", preset)` — organiza comps/sequências, pré-comps/aninhamentos, footages, áudios, imagens, sólidos e contêineres PSD/AI.
+2. **Create Structure (`btnCreateStructure`):** chama `$.global.createPresetFolderStructure(preset)` — cria fisicamente no painel a estrutura vazia de pastas/bins com seus respectivos Color Labels, sem mover ou alterar nenhum asset existente.
+3. **Media Only (`btnMediaOnly`):** chama `$.global.organizeWithPreset("media_only", preset)` — move exclusivamente footage, áudio, imagens e sólidos, mantendo composições/sequências onde o usuário as posicionou. Ainda aplica classificação por regras, *Pasta de Origem*, *OTHERS* e Color Labels.
+4. **Verificar Comps / Limpeza (`btnCheckComps`):** chama `$.global.checkUnusedComps(preset)` — identifica e isola em pasta dedicada (`Nunca Usadas`, nome configurável) itens vazios e comps/sequências que não estão vinculadas nem ativas no fluxo de entrega.
+5. **Rollback (`btnRollback`):** abre o modal de confirmação e chama `$.global.rollbackProject(saveBefore, snapshotJson)` — devolve o projeto ao estado anterior à última organização (detalhado em **2.4**).
+
+Todas as chamadas retornam um JSON padronizado (`success`, `movedComps`, `movedFootages`, `cleanedFolders`, `reducedCount`, `projectSaved`, `error`), usado pelo painel para montar a mensagem de status e, em caso de sucesso, para sincronizar o snapshot de rollback.
 
 ### 2.3 Opções Rápidas (Toggles de Pipeline)
-- `usePrefixNumbering`: Prefixa automaticamente pastas no nível ativo com `01_`, `02_`, `03_...`.
-- `deleteEmptyFolders`: Remove recursivamente pastas e bins que restarem vazios ao fim da triagem.
-- `saveProjectBefore`: Salva o projeto antes de iniciar qualquer modificação.
-- `reduceProject`: Executa redução de projeto nas comps selecionadas antes da triagem (quando suportado).
+- `usePrefixNumbering`: prefixa pastas com `01_`, `02_`, `03_...` **apenas nas pastas que realmente contiverem itens** (categorias vazias são puladas). Cada nó pode sair da numeração com `useNumbering: false`. O prefixo antigo é removido antes de renumerar (`stripNumericPrefix`), evitando acúmulo de `01_01_` em reexecuções.
+- `deleteEmptyFolders`: remove recursivamente pastas/bins que restarem vazios ao fim da triagem (`cleanEmptyFolders` no AE, `cleanEmptyBinsBottomUp` no Premiere), ignorando pastas protegidas do sistema.
+- `saveProjectBefore`: salva o projeto antes de iniciar qualquer modificação (é forçado quando `reduceProject` está ativo).
+- `reduceProject`: reduz o projeto às dependências da comp/sequência selecionada antes da triagem (no Premiere usa um bin temporário `__ORGANIZER_REDUCE_TMP__` como lixeira); exibe banner de aviso no painel enquanto estiver ligado.
+- `groupBySourceFolder`: cria uma subpasta com o nome da pasta em que o arquivo reside em disco (ex: `02_Assets > 03_Footages > MP4 > Teste > Teste.mp4`). Ativo por padrão **por pasta** (`rules.groupBySourceFolder`, com fallback global em `settings.groupBySourceFolder`) e sincronizado entre After Effects e Premiere Pro.
+  - O toggle do painel grava `settings.groupBySourceFolder` **e propaga o valor para todos os nós** da árvore.
+  - Se apenas algumas pastas desativarem a opção, o tile entra em estado **parcial** (classe `.partial` + `#groupSourceNote`) listando as pastas divergentes.
+- **Persistência dos toggles:** gravados no preset ativo via `presetManager.savePreset()` e espelhados em `localStorage` (`ae_organizer_save_project`, `ae_organizer_reduce_project`, `ae_organizer_delete_empty`), garantindo que o painel reabra no último estado usado.
+
+### 2.4 Snapshot & Rollback (Desfazer Organização)
+Sistema que devolve o projeto ao estado exato anterior à organização, em ambos os hosts.
+
+**Camada de host:**
+
+| Função | Papel |
+| :--- | :--- |
+| `aeft_captureRawSnapshot()` / `ppro_captureRawSnapshot()` | Varre o projeto e registra, por item, `id`/`nodeId`, `name`, pasta/bin pai, `label`, `comment` e a profundidade das pastas/bins |
+| `aeft_ensurePreOrganizeSnapshot()` / `ppro_ensurePreOrganizeSnapshot()` | Captura o snapshot **antes** de organizar. Só recaptura quando o projeto realmente mudou (compara `projectFile` + IDs de pastas criadas e pais dos itens), preservando o estado original em reexecuções |
+| `aeft_markPostOrganizeState()` / `ppro_markPostOrganizeState()` | Marca, após a organização, quais pastas/bins foram criados e qual o pai final de cada item |
+| `aeft_getRollbackSnapshotJson()` / `ppro_getRollbackSnapshotJson()` | Serializa o snapshot em JSON para o frontend |
+| `aeft_rollbackProject()` / `ppro_rollbackProject()` | Restaura o `parentFolder` (AE) ou executa `moveBin` (Premiere), recria pastas removidas com nome + label, remove pastas/bins que não pertencem ao snapshot e, opcionalmente, salva o projeto |
+
+**Fluxo no painel:**
+1. Toda operação bem-sucedida (Organizar, Criar estrutura, Apenas Mídias, Verificar comps) chama `syncRollbackSnapshotToLocalStorage()`, espelhando o resultado de `$.global.getRollbackSnapshotJson()` em `localStorage["ae_organizer_rollback_snapshot"]` — o snapshot sobrevive a reload do painel.
+2. Clicar em **Rollback** abre `#rollbackModalBackdrop` com **Salvar e Continuar**, **Continuar sem Salvar** e **Cancelar** (Esc e clique no backdrop fecham).
+3. Ao concluir, o painel exibe `Itens restaurados`, `Pastas recriadas`, `Pastas removidas` e `Projeto salvo`, e limpa o snapshot do `localStorage`.
+4. O roteador expõe `$.global.rollbackProject` e `$.global.getRollbackSnapshotJson` (também em `organizerRouter`), mantendo o frontend 100% agnóstico de host.
 
 ---
 
@@ -55,18 +93,23 @@ O sistema resolve a desorganização em projetos de qualquer complexidade:
    │
    ├── 📁 02_Images/
    │   ├── 📁 PSD/
-   │   │   └── 📁 [Pasta Nativa do PSD]/
-   │   │       ├── 📁 01_PreComps/ (grupos com comps)
-   │   │       └── [Camadas e arquivos .psd]
+   │   │   └── 📁 [Pasta de Origem no disco]/
+   │   │       └── 📁 [Pasta Nativa do PSD]/
+   │   │           ├── 📁 01_PreComps/ (grupos com comps)
+   │   │           └── [Camadas e arquivos .psd]
    │   ├── 📁 AI/
    │   ├── 📁 PNG/
+   │   │   └── 📁 [Pasta de Origem]/          ← groupBySourceFolder
    │   ├── 📁 JPG/
+   │   ├── 📁 OTHERS/                         ← catchOthers (fallback)
    │   └── 📁 [Outras extensões de imagem: EXR, TIFF, SVG, etc.]/
    │
    ├── 📁 03_Footages/
    │   ├── 📁 MP4/
+   │   │   └── 📁 [Pasta de Origem]/
    │   ├── 📁 MOV/
    │   ├── 📁 PRORES/
+   │   ├── 📁 OTHERS/
    │   └── 📁 [Outras extensões de vídeo, sequências e dados: MXF, R3D, C4D, JSON]/
    │
    ├── 📁 04_Audios/
@@ -78,8 +121,15 @@ O sistema resolve a desorganização em projetos de qualquer complexidade:
        └── [Sólidos nativos do host]
 
 📁 Nunca Usadas/
-   └── [Composições vazias ou desvinculadas]
+   └── [Composições/sequências vazias ou desvinculadas]
 ```
+
+**Regras da taxonomia:**
+- Os prefixos `01_`, `02_`... só aparecem em pastas **que receberam itens** — categorias vazias não entram na contagem.
+- A subpasta `[Pasta de Origem]` só existe quando a regra daquela pasta tem `groupBySourceFolder` ativo.
+- A subpasta `OTHERS` só existe quando a regra daquela pasta tem `catchOthers` ativo; ela recebe itens da categoria que não tiveram extensão mapeada.
+- Contêineres PSD/AI mantêm a pasta nativa do arquivo intacta (`handlePsdBundles`), com `01_PreComps` interna quando o pacote contém composições.
+- O nome da pasta de itens não usados vem de `settings.unusedFolderName` (padrão `Nunca Usadas`).
 
 ---
 
@@ -87,25 +137,43 @@ O sistema resolve a desorganização em projetos de qualquer complexidade:
 
 ```
 AE_File_Organizer/
-├── .debug                  # Portas de depuração remota do Chromium (AE e PPro)
-├── package.json            # Configurações do projeto e scripts de build Vite
+├── .debug                  # Portas de depuração remota do Chromium (IDs com.tidyflow / com.tidyflow.editor)
+├── package.json            # Configurações do projeto e scripts de build Vite (name: tidyflow)
 ├── vite.config.js          # Configuração do Vite para desenvolvimento
+├── MANIFESTO_MESTRE.md     # Este blueprint
 ├── CSXS/
-│   ├── manifest.xml        # Manifesto mestre de registro CEP (AEFT + PPRO)
+│   ├── manifest.xml        # Manifesto mestre de registro CEP (AEFT + PPRO), painel fixo 360×440
 │   └── manifest.dev.xml    # Manifesto de teste com live-server
 ├── client/
 │   ├── CSInterface.js      # Biblioteca ponte de comunicação CEP <-> Host
-│   ├── index.html          # Interface do Painel Principal
-│   ├── main.js             # Lógica e controladores do Painel Principal
-│   ├── tree_editor.html    # Interface do Editor de Presets (Janela Modeless)
-│   ├── tree_editor.js      # Lógica da árvore de pastas e regras de filtros
-│   ├── PresetManager.js    # Gerenciador de leitura, escrita e schema de presets
+│   ├── index.html          # Interface do Painel Principal (estrutura semântica)
+│   ├── index.css           # Design system do painel (Figma: dark UI, tiles, toggles, modais)
+│   ├── main.js             # Controladores do painel: modos, toggles, presets e rollback
+│   ├── tree_editor.html    # Interface do Preset Builder (Janela Modeless)
+│   ├── tree_editor.css     # Design system do Preset Builder (árvore, modais, popovers)
+│   ├── tree_editor.js      # Árvore drag & drop, regras, import/export e persistência
+│   ├── PresetManager.js    # Leitura/escrita de presets, schema, labels e extensões por host
 │   └── presets/
-│       └── default_preset.json # Preset padrão de fábrica
-└── host/
-    ├── organizer.jsx       # Roteador unificado de Host (detecta AEFT vs PPRO)
-    ├── aeft_organizer.jsx  # Motor específico do After Effects (CompItem, FolderItem)
-    └── ppro_organizer.jsx  # Motor específico do Premiere Pro 22.x+ (ProjectItem, Bin, Sequence)
+│       └── default_preset.json # Preset padrão de fábrica (After Effects)
+├── host/
+│   ├── organizer.jsx       # Roteador unificado de Host (detecta AEFT vs PPRO)
+│   ├── aeft_organizer.jsx  # Motor do After Effects (CompItem/FolderItem) + snapshot/rollback
+│   └── ppro_organizer.jsx  # Motor do Premiere Pro 22.x+ (ProjectItem/Bin/Sequence) + snapshot/rollback
+├── design/
+│   ├── ae_organizer_full_ui.svg      # Mockup consolidado da interface
+│   ├── ae_organizer_ui_tracking.csv  # Rastreio de elementos de UI
+│   └── figma_exports/                # Exportações do Figma
+│       ├── main_panel.svg            # Painel principal (layout atual)
+│       ├── main_panel_old.svg        # Painel principal (layout anterior)
+│       ├── modal_rules.svg           # Modal de Regras e Filtros
+│       └── preset_builder.svg        # Preset Builder / árvore de pastas
+├── scripts/
+│   ├── setup_dev.ps1               # Setup do ambiente de desenvolvimento (symlink CEP)
+│   ├── install_symlink.bat         # Instalação do symlink da extensão
+│   └── rollback_ponto_retorno.bat  # Restaura o código para a tag ponto-de-retorno-ae-v1.0
+├── src/
+│   └── config.json         # Config legado do motor antigo (referência histórica)
+└── dist/                   # Build de produção gerado pelo Vite (não versionado)
 ```
 
 ---
@@ -122,6 +190,7 @@ AE_File_Organizer/
     "deleteEmptyFolders": true,
     "saveProjectBefore": true,
     "reduceProject": false,
+    "groupBySourceFolder": true,
     "unusedFolderName": "Nunca Usadas"
   },
   "tree": [
@@ -135,6 +204,7 @@ AE_File_Organizer/
         "groupByMainComp": false,
         "handlePsdBundles": false,
         "groupSubfoldersByExt": false,
+        "groupBySourceFolder": true,
         "catchOthers": false,
         "nameFilter": "",
         "nameFilterMode": "contains"
@@ -151,6 +221,7 @@ AE_File_Organizer/
         "groupByMainComp": false,
         "handlePsdBundles": false,
         "groupSubfoldersByExt": false,
+        "groupBySourceFolder": true,
         "catchOthers": false,
         "nameFilter": "",
         "nameFilterMode": "contains"
@@ -166,6 +237,7 @@ AE_File_Organizer/
             "groupByMainComp": true,
             "handlePsdBundles": false,
             "groupSubfoldersByExt": false,
+            "groupBySourceFolder": true,
             "catchOthers": false,
             "nameFilter": "",
             "nameFilterMode": "contains"
@@ -182,6 +254,7 @@ AE_File_Organizer/
             "groupByMainComp": false,
             "handlePsdBundles": true,
             "groupSubfoldersByExt": true,
+            "groupBySourceFolder": true,
             "catchOthers": false,
             "nameFilter": "",
             "nameFilterMode": "contains"
@@ -198,6 +271,7 @@ AE_File_Organizer/
             "groupByMainComp": false,
             "handlePsdBundles": false,
             "groupSubfoldersByExt": true,
+            "groupBySourceFolder": true,
             "catchOthers": true,
             "nameFilter": "",
             "nameFilterMode": "contains"
@@ -214,6 +288,7 @@ AE_File_Organizer/
             "groupByMainComp": false,
             "handlePsdBundles": false,
             "groupSubfoldersByExt": true,
+            "groupBySourceFolder": true,
             "catchOthers": false,
             "nameFilter": "",
             "nameFilterMode": "contains"
@@ -230,6 +305,7 @@ AE_File_Organizer/
             "groupByMainComp": false,
             "handlePsdBundles": false,
             "groupSubfoldersByExt": false,
+            "groupBySourceFolder": true,
             "catchOthers": false,
             "nameFilter": "",
             "nameFilterMode": "contains"
@@ -242,11 +318,41 @@ AE_File_Organizer/
 }
 ```
 
+### 5.1 Semântica dos Campos
+
+| Campo | Onde | Descrição |
+| :--- | :--- | :--- |
+| `presetName` | raiz | Nome único do perfil; usado como nome de arquivo (`sanitizeFileName`) e chave em `localStorage` |
+| `isBuiltIn` | raiz | `true` apenas no preset de fábrica — bloqueia exclusão e é restaurado por **Reset Default** |
+| `version` / `$schema` | raiz | Controle de versão e referência de schema (draft-07) |
+| `settings.usePrefixNumbering` | settings | Liga a numeração ordinal `01_`, `02_`... (só em pastas com itens) |
+| `settings.deleteEmptyFolders` | settings | Remove pastas/bins vazios ao final |
+| `settings.saveProjectBefore` | settings | Salva o projeto antes de modificar |
+| `settings.reduceProject` | settings | Executa redução de projeto antes da triagem |
+| `settings.groupBySourceFolder` | settings | Valor **global** de fallback para a *Pasta de Origem* |
+| `settings.unusedFolderName` | settings | Nome da pasta de itens vazios/desvinculados (padrão `Nunca Usadas`) |
+| `tree[].id` | nó | Identificador estável do nó (usado pelo editor e pelo mapeamento `nodeFolderMap`) |
+| `tree[].name` | nó | Nome-base da pasta, sem prefixo numérico |
+| `tree[].label` | nó | Índice de Color Label **0–16**, convertido por host no momento de aplicar |
+| `tree[].useNumbering` | nó | `false` exclui esta pasta da numeração sequencial (padrão `true`) |
+| `tree[].children` | nó | Subpastas aninhadas (recursivo, profundidade livre) |
+| `rules.types` | nó | Categorias aceitas: `MainComp`, `PreComps`, `StillImages`, `Videos`, `ImageSequences`, `Audios`, `Solids`, `DataFiles` |
+| `rules.extensions` | nó | Lista de extensões (sem ponto, minúsculas) aceitas pelo nó |
+| `rules.groupSubfoldersByExt` | nó | Cria subpasta em MAIÚSCULAS por extensão (`MP4/`, `PNG/`...) |
+| `rules.groupBySourceFolder` | nó | Cria subpasta com o nome da pasta de origem no disco; ausente ⇒ herda `settings` |
+| `rules.groupByMainComp` | nó | Agrupa pré-comps/sequências aninhadas pelo nome da comp/seq principal |
+| `rules.handlePsdBundles` | nó | Preserva o contêiner nativo de PSD/AI (não espalha camadas) |
+| `rules.catchOthers` | nó | Habilita a subpasta `OTHERS` para itens sem extensão mapeada |
+| `rules.nameFilter` | nó | Lista de palavras separadas por vírgula; quem contiver qualquer uma vai para o nó |
+| `rules.nameFilterMode` | nó | `"contains"` (padrão) ou `"regex"` |
+
+> **Observação:** existe **um único preset de fábrica** (`client/presets/default_preset.json`), compartilhado pelos dois hosts — o mesmo arquivo, a mesma árvore de pastas e as mesmas regras. As diferenças aparecem apenas em **opções resolvidas por host**: `getDefaultExtensions()` devolve `DEFAULT_EXTENSIONS_AE` no After Effects e `DEFAULT_EXTENSIONS_PPRO` no Premiere Pro (ver **6.5**), e os Color Labels são convertidos no momento de aplicar. Um eventual `client/presets/default_preset_ppro.json` é apenas um *override* opcional de bundle, nunca um requisito.
+
 ---
 
 ## 6. Estratégia de Portabilidade & Código Único (After Effects + Premiere Pro)
 
-Para manter **1 único codebase** onde qualquer atualização de UI, regras ou presets funcione simultaneamente nos dois programas sem retrabalho:
+**Um único plugin** — um bundle CEP, um painel, um Preset Builder e o mesmo conjunto de presets — atende os dois hosts. O que varia entre After Effects e Premiere Pro são apenas **opções específicas por host** (vocabulário, tabela de labels, dicionário de extensões e recursos suportados), resolvidas em runtime por `PresetManager.isPremierePro()`, sem duplicar telas, arquivos de preset ou motores de UI. Assim, qualquer atualização de UI, regras ou presets chega aos dois programas sem retrabalho:
 
 ### 6.1 Unificação no `CSXS/manifest.xml`
 O CEP suporta múltiplos hosts sob a mesma extensão. O Premiere Pro 22.x+ (`PPRO`) opera lado a lado com o After Effects (`AEFT`):
@@ -258,10 +364,12 @@ O CEP suporta múltiplos hosts sob a mesma extensão. O Premiere Pro 22.x+ (`PPR
 ```
 
 ### 6.2 Frontend 100% Compartilhado (Client-Side)
-- O HTML, CSS, `tree_editor.html`, `PresetManager.js` e a lógica de eventos são idênticos e compartilham a mesma pasta de presets em disco (`%APPDATA%/AE_Organizer/presets`).
+- O HTML, o design system (`index.css` / `tree_editor.css`), `tree_editor.html`, `PresetManager.js` e a lógica de eventos são idênticos e compartilham a mesma pasta de presets em disco (`%APPDATA%/TidyFlow/presets`), com migração única de `%APPDATA%/AE_Organizer/presets`.
 - O painel consulta o ID do host via `csInterface.getHostEnvironment().appId`:
   - Se for `"AEFT"`, exibe termos como *"Composições"* e os 16 labels do After Effects.
   - Se for `"PPRO"`, exibe termos como *"Sequências"* e mapeia de forma bijetora (1:1) os 16 color labels do Premiere Pro (`0..15`).
+- A sincronização entre o Preset Builder e o painel usa três caminhos redundantes: `window.opener.onPresetBuilderUpdated`, `window.parent.onPresetBuilderUpdated` e o CSEvent `com.tidyflow.presetsUpdated`; o painel ainda re-sincroniza no evento `focus`.
+- O painel Principal é registrado como `com.tidyflow` e o editor como `com.tidyflow.editor` (janela separada), ambos sob o bundle `com.tidyflow`.
 
 ### 6.3 Camada de Abstração ExtendScript (`host/organizer.jsx`)
 O frontend sempre chama as mesmas funções globais (`$.global.organizeWithPreset`, `$.global.createPresetFolderStructure`, `$.global.checkUnusedComps`), e o roteador em `host/organizer.jsx` direciona automaticamente para `aeft_organizer.jsx` ou `ppro_organizer.jsx`.
@@ -277,4 +385,84 @@ O frontend sempre chama as mesmas funções globais (`$.global.organizeWithPrese
 | **Sequência / Comp** | `CompItem` | `item.isSequence()` |
 | **Cores / Labels** | `item.label = 1..16` | `item.getColorLabel()` / `item.setColorLabel(n)` |
 | **Caminho do Arquivo**| `item.file.fsName` | `item.getMediaPath()` |
+
+### 6.5 Dicionários de Extensões e Labels por Host
+O `PresetManager` mantém dois dicionários de fábrica **no mesmo plugin** e escolhe pelo host:
+
+| Categoria | `DEFAULT_EXTENSIONS_AE` | `DEFAULT_EXTENSIONS_PPRO` (adicional/diferencial) |
+| :--- | :--- | :--- |
+| Imagens | psd, ai, png, jpg, tif, exr, svg, raw/CR2... | inclui `jfif`, `ico`, `dng` entre as fotos |
+| Vídeos | mp4, mov, mxf, r3d, braw, dnxhd... | inclui `mod`, `tod`, `ari`, `crm` (codecs de câmera) |
+| Áudios | wav, mp3, aac, aiff, m4a, flac... | inclui `m2a`, `asnd`, `ac3`, `caf`, `mid/midi` |
+| Dados | json, csv, c4d, obj, aep, prproj... | inclui `prel`, `chproj`, `ale` e legendas `mcc`, `dfxp`, `ttml`, `cap`, `sbv` |
+| ImageSequences | — (usa a lista de vídeos) | `png`, `exr`, `tga`, `tif`, `jpg`, `dpx`, `cin`, `dng`... |
+
+- `getDefaultExtensions()` devolve o dicionário do host ativo; `PresetManager.DEFAULT_EXTENSIONS_AE` / `_PPRO` ficam expostos para uso externo.
+- **Color Labels:** o After Effects usa `AE_LABELS` (slots `1..16`); o Premiere usa o mapa bijetor `PPRO_LABELS_BY_SLOT` (slots `0..16`) e a ordem canônica `PPRO_LABELS_ORDERED`, consumidos por `getLabelsList()` / `getLabelInfo()`. O preset sempre guarda o índice **do host**; a conversão para a API nativa acontece em `applyLabelSafe` / `applyPProLabelSafe`.
+
+### 6.6 Snapshot e Rollback por Host
+
+| Aspecto | After Effects | Premiere Pro |
+| :--- | :--- | :--- |
+| Identificador do item | `item.id` (numérico) | `item.nodeId` (string) |
+| Contêiner | `FolderItem` / `app.project.rootFolder` | `Bin` / `app.project.rootItem` |
+| Restaurar posição | `item.parentFolder = folderOriginal` | `item.moveBin(binOriginal)` |
+| Recriar pasta | `app.project.items.addFolder(name)` | `parentBin.createBin(name)` |
+| Cor da pasta recriada | `folder.label = n` | `bin.setColorLabel(n)` |
+| Limpeza de vazios | `cleanEmptyFolders()` | `removeNonSnapshotBinsBottomUp()` / `removeAllEmptyBinsBottomUp()` |
+| Fronteira de desfazer | `app.beginUndoGroup()` / `app.endUndoGroup()` | `app.beginUndoGroup()` / `app.endUndoGroup()` |
+
+Ambos expõem o mesmo contrato (`captureRawSnapshot`, `ensurePreOrganizeSnapshot`, `markPostOrganizeState`, `getRollbackSnapshotJson`, `rollbackProject`), com prefixo `aeft_` ou `ppro_`, e são roteados por `host/organizer.jsx`.
+
+### 6.7 Opções Específicas por Host (dentro do mesmo plugin)
+O plugin é um só; as diferenças são **opções** ativadas/ajustadas em runtime, não forks de código ou de preset:
+
+| Opção | After Effects (`AEFT`) | Premiere Pro (`PPRO`) |
+| :--- | :--- | :--- |
+| Vocabulário da UI | *Composições*, *Pré-composições*, *Comp Principal* | *Sequências*, *Sequências Aninhadas*, *Seq. Principal* |
+| Tabela de labels | `AE_LABELS` (0–16) | `PPRO_LABELS_BY_SLOT` (mapa bijetor 0–16) / `PPRO_LABELS_ORDERED` |
+| Dicionário de extensões | `DEFAULT_EXTENSIONS_AE` | `DEFAULT_EXTENSIONS_PPRO` (codecs de câmera, MOGRT, legendas, `ale`/`prel`) |
+| Tipos sintéticos (`Solids` no preset) | Sólidos nativos (`SolidItem`) | Color Matte, Adjustment Layer, Black Video, Bars & Tone, Transparent Video, Titles |
+| `reduceProject` | Redução nativa via `reduceProject` | Redução com bin temporário `__ORGANIZER_REDUCE_TMP__` |
+| Contêiner de pasta/bin | `FolderItem` + `parentFolder` | `Bin` + `createBin` / `moveBin` |
+| Snapshot & Rollback | `aeft_*` | `ppro_*` |
+| Botão "Verificar comps" | "Verificar composições" | "Verificar sequências" |
+
+Todos os demais elementos — layout, CSS, árvore de pastas, modal de regras, toggles, presets e fluxo de rollback — são **idênticos** nos dois programas.
+
+---
+
+## 7. Changelog & Estado Atual (03/11/2026)
+
+### 7.1 Entregue nesta data
+
+| Área | Entrega |
+| :--- | :--- |
+| **Rebranding** | Extensão renomeada para **TidyFlow**: `ExtensionBundleId="com.tidyflow"`, extensões `com.tidyflow` e `com.tidyflow.editor`, menus "TidyFlow" / "TidyFlow - Preset Builder", `.debug` e `package.json` atualizados. **Um único bundle atende AEFT + PPRO** |
+| **UI / Figma** | Painel e Preset Builder redesenhados: `index.css` e `tree_editor.css` criados, HTML enxugado, exports em `design/figma_exports/`, painel fixo 360×440 e grade de tiles (hero + 3 ações + 5 toggles) |
+| **Rollback** | Snapshot/restore completo nos dois hosts, espelho em `localStorage`, modal de confirmação e novo tile `Rollback` no painel |
+| **Pasta de Origem** | `groupBySourceFolder` granular por pasta, propagação pelo toggle global e aviso de estado "parcial" |
+| **Preset Builder** | Drag & drop com zonas, popover de labels, modal de regras em 4 seções, filtro por nomenclatura, importar/exportar JSON, abrir pasta local, badges e "Salvar e Organizar Agora" |
+| **Numeração** | Prefixos aplicados só em pastas com conteúdo, com remoção de prefixo antigo antes de renumerar |
+| **Premiere Pro** | Opções específicas do host no mesmo plugin: `DEFAULT_EXTENSIONS_PPRO`, mapa de labels `PPRO_LABELS_BY_SLOT` e snapshot/rollback próprios |
+| **Presets** | Um único conjunto de presets para os dois hosts, em `%APPDATA%/TidyFlow/presets`, com migração única e limpeza nas duas pastas ao excluir |
+| **Infra** | `scripts/rollback_ponto_retorno.bat` (tag `ponto-de-retorno-ae-v1.0`), `scripts/setup_dev.ps1`, `scripts/install_symlink.bat` |
+
+### 7.2 Histórico de commits
+
+| Commit | Data/Hora | Descrição |
+| :--- | :--- | :--- |
+| `5556a74` | 2026-11-03 11:29 | `chore: ponto de retorno antes da adaptacao Premiere Pro` (tag `ponto-de-retorno-ae-v1.0`) |
+| `c5b01f7` | 2026-11-03 11:42 | `feat: suporte unificado After Effects e Premiere Pro 22.x+` |
+| *working tree* | 2026-11-03 | Rebranding TidyFlow, UI Figma, rollback, pasta de origem granular, import/export de presets |
+
+### 7.3 Pendências conhecidas (dívida técnica)
+
+1. **Preset único por design:** não existe `client/presets/default_preset_ppro.json` — o mesmo `default_preset.json` alimenta os dois hosts, com extensões e labels resolvidos em runtime. Criar um arquivo dedicado só será necessário se, no futuro, a árvore padrão precisar divergir entre AE e Premiere.
+2. **`client/main.js` referencia `#headerTitle`**, elemento removido no redesign; o título ainda é sobrescrito para "PPro Organizer" em `main.js` e `tree_editor.js`.
+3. **`package-lock.json`** continua com `"name": "ae-file-organizer"`, dessincronizado do `package.json` (`tidyflow`).
+4. **Painel com geometria travada** em 360×440 (`MinSize == MaxSize`); qualquer conteúdo novo precisa caber nesse limite.
+5. **`src/config.json`** é configuração legada do motor antigo e não é lido pelo fluxo atual (mantido apenas como referência).
+6. **`dist/`** é build gerado (`npm run build`) e não é versionado — não usar como fonte de verdade.
+
 

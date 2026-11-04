@@ -113,6 +113,22 @@
         return $.global.aeft_createPresetFolderStructure(presetJsonString);
     };
 
+    $.global.rollbackProject = function (saveBefore, backupSnapshotJson) {
+        var isPPro = ensureEngineReady();
+        if (isPPro) {
+            return $.global.ppro_rollbackProject(saveBefore, backupSnapshotJson);
+        }
+        return $.global.aeft_rollbackProject(saveBefore, backupSnapshotJson);
+    };
+
+    $.global.getRollbackSnapshotJson = function () {
+        var isPPro = ensureEngineReady();
+        if (isPPro) {
+            return $.global.ppro_getRollbackSnapshotJson ? $.global.ppro_getRollbackSnapshotJson() : "";
+        }
+        return $.global.aeft_getRollbackSnapshotJson ? $.global.aeft_getRollbackSnapshotJson() : "";
+    };
+
     $.global.organizerRouter = {
         getHostId: function () {
             return detectIsPremierePro() ? "PPRO" : "AEFT";
@@ -120,6 +136,8 @@
         organizeWithPreset: $.global.organizeWithPreset,
         createPresetFolderStructure: $.global.createPresetFolderStructure,
         checkUnusedComps: $.global.checkUnusedComps,
-        getProjectComps: $.global.getProjectComps
+        getProjectComps: $.global.getProjectComps,
+        rollbackProject: $.global.rollbackProject,
+        getRollbackSnapshotJson: $.global.getRollbackSnapshotJson
     };
 })();

@@ -20,6 +20,13 @@
   var chkSaveProject = document.getElementById("chkSaveProject");
   var chkReduceProject = document.getElementById("chkReduceProject");
   var chkDeleteEmptyFolders = document.getElementById("chkDeleteEmptyFolders");
+  var chkGroupBySourceFolder = document.getElementById("chkGroupBySourceFolder");
+  var btnRollback = document.getElementById("btnRollback");
+  var rollbackModalBackdrop = document.getElementById("rollbackModalBackdrop");
+  var btnRollbackSaveAndContinue = document.getElementById("btnRollbackSaveAndContinue");
+  var btnRollbackContinueWithoutSave = document.getElementById("btnRollbackContinueWithoutSave");
+  var btnRollbackCancel = document.getElementById("btnRollbackCancel");
+  var reduceProjectAlert = document.getElementById("reduceProjectAlert");
   var statusMsg = document.getElementById("statusMsg");
 
   if (isPPro) {
@@ -29,7 +36,12 @@
       noticeText.textContent = "Selecione as sequências no painel Project antes de organizar.";
     }
     if (btnCheckCompsLabel) {
-      btnCheckCompsLabel.textContent = "Verificar sequências";
+      var word2 = document.getElementById("btnCheckCompsWord2");
+      if (word2) {
+        word2.textContent = "sequências";
+      } else {
+        btnCheckCompsLabel.textContent = "Verificar sequências";
+      }
     }
     if (chkReduceProject && chkReduceProject.parentElement) {
       chkReduceProject.parentElement.title =
@@ -76,6 +88,20 @@
     if (chkSaveProject) chkSaveProject.disabled = isBusy;
     if (chkReduceProject) chkReduceProject.disabled = isBusy;
     if (chkDeleteEmptyFolders) chkDeleteEmptyFolders.disabled = isBusy;
+    if (chkGroupBySourceFolder) chkGroupBySourceFolder.disabled = isBusy;
+    if (btnRollback) btnRollback.disabled = isBusy;
+  }
+
+  function syncRollbackSnapshotToLocalStorage() {
+    try {
+      csInterface.evalScript("$.global.getRollbackSnapshotJson()", function (snapJson) {
+        if (snapJson && snapJson !== "EvalScript error." && snapJson !== "undefined") {
+          try {
+            localStorage.setItem("ae_organizer_rollback_snapshot", snapJson);
+          } catch (eLs) {}
+        }
+      });
+    } catch (e) {}
   }
 
   function syncPresetsAndToggles() {
@@ -113,7 +139,70 @@
       if (chkReduceProject) {
         chkReduceProject.checked = savedReduce !== null ? (savedReduce === "true") : Boolean(s.reduceProject);
       }
+      if (chkGroupBySourceFolder) {
+        // Reflete o estado real das pastas (fonte única: regras do preset)
+        var anyOn = false, anyOff = false;
+        (function scan(nodes) {
+          for (var i = 0; i < (nodes || []).length; i++) {
+            if (nodes[i].rules && nodes[i].rules.groupBySourceFolder === false) anyOff = true;
+            else anyOn = true;
+            scan(nodes[i].children);
+          }
+        })(activePreset.tree);
+        chkGroupBySourceFolder.checked = (anyOn || anyOff) ? anyOn : (s.groupBySourceFolder !== false);
+      }
     } catch (e) {}
+
+    updateGroupSourceIndicator();
+    updateReduceProjectWarning();
+  }
+
+  // Alerta de Reduzir Projeto (dependências da composição selecionada)
+  function updateReduceProjectWarning() {
+    if (!reduceProjectAlert || !chkReduceProject) return;
+    if (chkReduceProject.checked) {
+      reduceProjectAlert.style.display = "block";
+      var compWord = isPPro ? "sequência selecionada" : "composição selecionada";
+      reduceProjectAlert.innerHTML = "⚠️ <strong>Atenção:</strong> O projeto será reduzido apenas com as dependências da " + compWord + ".";
+    } else {
+      reduceProjectAlert.style.display = "none";
+    }
+  }
+
+  // Sinaliza quando alguma pasta do preset tem "Pasta de Origem" desativada nas Regras e Filtros
+  function updateGroupSourceIndicator() {
+    if (!chkGroupBySourceFolder) return;
+    var tile = chkGroupBySourceFolder.parentNode;
+    var note = document.getElementById("groupSourceNote");
+    var missing = [];
+    var total = 0;
+    function walk(nodes) {
+      for (var i = 0; i < (nodes || []).length; i++) {
+        var n = nodes[i];
+        total++;
+        if (n.rules && n.rules.groupBySourceFolder === false) missing.push(n.name);
+        walk(n.children);
+      }
+    }
+    if (activePreset) walk(activePreset.tree);
+
+    // Nenhuma pasta com a tag: desliga. Todas ou algumas: ligado (verde / amarelo)
+    if (total > 0) chkGroupBySourceFolder.checked = (missing.length < total);
+
+    if (missing.length && missing.length < total) {
+      tile.classList.add("partial");
+      if (note) {
+        note.style.display = "block";
+        note.textContent = "Atenção: " + (missing.length === 1 ? "a pasta " : "as pastas ") +
+          missing.join(", ") + " não usa(m) 'Pasta de Origem' nas Regras e Filtros.";
+      }
+    } else {
+      tile.classList.remove("partial");
+      if (note) {
+        note.style.display = "none";
+        note.textContent = "";
+      }
+    }
   }
 
   function persistTogglesToActivePreset() {
@@ -141,8 +230,22 @@
         localStorage.setItem("ae_organizer_delete_empty", chkDeleteEmptyFolders.checked ? "true" : "false");
       } catch (e) {}
     }
+    if (chkGroupBySourceFolder) {
+      activePreset.settings.groupBySourceFolder = chkGroupBySourceFolder.checked;
+      // O toggle global controla todas as pastas (regras por pasta têm prioridade no organizador)
+      var gv = chkGroupBySourceFolder.checked;
+      (function applyAll(nodes) {
+        for (var i = 0; i < (nodes || []).length; i++) {
+          if (!nodes[i].rules) nodes[i].rules = {};
+          nodes[i].rules.groupBySourceFolder = gv;
+          applyAll(nodes[i].children);
+        }
+      })(activePreset.tree);
+    }
 
     presetManager.savePreset(activePreset);
+    updateGroupSourceIndicator();
+    presetManager.notifyPresetsUpdated(activePreset.presetName);
   }
 
   if (presetSelect) {
@@ -158,13 +261,27 @@
     chkPrefixNumbering.addEventListener("change", persistTogglesToActivePreset);
   }
   if (chkSaveProject) {
-    chkSaveProject.addEventListener("change", persistTogglesToActivePreset);
+    chkSaveProject.addEventListener("change", function () {
+      persistTogglesToActivePreset();
+      updateReduceProjectWarning();
+    });
   }
   if (chkReduceProject) {
-    chkReduceProject.addEventListener("change", persistTogglesToActivePreset);
+    chkReduceProject.addEventListener("change", function () {
+      if (chkReduceProject.checked) {
+        if (chkSaveProject) {
+          chkSaveProject.checked = true;
+        }
+      }
+      updateReduceProjectWarning();
+      persistTogglesToActivePreset();
+    });
   }
   if (chkDeleteEmptyFolders) {
     chkDeleteEmptyFolders.addEventListener("change", persistTogglesToActivePreset);
+  }
+  if (chkGroupBySourceFolder) {
+    chkGroupBySourceFolder.addEventListener("change", persistTogglesToActivePreset);
   }
 
   // Abrir o Preset Builder SEMPRE em uma Janela Separada Flutuante
@@ -174,7 +291,7 @@
     btnOpenPresetBuilder.addEventListener("click", function () {
       try {
         if (window.__adobe_cep__) {
-          csInterface.requestOpenExtension("com.organizer.ae.editor", "");
+          csInterface.requestOpenExtension("com.tidyflow.editor", "");
         }
       } catch (e1) {}
 
@@ -207,12 +324,21 @@
     });
   }
 
-  window.onPresetBuilderUpdated = function () {
+  window.onPresetBuilderUpdated = function (name) {
+    if (typeof name === "string" && name) {
+      presetManager.setActivePresetNameSilent(name);
+    }
     syncPresetsAndToggles();
   };
 
   try {
-    csInterface.addEventListener("com.organizer.ae.presetsUpdated", function () {
+    csInterface.addEventListener("com.tidyflow.presetsUpdated", function (evt) {
+      try {
+        var d = evt && evt.data ? (typeof evt.data === "string" ? JSON.parse(evt.data) : evt.data) : null;
+        if (d && d.activePreset) {
+          presetManager.setActivePresetNameSilent(d.activePreset);
+        }
+      } catch (eEvt) {}
       syncPresetsAndToggles();
     });
   } catch (e) {}
@@ -231,6 +357,7 @@
     activePreset.settings.saveProjectBefore = chkSaveProject ? chkSaveProject.checked : true;
     activePreset.settings.reduceProject = chkReduceProject ? chkReduceProject.checked : false;
     activePreset.settings.deleteEmptyFolders = chkDeleteEmptyFolders ? chkDeleteEmptyFolders.checked : true;
+    activePreset.settings.groupBySourceFolder = chkGroupBySourceFolder ? chkGroupBySourceFolder.checked : true;
 
     csInterface.evalScript(
       "$.global.organizeWithPreset(" +
@@ -273,6 +400,7 @@
               "Projeto organizado! (" + summaryParts.join(", ") + ")",
               "success"
             );
+            syncRollbackSnapshotToLocalStorage();
           } else {
             var errMsg = (response && response.error) || "Falha desconhecida.";
             if (errMsg.indexOf("Nenhuma composi") !== -1 || errMsg.indexOf("Nenhuma sequ") !== -1) {
@@ -335,6 +463,7 @@
                   "success"
                 );
               }
+              syncRollbackSnapshotToLocalStorage();
             } else {
               var errMsg = (response && response.error) || "Falha desconhecida.";
               setStatus("Erro: " + errMsg, "error");
@@ -406,6 +535,7 @@
                     ".",
                   "success"
                 );
+                syncRollbackSnapshotToLocalStorage();
               }
             } else {
               var errMsg = (response && response.error) || "Falha desconhecida.";
@@ -419,7 +549,122 @@
     });
   }
 
+  function openRollbackModal() {
+    if (rollbackModalBackdrop) {
+      rollbackModalBackdrop.classList.add("open");
+    }
+  }
+
+  function closeRollbackModal() {
+    if (rollbackModalBackdrop) {
+      rollbackModalBackdrop.classList.remove("open");
+    }
+  }
+
+  function runRollback(saveBefore) {
+    closeRollbackModal();
+    setBusy(true);
+    setStatus(
+      saveBefore ? "Salvando projeto e revertendo organização..." : "Revertendo organização (Rollback)...",
+      ""
+    );
+
+    var backupSnap = "";
+    try {
+      backupSnap = localStorage.getItem("ae_organizer_rollback_snapshot") || "";
+    } catch (e) {}
+
+    loadOrReloadHostScripts(function () {
+      csInterface.evalScript(
+        "$.global.rollbackProject(" +
+          (saveBefore ? "true" : "false") +
+          ", " +
+          JSON.stringify(backupSnap) +
+          ")",
+        function (result) {
+          setBusy(false);
+
+          if (!result || result === "EvalScript error.") {
+            setStatus("Erro ao executar Rollback no " + hostAppName + ".", "error");
+            return;
+          }
+
+          try {
+            var response = JSON.parse(result);
+            if (response && response.success) {
+              try {
+                localStorage.removeItem("ae_organizer_rollback_snapshot");
+              } catch (eRm) {}
+
+              var restoredItems = response.restoredItems || 0;
+              var recreatedFolders = response.recreatedFolders || 0;
+              var removedFolders = response.removedFolders || 0;
+              var projectSaved = response.projectSaved;
+
+              var parts = ["Itens restaurados: " + restoredItems];
+              if (recreatedFolders > 0) {
+                parts.push("Pastas recriadas: " + recreatedFolders);
+              }
+              if (removedFolders > 0) {
+                parts.push("Pastas removidas: " + removedFolders);
+              }
+              if (projectSaved) {
+                parts.push("Projeto salvo");
+              }
+
+              setStatus("Rollback concluído! (" + parts.join(", ") + ")", "success");
+            } else {
+              var errMsg = (response && response.error) || "Falha desconhecida no Rollback.";
+              setStatus("Erro: " + errMsg, "error");
+            }
+          } catch (e) {
+            setStatus("Resposta inválida do " + hostAppName + ".", "error");
+          }
+        }
+      );
+    });
+  }
+
+  if (btnRollback) {
+    btnRollback.addEventListener("click", function () {
+      openRollbackModal();
+    });
+  }
+
+  if (btnRollbackSaveAndContinue) {
+    btnRollbackSaveAndContinue.addEventListener("click", function () {
+      runRollback(true);
+    });
+  }
+
+  if (btnRollbackContinueWithoutSave) {
+    btnRollbackContinueWithoutSave.addEventListener("click", function () {
+      runRollback(false);
+    });
+  }
+
+  if (btnRollbackCancel) {
+    btnRollbackCancel.addEventListener("click", function () {
+      closeRollbackModal();
+    });
+  }
+
+  if (rollbackModalBackdrop) {
+    rollbackModalBackdrop.addEventListener("click", function (evt) {
+      if (evt.target === rollbackModalBackdrop) {
+        closeRollbackModal();
+      }
+    });
+  }
+
   window.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" || event.keyCode === 27) {
+      if (rollbackModalBackdrop && rollbackModalBackdrop.classList.contains("open")) {
+        event.preventDefault();
+        closeRollbackModal();
+        return;
+      }
+    }
     var isCtrlR =
       (event.ctrlKey || event.metaKey) &&
       (event.key === "r" || event.key === "R" || event.keyCode === 82);

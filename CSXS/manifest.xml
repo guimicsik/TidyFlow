@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.organizer.ae" ExtensionBundleVersion="1.0.0" ExtensionBundleName="AE Organizer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.tidyflow" ExtensionBundleVersion="1.0.0" ExtensionBundleName="TidyFlow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ExtensionList>
-    <Extension Id="com.organizer.ae" Version="1.0.0" />
-    <Extension Id="com.organizer.ae.editor" Version="1.0.0" />
+    <Extension Id="com.tidyflow" Version="1.0.0" />
+    <Extension Id="com.tidyflow.editor" Version="1.0.0" />
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>
@@ -17,7 +17,7 @@
     </RequiredRuntimeList>
   </ExecutionEnvironment>
   <DispatchInfoList>
-    <Extension Id="com.organizer.ae">
+    <Extension Id="com.tidyflow">
       <DispatchInfo>
         <Resources>
           <MainPath>./client/index.html</MainPath>
@@ -34,21 +34,25 @@
         </Lifecycle>
         <UI>
           <Type>Panel</Type>
-          <Menu>AE Organizer</Menu>
+          <Menu>TidyFlow</Menu>
           <Geometry>
             <Size>
-              <Height>380</Height>
+              <Height>440</Height>
               <Width>360</Width>
             </Size>
             <MinSize>
-              <Height>200</Height>
-              <Width>120</Width>
+              <Height>440</Height>
+              <Width>360</Width>
             </MinSize>
+            <MaxSize>
+              <Height>440</Height>
+              <Width>360</Width>
+            </MaxSize>
           </Geometry>
         </UI>
       </DispatchInfo>
     </Extension>
-    <Extension Id="com.organizer.ae.editor">
+    <Extension Id="com.tidyflow.editor">
       <DispatchInfo>
         <Resources>
           <MainPath>./client/tree_editor.html</MainPath>
@@ -65,7 +69,7 @@
         </Lifecycle>
         <UI>
           <Type>Panel</Type>
-          <Menu>AE Organizer - Preset Builder</Menu>
+          <Menu>TidyFlow - Preset Builder</Menu>
           <Geometry>
             <Size>
               <Height>640</Height>

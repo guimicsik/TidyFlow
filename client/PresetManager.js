@@ -69,7 +69,7 @@
     PPRO_LABELS_BY_SLOT[2]
   ];
 
-  var DEFAULT_EXTENSIONS = {
+  var DEFAULT_EXTENSIONS_AE = {
     Images: [
       "psd", "psb", "pdd", "ai", "eps", "ps", "pdf", "png", "jpg", "jpeg", "jpe", "webp",
       "tif", "tiff", "bmp", "rle", "dib", "gif", "exr", "sxr", "mxr", "tga", "vda",
@@ -101,7 +101,44 @@
     ]
   };
 
-  function getFactoryPresetObject() {
+  // Extensões otimizadas para o Adobe Premiere Pro (inclui codecs de câmera, legendas broadcast e projetos NLE)
+  var DEFAULT_EXTENSIONS_PPRO = {
+    Images: [
+      "psd", "psb", "pdd", "ai", "eps", "ps", "pdf", "png", "jpg", "jpeg", "jpe", "jfif", "webp",
+      "tif", "tiff", "bmp", "rle", "dib", "ico", "gif", "exr", "sxr", "mxr", "tga", "vda",
+      "icb", "vst", "hdr", "rgbe", "xyze", "heif", "heic", "svg",
+      "iff", "tdi", "sgi", "rgb", "bw", "pic", "rla", "rpf", "ei", "raw", "crw",
+      "cr2", "cr3", "nef", "nrw", "arw", "srf", "sr2", "raf", "orf", "rw2", "pef",
+      "x3f", "erf", "kdc", "dcr", "mos", "mrw", "iiq", "3fr", "fff", "srw",
+      "gpr", "dxo", "arq", "rwl", "mfw", "mef", "dng"
+    ],
+    Videos: [
+      "mp4", "m4v", "mov", "qt", "prores", "avi", "mkv", "webm", "mxf", "mpg",
+      "mpeg", "m1v", "mpv", "m2p", "m2v", "m2t", "m2ts", "mts", "ts", "vob",
+      "mod", "tod", "3gp", "3g2", "amc", "dv", "wmv", "asf", "flv", "f4v",
+      "r3d", "ari", "braw", "crm", "cin", "dpx", "dng", "hevc", "h264", "264",
+      "ogv", "cine", "yuv", "dnxhd", "dnxhr"
+    ],
+    Audios: [
+      "wav", "bwf", "mp3", "mpa", "mpe", "m2a", "aac", "m4a", "aif", "aiff",
+      "flac", "ogg", "wma", "mka", "asnd", "ac3", "caf", "mid", "midi"
+    ],
+    DataFiles: [
+      "obj", "gltf", "glb", "fbx", "c4d",
+      "json", "mgjson", "csv", "tsv", "tab", "txt", "pbl", "jsx", "bvh",
+      "prproj", "prel", "chproj", "aep", "aepx", "aet",
+      "mogrt", "srt", "vtt", "scc", "stl", "mcc", "dfxp", "ttml", "cap", "sbv",
+      "xml", "edl", "aaf", "omf", "ale", "cube", "look"
+    ],
+    ImageSequences: [
+      "png", "exr", "tga", "tif", "tiff", "jpg", "jpeg", "dpx", "cin", "iff", "hdr", "dng"
+    ]
+  };
+
+  var DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS_AE;
+
+  function getFactoryPresetObject(isPPro) {
+    var extDict = isPPro ? DEFAULT_EXTENSIONS_PPRO : DEFAULT_EXTENSIONS_AE;
     return {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "presetName": DEFAULT_PRESET_NAME,
@@ -112,6 +149,7 @@
         "deleteEmptyFolders": true,
         "saveProjectBefore": true,
         "reduceProject": false,
+        "groupBySourceFolder": true,
         "unusedFolderName": "Nunca Usadas"
       },
       "tree": [
@@ -168,10 +206,11 @@
               "label": 4,
               "rules": {
                 "types": ["StillImages"],
-                "extensions": DEFAULT_EXTENSIONS.Images.slice(),
+                "extensions": extDict.Images.slice(),
                 "groupByMainComp": false,
                 "handlePsdBundles": true,
                 "groupSubfoldersByExt": true,
+                "groupBySourceFolder": true,
                 "catchOthers": true,
                 "nameFilter": "",
                 "nameFilterMode": "contains"
@@ -184,12 +223,13 @@
               "label": 6,
               "rules": {
                 "types": ["Videos", "ImageSequences", "DataFiles"],
-                "extensions": DEFAULT_EXTENSIONS.Videos
-                  .concat(DEFAULT_EXTENSIONS.DataFiles)
+                "extensions": extDict.Videos
+                  .concat(extDict.DataFiles)
                   .concat(["exr", "png", "tga", "tif", "tiff", "jpg", "jpeg"]),
                 "groupByMainComp": false,
                 "handlePsdBundles": false,
                 "groupSubfoldersByExt": true,
+                "groupBySourceFolder": true,
                 "catchOthers": true,
                 "nameFilter": "",
                 "nameFilterMode": "contains"
@@ -202,10 +242,11 @@
               "label": 7,
               "rules": {
                 "types": ["Audios"],
-                "extensions": DEFAULT_EXTENSIONS.Audios.slice(),
+                "extensions": extDict.Audios.slice(),
                 "groupByMainComp": false,
                 "handlePsdBundles": false,
                 "groupSubfoldersByExt": true,
+                "groupBySourceFolder": true,
                 "catchOthers": true,
                 "nameFilter": "",
                 "nameFilterMode": "contains"
@@ -299,6 +340,7 @@
         groupByMainComp: Boolean(rules.groupByMainComp),
         handlePsdBundles: Boolean(rules.handlePsdBundles),
         groupSubfoldersByExt: Boolean(rules.groupSubfoldersByExt),
+        groupBySourceFolder: rules.groupBySourceFolder !== undefined ? Boolean(rules.groupBySourceFolder) : true,
         catchOthers: Boolean(rules.catchOthers),
         nameFilter: rules.nameFilter ? String(rules.nameFilter) : "",
         nameFilterMode: rules.nameFilterMode === "regex" ? "regex" : "contains"
@@ -333,6 +375,7 @@
         deleteEmptyFolders: s.deleteEmptyFolders !== undefined ? Boolean(s.deleteEmptyFolders) : true,
         saveProjectBefore: s.saveProjectBefore !== undefined ? Boolean(s.saveProjectBefore) : true,
         reduceProject: s.reduceProject !== undefined ? Boolean(s.reduceProject) : false,
+        groupBySourceFolder: s.groupBySourceFolder !== undefined ? Boolean(s.groupBySourceFolder) : true,
         unusedFolderName: (s.unusedFolderName && String(s.unusedFolderName).trim()) ? String(s.unusedFolderName).trim() : "Nunca Usadas"
       },
       tree: normTree
@@ -352,6 +395,12 @@
   PresetManager.PPRO_LABELS_BY_SLOT = PPRO_LABELS_BY_SLOT;
   PresetManager.DEFAULT_PRESET_NAME = DEFAULT_PRESET_NAME;
   PresetManager.DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS;
+  PresetManager.DEFAULT_EXTENSIONS_AE = DEFAULT_EXTENSIONS_AE;
+  PresetManager.DEFAULT_EXTENSIONS_PPRO = DEFAULT_EXTENSIONS_PPRO;
+
+  PresetManager.prototype.getDefaultExtensions = function () {
+    return this.isPremierePro() ? DEFAULT_EXTENSIONS_PPRO : DEFAULT_EXTENSIONS_AE;
+  };
 
   PresetManager.prototype.getHostAppId = function () {
     try {
@@ -391,9 +440,31 @@
     try {
       var userData = this.csInterface.getSystemPath(SystemPath.USER_DATA);
       if (!userData) return null;
-      var folder = this.path.join(userData, "AE_Organizer", "presets");
-      if (this.fs && !this.fs.existsSync(folder)) {
-        this.fs.mkdirSync(folder, { recursive: true });
+      var folder = this.path.join(userData, "TidyFlow", "presets");
+      var oldFolder = this.path.join(userData, "AE_Organizer", "presets");
+      if (this.fs) {
+        if (!this.fs.existsSync(folder)) {
+          this.fs.mkdirSync(folder, { recursive: true });
+        }
+        // Migração suave de presets antigos, se existirem
+        try {
+          // Migra apenas uma vez; do contrário presets excluídos reaparecem
+          var migrated = false;
+          try { migrated = localStorage.getItem("ae_organizer_presets_migrated") === "1"; } catch (eFlag) {}
+          if (!migrated) {
+            try { localStorage.setItem("ae_organizer_presets_migrated", "1"); } catch (eFlag2) {}
+          }
+          if (!migrated && this.fs.existsSync(oldFolder)) {
+            var files = this.fs.readdirSync(oldFolder);
+            for (var i = 0; i < files.length; i++) {
+              var srcFile = this.path.join(oldFolder, files[i]);
+              var destFile = this.path.join(folder, files[i]);
+              if (!this.fs.existsSync(destFile)) {
+                this.fs.copyFileSync(srcFile, destFile);
+              }
+            }
+          }
+        } catch (migErr) {}
       }
       return folder;
     } catch (e) {
@@ -405,15 +476,23 @@
     try {
       if (this.csInterface && this.fs && this.path) {
         var extPath = this.csInterface.getSystemPath(SystemPath.EXTENSION);
-        var defaultFilePath = this.path.join(extPath, "client", "presets", "default_preset.json");
+        var presetFileName = this.isPremierePro() ? "default_preset_ppro.json" : "default_preset.json";
+        var defaultFilePath = this.path.join(extPath, "client", "presets", presetFileName);
         if (this.fs.existsSync(defaultFilePath)) {
           var raw = this.fs.readFileSync(defaultFilePath, "utf8");
           var parsed = JSON.parse(raw);
           return normalizePreset(parsed);
         }
+        // Fallback para default_preset.json genérico
+        var fallbackPath = this.path.join(extPath, "client", "presets", "default_preset.json");
+        if (this.fs.existsSync(fallbackPath)) {
+          var rawFb = this.fs.readFileSync(fallbackPath, "utf8");
+          var parsedFb = JSON.parse(rawFb);
+          return normalizePreset(parsedFb);
+        }
       }
     } catch (e) {}
-    return getFactoryPresetObject();
+    return getFactoryPresetObject(this.isPremierePro());
   };
 
   PresetManager.prototype.getDefaultPreset = function () {
@@ -500,11 +579,14 @@
       } catch (dirErr) {}
     }
 
-    // 2. Fallback / complemento do localStorage
+    // 2. Fallback do localStorage: só quando o disco não está acessível.
+    // (Cada painel tem seu próprio localStorage; com o disco acessível, a pasta é a fonte única da verdade.)
+    var diskOk = Boolean(dir && this.fs && this.path);
     var localMap = this._loadLocalStorageMap();
     for (var key in localMap) {
       if (localMap.hasOwnProperty(key)) {
         var p = localMap[key];
+        if (diskOk) continue;
         if (p && p.presetName && !seen[String(p.presetName).toLowerCase()]) {
           seen[String(p.presetName).toLowerCase()] = true;
           result.push({
@@ -513,6 +595,17 @@
           });
         }
       }
+    }
+    if (diskOk) {
+      // Remove "fantasmas" (presets excluídos em outro painel)
+      var cleaned = false;
+      for (var k2 in localMap) {
+        if (localMap.hasOwnProperty(k2) && !seen[String(k2).toLowerCase()]) {
+          delete localMap[k2];
+          cleaned = true;
+        }
+      }
+      if (cleaned) this._saveLocalStorageMap(localMap);
     }
 
     return result;
@@ -548,7 +641,7 @@
     }
 
     var localMap = this._loadLocalStorageMap();
-    if (localMap[presetName]) {
+    if (!(dir && this.fs && this.path) && localMap[presetName]) {
       return normalizePreset(localMap[presetName]);
     }
 
@@ -621,23 +714,31 @@
     }
 
     var dir = this.getPresetsFolderPath();
+    var dirsToClean = [];
     if (dir && this.fs && this.path) {
+      dirsToClean.push(dir);
       try {
-        var expectedFile = this.path.join(dir, sanitizeFileName(presetName) + ".json");
-        if (this.fs.existsSync(expectedFile)) {
-          this.fs.unlinkSync(expectedFile);
-        } else {
-          var files = this.fs.readdirSync(dir);
-          for (var i = 0; i < files.length; i++) {
-            if (/\.json$/i.test(files[i])) {
-              var full = this.path.join(dir, files[i]);
-              try {
-                var item = JSON.parse(this.fs.readFileSync(full, "utf8"));
-                if (item && String(item.presetName).toLowerCase() === String(presetName).toLowerCase()) {
-                  this.fs.unlinkSync(full);
-                }
-              } catch (e2) {}
-            }
+        // Pasta legada também precisa ser limpa, senão a migração recopia o arquivo
+        var userData = this.csInterface.getSystemPath(SystemPath.USER_DATA);
+        dirsToClean.push(this.path.join(userData, "AE_Organizer", "presets"));
+      } catch (eOld) {}
+    }
+    for (var d = 0; d < dirsToClean.length; d++) {
+      var targetDir = dirsToClean[d];
+      try {
+        if (!this.fs.existsSync(targetDir)) continue;
+        var files = this.fs.readdirSync(targetDir);
+        for (var i = 0; i < files.length; i++) {
+          if (/\.json$/i.test(files[i])) {
+            var full = this.path.join(targetDir, files[i]);
+            try {
+              var item = JSON.parse(this.fs.readFileSync(full, "utf8"));
+              var matchesName = item && String(item.presetName).toLowerCase() === String(presetName).toLowerCase();
+              var matchesFile = files[i].toLowerCase() === (sanitizeFileName(presetName) + ".json").toLowerCase();
+              if (matchesName || matchesFile) {
+                this.fs.unlinkSync(full);
+              }
+            } catch (e2) {}
           }
         }
       } catch (e) {}
@@ -700,6 +801,12 @@
     return false;
   };
 
+  PresetManager.prototype.setActivePresetNameSilent = function (presetName) {
+    try {
+      localStorage.setItem(STORAGE_KEY_ACTIVE, presetName || DEFAULT_PRESET_NAME);
+    } catch (e) {}
+  };
+
   PresetManager.prototype.notifyPresetsUpdated = function (activePresetName) {
     try {
       if (global.opener && typeof global.opener.onPresetBuilderUpdated === "function") {
@@ -707,8 +814,13 @@
       }
     } catch (e0) {}
     try {
+      if (global.parent && global.parent !== global && typeof global.parent.onPresetBuilderUpdated === "function") {
+        global.parent.onPresetBuilderUpdated(activePresetName || this.getActivePresetName());
+      }
+    } catch (eParent) {}
+    try {
       if (this.csInterface && typeof CSEvent !== "undefined") {
-        var evt = new CSEvent("com.organizer.ae.presetsUpdated", "APPLICATION");
+        var evt = new CSEvent("com.tidyflow.presetsUpdated", "APPLICATION");
         evt.data = JSON.stringify({ activePreset: activePresetName || this.getActivePresetName() });
         this.csInterface.dispatchEvent(evt);
       }
@@ -727,6 +839,7 @@
         groupByMainComp: false,
         handlePsdBundles: false,
         groupSubfoldersByExt: false,
+        groupBySourceFolder: true,
         catchOthers: false,
         nameFilter: "",
         nameFilterMode: "contains"

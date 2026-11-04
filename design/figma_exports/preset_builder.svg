@@ -1,0 +1,360 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 860" width="1020" height="860">
+  <defs>
+    <style>
+      .bg-panel { fill: #1e1e1e; }
+      .text-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; font-weight: 600; fill: #8a8a8a; letter-spacing: 0.6px; text-transform: uppercase; }
+      .text-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #9a9a9a; }
+      .text-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; fill: #d4d4d4; }
+      .text-btn { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; font-weight: 500; text-anchor: middle; dominant-baseline: middle; }
+    </style>
+  </defs>
+
+  <!-- Fundo da Janela TidyFlow - Preset Builder -->
+  <rect width="1020" height="860" rx="4" class="bg-panel" stroke="#333333" stroke-width="1"/>
+
+  <!-- Top Header Bar com Ícone Sanduíche -->
+  <g id="window-header">
+    <rect width="1020" height="34" fill="#252525"/>
+    <text x="14" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#ffffff">TidyFlow - Preset Builder</text>
+    <g transform="translate(156, 14)" stroke="#888888" stroke-width="1.5">
+      <line x1="0" y1="0" x2="10" y2="0"/>
+      <line x1="0" y1="4" x2="10" y2="4"/>
+      <line x1="0" y1="8" x2="10" y2="8"/>
+    </g>
+  </g>
+
+  <g transform="translate(16, 46)">
+    <!-- Linha 1: Preset Select + Badge "Padrão de Fábrica" -->
+    <g id="preset-select-row" transform="translate(0, 0)">
+      <text x="0" y="18" class="text-title" fill="#8a8a8a">PRESET:</text>
+      <g transform="translate(64, 2)">
+        <rect width="250" height="26" rx="3" fill="#181818" stroke="#3c3c3c" stroke-width="1"/>
+        <text x="8" y="17" class="text-label">Default Clean (Default)</text>
+        <path d="M 230,11 L 235,16 L 240,11" fill="none" stroke="#d4d4d4" stroke-width="1.8" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(322, 4)">
+        <rect width="94" height="22" rx="3" fill="#202c3b" stroke="#2d425c" stroke-width="1"/>
+        <text x="47" y="15" class="text-btn" fill="#7abaff" font-size="10">Padrão de Fábrica</text>
+      </g>
+    </g>
+
+    <!-- Linha 2: Barra de Ações (Salvar, Salvar Como, Reset, Importar, Exportar, Abrir Pasta, Excluir) -->
+    <g id="preset-action-buttons" transform="translate(0, 38)">
+      <!-- Salvar (Azul) -->
+      <g id="btn-save">
+        <rect width="58" height="28" rx="3" fill="#1473e6"/>
+        <text x="29" y="18" class="text-btn" fill="#ffffff" font-weight="600">Salvar</text>
+      </g>
+      <!-- Salvar Como Novo... -->
+      <g id="btn-save-as" transform="translate(64, 0)">
+        <rect width="124" height="28" rx="3" fill="#282828" stroke="#3c3c3c"/>
+        <text x="62" y="18" class="text-btn" fill="#d4d4d4">Salvar Como Novo...</text>
+      </g>
+      <!-- Reset Default -->
+      <g id="btn-reset-default" transform="translate(194, 0)">
+        <rect width="94" height="28" rx="3" fill="#282828" stroke="#3c3c3c"/>
+        <text x="47" y="18" class="text-btn" fill="#d4d4d4">Reset Default</text>
+      </g>
+      <!-- Importar JSON -->
+      <g id="btn-import-json" transform="translate(294, 0)">
+        <rect width="98" height="28" rx="3" fill="#282828" stroke="#3c3c3c"/>
+        <text x="49" y="18" class="text-btn" fill="#d4d4d4">Importar JSON</text>
+      </g>
+      <!-- Exportar JSON -->
+      <g id="btn-export-json" transform="translate(398, 0)">
+        <rect width="98" height="28" rx="3" fill="#282828" stroke="#3c3c3c"/>
+        <text x="49" y="18" class="text-btn" fill="#d4d4d4">Exportar JSON</text>
+      </g>
+      <!-- Abrir Pasta -->
+      <g id="btn-open-folder" transform="translate(502, 0)">
+        <rect width="82" height="28" rx="3" fill="#282828" stroke="#3c3c3c"/>
+        <text x="41" y="18" class="text-btn" fill="#d4d4d4">Abrir Pasta</text>
+      </g>
+      <!-- Excluir (Desabilitado) -->
+      <g id="btn-delete-preset" transform="translate(590, 0)">
+        <rect width="58" height="28" rx="3" fill="#2a1f1f" stroke="#442a2a" opacity="0.6"/>
+        <text x="29" y="18" class="text-btn" fill="#f28b8b" opacity="0.6">Excluir</text>
+      </g>
+    </g>
+
+    <!-- Linha 3: Switches do Preset + Input "Pasta Não Usadas" -->
+    <g id="preset-settings-row" transform="translate(0, 80)">
+      <!-- Switch 1: Numeração Sequencial (LIGADO) -->
+      <g transform="translate(0, 4)">
+        <rect width="26" height="14" rx="7" fill="#1473e6"/>
+        <circle cx="19" cy="7" r="5" fill="#ffffff"/>
+        <text x="36" y="11" class="text-label">Numeração Sequencial (01_, 02_...)</text>
+      </g>
+      <!-- Switch 2: Deletar Pastas Vazias (LIGADO) -->
+      <g transform="translate(230, 4)">
+        <rect width="26" height="14" rx="7" fill="#1473e6"/>
+        <circle cx="19" cy="7" r="5" fill="#ffffff"/>
+        <text x="36" y="11" class="text-label">Deletar Pastas Vazias</text>
+      </g>
+      <!-- Input Pasta Não Usadas: Nunca Usadas -->
+      <g transform="translate(700, 0)">
+        <text x="0" y="16" class="text-sub">Pasta Não Usadas:</text>
+        <rect x="100" y="0" width="130" height="26" rx="3" fill="#181818" stroke="#3c3c3c"/>
+        <text x="108" y="17" class="text-label">Nunca Usadas</text>
+      </g>
+    </g>
+
+    <!-- Linha 4: Título da Estrutura + Botão + Add Top Folder -->
+    <g transform="translate(0, 126)">
+      <text x="0" y="17" class="text-title" fill="#8a8a8a">ESTRUTURA DA ÁRVORE DE PASTAS (CLIQUE NA COR PARA LABEL AE • CLIQUE NAS REGRAS PARA FILTRAR)</text>
+      <!-- Botão + Add Top Folder -->
+      <g id="btn-add-top-folder" transform="translate(860, 0)">
+        <rect width="124" height="26" rx="3" fill="#1473e6"/>
+        <text x="62" y="17" class="text-btn" fill="#ffffff" font-weight="bold">+ Add Top Folder</text>
+      </g>
+    </g>
+
+    <!-- ÁRVORE DE PASTAS COMPLETA -->
+    <g id="folder-tree-list" transform="translate(0, 160)">
+      
+      <!-- ITEM 1: 01_ Output (Comp Principal + Pasta Origem) -->
+      <g id="tree-row-output" transform="translate(0, 0)">
+        <rect width="984" height="42" rx="4" fill="#1d1d1d" stroke="#2b2b2b"/>
+        <!-- Handle Drag -->
+        <g transform="translate(10, 14)" stroke="#666666" stroke-width="1.5">
+          <circle cx="2" cy="3" r="1"/><circle cx="6" cy="3" r="1"/>
+          <circle cx="2" cy="8" r="1"/><circle cx="6" cy="8" r="1"/>
+          <circle cx="2" cy="13" r="1"/><circle cx="6" cy="13" r="1"/>
+        </g>
+        <!-- Cor Verde AE -->
+        <rect x="28" y="12" width="18" height="18" rx="3" fill="#4ec978" stroke="#ffffff" stroke-width="0.5"/>
+        <!-- Badge 01_ -->
+        <rect x="52" y="11" width="28" height="20" rx="2" fill="#182c44" stroke="#27466e"/>
+        <text x="66" y="24" class="text-btn" fill="#7abaff" font-size="10">01_</text>
+        <!-- Input Nome: Output -->
+        <rect x="86" y="8" width="154" height="26" rx="3" fill="#141414" stroke="#3a3a3a"/>
+        <text x="96" y="24" class="text-label" font-weight="500">Output</text>
+        <!-- Pílula Comp Principal -->
+        <g transform="translate(250, 11)">
+          <rect width="90" height="20" rx="2" fill="#1a2533" stroke="#283a4f"/>
+          <text x="45" y="14" class="text-btn" fill="#7abaff" font-size="9">Comp Principal</text>
+        </g>
+        <!-- Pílula Verde: Pasta Origem -->
+        <g transform="translate(346, 11)">
+          <rect width="76" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="38" y="14" class="text-btn" fill="#7cd692" font-size="9">Pasta Origem</text>
+        </g>
+        <!-- Ações ( ↑ ↓ + - ) -->
+        <g transform="translate(870, 8)">
+          <rect width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="12" y="17" class="text-btn" fill="#888888">↑</text>
+          <rect x="28" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="40" y="17" class="text-btn" fill="#888888">↓</text>
+          <rect x="56" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="68" y="17" class="text-btn" fill="#888888">+</text>
+          <rect x="84" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="96" y="17" class="text-btn" fill="#888888">−</text>
+        </g>
+      </g>
+
+      <!-- ITEM 2: 02_ Assets (Contêiner Pai + Pasta Origem) -->
+      <g id="tree-row-assets" transform="translate(0, 48)">
+        <rect width="984" height="42" rx="4" fill="#1d1d1d" stroke="#2b2b2b"/>
+        <g transform="translate(10, 14)" stroke="#666666" stroke-width="1.5">
+          <circle cx="2" cy="3" r="1"/><circle cx="6" cy="3" r="1"/>
+          <circle cx="2" cy="8" r="1"/><circle cx="6" cy="8" r="1"/>
+        </g>
+        <text x="24" y="25" fill="#888888" font-size="10">▾</text>
+        <rect x="36" y="12" width="18" height="18" rx="3" fill="#666666"/>
+        <rect x="60" y="11" width="28" height="20" rx="2" fill="#182c44" stroke="#27466e"/>
+        <text x="74" y="24" class="text-btn" fill="#7abaff" font-size="10">02_</text>
+        <rect x="94" y="8" width="154" height="26" rx="3" fill="#141414" stroke="#3a3a3a"/>
+        <text x="104" y="24" class="text-label" font-weight="500">Assets</text>
+        <g transform="translate(258, 11)">
+          <rect width="76" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="38" y="14" class="text-btn" fill="#7cd692" font-size="9">Pasta Origem</text>
+        </g>
+        <g transform="translate(870, 8)">
+          <rect width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="12" y="17" class="text-btn" fill="#888888">↑</text>
+          <rect x="28" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="40" y="17" class="text-btn" fill="#888888">↓</text>
+          <rect x="56" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="68" y="17" class="text-btn" fill="#888888">+</text>
+          <rect x="84" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="96" y="17" class="text-btn" fill="#888888">−</text>
+        </g>
+      </g>
+
+      <!-- SUBPASTA 1: 01_ PreComps -->
+      <g id="tree-subrow-precomps" transform="translate(36, 96)">
+        <line x1="-12" y1="-10" x2="-12" y2="21" stroke="#3a3a3a" stroke-width="1"/>
+        <line x1="-12" y1="21" x2="0" y2="21" stroke="#3a3a3a" stroke-width="1"/>
+        <rect width="948" height="42" rx="4" fill="#1a1a1a" stroke="#282828"/>
+        <g transform="translate(10, 14)" stroke="#555555" stroke-width="1.5">
+          <circle cx="2" cy="3" r="1"/><circle cx="6" cy="3" r="1"/>
+          <circle cx="2" cy="8" r="1"/><circle cx="6" cy="8" r="1"/>
+        </g>
+        <rect x="28" y="12" width="18" height="18" rx="3" fill="#9fa8da"/>
+        <rect x="52" y="11" width="28" height="20" rx="2" fill="#182c44" stroke="#27466e"/>
+        <text x="66" y="24" class="text-btn" fill="#7abaff" font-size="10">01_</text>
+        <rect x="86" y="8" width="144" height="26" rx="3" fill="#141414" stroke="#3a3a3a"/>
+        <text x="96" y="24" class="text-label">PreComps</text>
+        <g transform="translate(240, 11)">
+          <rect width="64" height="20" rx="2" fill="#1a2533" stroke="#283a4f"/>
+          <text x="32" y="14" class="text-btn" fill="#7abaff" font-size="9">Pre-Comps</text>
+          <rect x="70" width="118" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="129" y="14" class="text-btn" fill="#7cd692" font-size="9">Agrupar por MainComp</text>
+          <rect x="194" width="76" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="232" y="14" class="text-btn" fill="#7cd692" font-size="9">Pasta Origem</text>
+        </g>
+        <g transform="translate(834, 8)">
+          <rect width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="12" y="17" class="text-btn" fill="#888888">↑</text>
+          <rect x="28" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="40" y="17" class="text-btn" fill="#888888">↓</text>
+          <rect x="56" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="68" y="17" class="text-btn" fill="#888888">+</text>
+          <rect x="84" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="96" y="17" class="text-btn" fill="#888888">−</text>
+        </g>
+      </g>
+
+      <!-- SUBPASTA 2: 02_ Images -->
+      <g id="tree-subrow-images" transform="translate(36, 144)">
+        <line x1="-12" y1="-10" x2="-12" y2="21" stroke="#3a3a3a" stroke-width="1"/>
+        <line x1="-12" y1="21" x2="0" y2="21" stroke="#3a3a3a" stroke-width="1"/>
+        <rect width="948" height="42" rx="4" fill="#1a1a1a" stroke="#282828"/>
+        <g transform="translate(10, 14)" stroke="#555555" stroke-width="1.5">
+          <circle cx="2" cy="3" r="1"/><circle cx="6" cy="3" r="1"/>
+          <circle cx="2" cy="8" r="1"/><circle cx="6" cy="8" r="1"/>
+        </g>
+        <rect x="28" y="12" width="18" height="18" rx="3" fill="#ef9a9a"/>
+        <rect x="52" y="11" width="28" height="20" rx="2" fill="#182c44" stroke="#27466e"/>
+        <text x="66" y="24" class="text-btn" fill="#7abaff" font-size="10">02_</text>
+        <rect x="86" y="8" width="144" height="26" rx="3" fill="#141414" stroke="#3a3a3a"/>
+        <text x="96" y="24" class="text-label">Images</text>
+        <g transform="translate(240, 11)">
+          <rect width="48" height="20" rx="2" fill="#1a2533" stroke="#283a4f"/>
+          <text x="24" y="14" class="text-btn" fill="#7abaff" font-size="9">Images</text>
+          <rect x="54" width="84" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="96" y="14" class="text-btn" fill="#7cd692" font-size="9">Bundles PSD/AI</text>
+          <rect x="144" width="86" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="187" y="14" class="text-btn" fill="#7cd692" font-size="9">Subpastas: EXT</text>
+          <rect x="236" width="76" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="274" y="14" class="text-btn" fill="#7cd692" font-size="9">Pasta Origem</text>
+          <rect x="318" width="124" height="20" rx="2" fill="#182319" stroke="#2d3d2e"/>
+          <text x="380" y="14" class="text-btn" fill="#9de6a6" font-size="9">.psd, .psb, .pdd, .ai +65</text>
+          <rect x="448" width="94" height="20" rx="2" fill="#352617" stroke="#543c22"/>
+          <text x="495" y="14" class="text-btn" fill="#f0ad4e" font-size="9">Fallback: OTHERS</text>
+        </g>
+        <g transform="translate(834, 8)">
+          <rect width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="12" y="17" class="text-btn" fill="#888888">↑</text>
+          <rect x="28" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="40" y="17" class="text-btn" fill="#888888">↓</text>
+          <rect x="56" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="68" y="17" class="text-btn" fill="#888888">+</text>
+          <rect x="84" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="96" y="17" class="text-btn" fill="#888888">−</text>
+        </g>
+      </g>
+
+      <!-- SUBPASTA 3: 03_ Footages -->
+      <g id="tree-subrow-footages" transform="translate(36, 192)">
+        <line x1="-12" y1="-10" x2="-12" y2="21" stroke="#3a3a3a" stroke-width="1"/>
+        <line x1="-12" y1="21" x2="0" y2="21" stroke="#3a3a3a" stroke-width="1"/>
+        <rect width="948" height="42" rx="4" fill="#1a1a1a" stroke="#282828"/>
+        <g transform="translate(10, 14)" stroke="#555555" stroke-width="1.5">
+          <circle cx="2" cy="3" r="1"/><circle cx="6" cy="3" r="1"/>
+          <circle cx="2" cy="8" r="1"/><circle cx="6" cy="8" r="1"/>
+        </g>
+        <rect x="28" y="12" width="18" height="18" rx="3" fill="#ffccbc"/>
+        <rect x="52" y="11" width="28" height="20" rx="2" fill="#182c44" stroke="#27466e"/>
+        <text x="66" y="24" class="text-btn" fill="#7abaff" font-size="10">03_</text>
+        <rect x="86" y="8" width="144" height="26" rx="3" fill="#141414" stroke="#3a3a3a"/>
+        <text x="96" y="24" class="text-label">Footages</text>
+        <g transform="translate(240, 11)">
+          <rect width="46" height="20" rx="2" fill="#1a2533" stroke="#283a4f"/>
+          <text x="23" y="14" class="text-btn" fill="#7abaff" font-size="9">Videos</text>
+          <rect x="52" width="56" height="20" rx="2" fill="#1a2533" stroke="#283a4f"/>
+          <text x="80" y="14" class="text-btn" fill="#7abaff" font-size="9">Img Seq</text>
+          <rect x="114" width="54" height="20" rx="2" fill="#1a2533" stroke="#283a4f"/>
+          <text x="141" y="14" class="text-btn" fill="#7abaff" font-size="9">Data/3D</text>
+          <rect x="174" width="86" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="217" y="14" class="text-btn" fill="#7cd692" font-size="9">Subpastas: EXT</text>
+          <rect x="266" width="76" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="304" y="14" class="text-btn" fill="#7cd692" font-size="9">Pasta Origem</text>
+          <rect x="348" width="134" height="20" rx="2" fill="#182319" stroke="#2d3d2e"/>
+          <text x="415" y="14" class="text-btn" fill="#9de6a6" font-size="9">.mp4, .m4v, .mov, .qt +72</text>
+          <rect x="488" width="94" height="20" rx="2" fill="#352617" stroke="#543c22"/>
+          <text x="535" y="14" class="text-btn" fill="#f0ad4e" font-size="9">Fallback: OTHERS</text>
+        </g>
+        <g transform="translate(834, 8)">
+          <rect width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="12" y="17" class="text-btn" fill="#888888">↑</text>
+          <rect x="28" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="40" y="17" class="text-btn" fill="#888888">↓</text>
+          <rect x="56" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="68" y="17" class="text-btn" fill="#888888">+</text>
+          <rect x="84" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="96" y="17" class="text-btn" fill="#888888">−</text>
+        </g>
+      </g>
+
+      <!-- SUBPASTA 4: 04_ Audios -->
+      <g id="tree-subrow-audios" transform="translate(36, 240)">
+        <line x1="-12" y1="-10" x2="-12" y2="21" stroke="#3a3a3a" stroke-width="1"/>
+        <line x1="-12" y1="21" x2="0" y2="21" stroke="#3a3a3a" stroke-width="1"/>
+        <rect width="948" height="42" rx="4" fill="#1a1a1a" stroke="#282828"/>
+        <g transform="translate(10, 14)" stroke="#555555" stroke-width="1.5">
+          <circle cx="2" cy="3" r="1"/><circle cx="6" cy="3" r="1"/>
+          <circle cx="2" cy="8" r="1"/><circle cx="6" cy="8" r="1"/>
+        </g>
+        <rect x="28" y="12" width="18" height="18" rx="3" fill="#c8e6c9"/>
+        <rect x="52" y="11" width="28" height="20" rx="2" fill="#182c44" stroke="#27466e"/>
+        <text x="66" y="24" class="text-btn" fill="#7abaff" font-size="10">04_</text>
+        <rect x="86" y="8" width="144" height="26" rx="3" fill="#141414" stroke="#3a3a3a"/>
+        <text x="96" y="24" class="text-label">Audios</text>
+        <g transform="translate(240, 11)">
+          <rect width="46" height="20" rx="2" fill="#1a2533" stroke="#283a4f"/>
+          <text x="23" y="14" class="text-btn" fill="#7abaff" font-size="9">Audios</text>
+          <rect x="52" width="86" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="95" y="14" class="text-btn" fill="#7cd692" font-size="9">Subpastas: EXT</text>
+          <rect x="144" width="76" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="182" y="14" class="text-btn" fill="#7cd692" font-size="9">Pasta Origem</text>
+          <rect x="226" width="134" height="20" rx="2" fill="#182319" stroke="#2d3d2e"/>
+          <text x="293" y="14" class="text-btn" fill="#9de6a6" font-size="9">.wav, .bwf, .mp3, .mpa +9</text>
+          <rect x="366" width="94" height="20" rx="2" fill="#352617" stroke="#543c22"/>
+          <text x="413" y="14" class="text-btn" fill="#f0ad4e" font-size="9">Fallback: OTHERS</text>
+        </g>
+        <g transform="translate(834, 8)">
+          <rect width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="12" y="17" class="text-btn" fill="#888888">↑</text>
+          <rect x="28" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="40" y="17" class="text-btn" fill="#888888">↓</text>
+          <rect x="56" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="68" y="17" class="text-btn" fill="#888888">+</text>
+          <rect x="84" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="96" y="17" class="text-btn" fill="#888888">−</text>
+        </g>
+      </g>
+
+      <!-- SUBPASTA 5: 05_ Solids -->
+      <g id="tree-subrow-solids" transform="translate(36, 288)">
+        <line x1="-12" y1="-10" x2="-12" y2="21" stroke="#3a3a3a" stroke-width="1"/>
+        <line x1="-12" y1="21" x2="0" y2="21" stroke="#3a3a3a" stroke-width="1"/>
+        <rect width="948" height="42" rx="4" fill="#1a1a1a" stroke="#282828"/>
+        <g transform="translate(10, 14)" stroke="#555555" stroke-width="1.5">
+          <circle cx="2" cy="3" r="1"/><circle cx="6" cy="3" r="1"/>
+          <circle cx="2" cy="8" r="1"/><circle cx="6" cy="8" r="1"/>
+        </g>
+        <rect x="28" y="12" width="18" height="18" rx="3" fill="#78909c"/>
+        <rect x="52" y="11" width="28" height="20" rx="2" fill="#182c44" stroke="#27466e"/>
+        <text x="66" y="24" class="text-btn" fill="#7abaff" font-size="10">05_</text>
+        <rect x="86" y="8" width="144" height="26" rx="3" fill="#141414" stroke="#3a3a3a"/>
+        <text x="96" y="24" class="text-label">Solids</text>
+        <g transform="translate(240, 11)">
+          <rect width="46" height="20" rx="2" fill="#1a2533" stroke="#283a4f"/>
+          <text x="23" y="14" class="text-btn" fill="#7abaff" font-size="9">Solids</text>
+          <rect x="52" width="76" height="20" rx="2" fill="#192c20" stroke="#2b4733"/>
+          <text x="90" y="14" class="text-btn" fill="#7cd692" font-size="9">Pasta Origem</text>
+        </g>
+        <g transform="translate(834, 8)">
+          <rect width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="12" y="17" class="text-btn" fill="#888888">↑</text>
+          <rect x="28" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="40" y="17" class="text-btn" fill="#888888">↓</text>
+          <rect x="56" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="68" y="17" class="text-btn" fill="#888888">+</text>
+          <rect x="84" width="24" height="26" rx="3" fill="#252525" stroke="#383838"/><text x="96" y="17" class="text-btn" fill="#888888">−</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Rodapé do Preset Builder (Salvar e Organizar Agora + Fechar) -->
+    <g id="builder-footer" transform="translate(0, 770)">
+      <line x1="0" y1="0" x2="984" y2="0" stroke="#2a2a2a" stroke-width="1"/>
+      <text x="0" y="26" class="text-sub">Pronto. Configure as pastas e regras do preset.</text>
+      
+      <!-- Botão Azul: Salvar e Organizar Agora -->
+      <g id="btn-save-and-organize-now" transform="translate(720, 10)">
+        <rect width="180" height="32" rx="4" fill="#1473e6"/>
+        <text x="90" y="20" class="text-btn" fill="#ffffff" font-weight="bold">Salvar e Organizar Agora</text>
+      </g>
+      <!-- Botão Secundário: Fechar -->
+      <g id="btn-footer-close" transform="translate(910, 10)">
+        <rect width="74" height="32" rx="4" fill="#282828" stroke="#3c3c3c"/>
+        <text x="37" y="20" class="text-btn" fill="#d4d4d4">Fechar</text>
+      </g>
+    </g>
+  </g>
+</svg>

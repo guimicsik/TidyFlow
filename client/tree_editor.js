@@ -15,35 +15,100 @@
     }
     var ruleSectionHostTitle = document.getElementById("ruleSectionHostTitle");
     if (ruleSectionHostTitle) {
-      ruleSectionHostTitle.textContent = "1. Tipos Nativos do Premiere Pro";
+      ruleSectionHostTitle.textContent = "1. Tipos de Itens Permitidos";
     }
     var lblTypeMainComp = document.getElementById("lblTypeMainComp");
     if (lblTypeMainComp) {
-      lblTypeMainComp.textContent = "Sequência Principal (MainComp / Output)";
+      lblTypeMainComp.textContent = "Sequência Principal";
+    }
+    var infoTypeMainComp = document.getElementById("infoTypeMainComp");
+    if (infoTypeMainComp) {
+      infoTypeMainComp.setAttribute(
+        "data-tooltip",
+        "Sequências finais de edição que não estão inseridas dentro de nenhuma outra sequência."
+      );
     }
     var lblTypePreComps = document.getElementById("lblTypePreComps");
     if (lblTypePreComps) {
-      lblTypePreComps.textContent = "Sequências Aninhadas / Multicam (Pre-Comps)";
+      lblTypePreComps.textContent = "Sequências Aninhadas";
+    }
+    var infoTypePreComps = document.getElementById("infoTypePreComps");
+    if (infoTypePreComps) {
+      infoTypePreComps.setAttribute(
+        "data-tooltip",
+        "Sequências secundárias ou multicâmera usadas dentro de outras sequências."
+      );
     }
     var lblTypeSolids = document.getElementById("lblTypeSolids");
     if (lblTypeSolids) {
-      lblTypeSolids.textContent = "Itens Sintéticos (Color Matte, Adjustment Layer, Black Video...)";
+      lblTypeSolids.textContent = "Itens Sintéticos";
+    }
+    var infoTypeSolids = document.getElementById("infoTypeSolids");
+    if (infoTypeSolids) {
+      infoTypeSolids.setAttribute(
+        "data-tooltip",
+        "Elementos gerados internamente no Premiere, como Color Matte, Adjustment Layer e Black Video."
+      );
     }
     var lblTypeDataFiles = document.getElementById("lblTypeDataFiles");
     if (lblTypeDataFiles) {
-      lblTypeDataFiles.textContent = "Dados / MOGRT / Legendas / XML (.mogrt, .srt, .xml...)";
+      lblTypeDataFiles.textContent = "Dados, MOGRT e Legendas";
+    }
+    var infoTypeDataFiles = document.getElementById("infoTypeDataFiles");
+    if (infoTypeDataFiles) {
+      infoTypeDataFiles.setAttribute(
+        "data-tooltip",
+        "Templates gráficos, arquivos de legenda, tabelas e projetos importados."
+      );
     }
     var lblRuleGroupByMainComp = document.getElementById("lblRuleGroupByMainComp");
     if (lblRuleGroupByMainComp) {
-      lblRuleGroupByMainComp.innerHTML =
-        "Agrupar Sequências Aninhadas em subpastas por Sequência Principal e <code>Geral/</code>";
+      lblRuleGroupByMainComp.textContent = "Agrupar por Seq. Principal";
     }
-    var lblRulePsdBundles = document.getElementById("chkRulePsdBundles")
-      ? document.getElementById("lblRulePsdBundles")
-      : null;
+    var infoRuleGroupByMainComp = document.getElementById("infoRuleGroupByMainComp");
+    if (infoRuleGroupByMainComp) {
+      infoRuleGroupByMainComp.setAttribute(
+        "data-tooltip",
+        "Separa as sequências aninhadas em subpastas com o nome da sequência principal onde são usadas."
+      );
+    }
+    var lblRulePsdBundles = document.getElementById("lblRulePsdBundles");
     if (lblRulePsdBundles) {
-      lblRulePsdBundles.textContent =
-        "Preservar pacotes de camadas PSD / AI (isolar sequências internas na Bin do PSD)";
+      lblRulePsdBundles.textContent = "Isolar PSD / AI";
+    }
+
+    // Tooltips dinâmicos e adaptados ao Premiere Pro para os pacotes de extensão
+    var packDataFiles = document.querySelector('input.rule-pack-chk[value="DataFiles"]');
+    if (packDataFiles && packDataFiles.parentElement) {
+      var tipData = packDataFiles.parentElement.querySelector(".info-icon");
+      if (tipData) {
+        tipData.setAttribute("data-tooltip", "Exemplos: .json, .csv, .prproj, .mogrt, .srt, .vtt, .mcc, .dfxp, .xml, .aaf...");
+      }
+      var lblData = packDataFiles.parentElement.querySelector(".btn-tile-label");
+      if (lblData) {
+        lblData.textContent = "Dados / Legendas";
+      }
+    }
+    var packAudios = document.querySelector('input.rule-pack-chk[value="Audios"]');
+    if (packAudios && packAudios.parentElement) {
+      var tipAud = packAudios.parentElement.querySelector(".info-icon");
+      if (tipAud) {
+        tipAud.setAttribute("data-tooltip", "Exemplos: .wav, .mp3, .aac, .m4a, .aif, .flac, .asnd, .ac3, .caf, .mid...");
+      }
+    }
+    var packVideos = document.querySelector('input.rule-pack-chk[value="Videos"]');
+    if (packVideos && packVideos.parentElement) {
+      var tipVid = packVideos.parentElement.querySelector(".info-icon");
+      if (tipVid) {
+        tipVid.setAttribute("data-tooltip", "Exemplos: .mp4, .mov, .prores, .mxf, .avi, .braw, .r3d, .mod, .tod...");
+      }
+    }
+    var packImages = document.querySelector('input.rule-pack-chk[value="Images"]');
+    if (packImages && packImages.parentElement) {
+      var tipImg = packImages.parentElement.querySelector(".info-icon");
+      if (tipImg) {
+        tipImg.setAttribute("data-tooltip", "Exemplos: .png, .jpg, .jfif, .ico, .psd, .ai, .svg, .exr, .dng...");
+      }
     }
   }
 
@@ -72,8 +137,9 @@
   var btnRunNow = document.getElementById("btnRunNow");
   var btnCloseModal = document.getElementById("btnCloseModal");
 
-  // Popover de Cores AE
+  // Popover de Cores AE e Tooltip de Info
   var labelPopover = document.getElementById("labelPopover");
+  var ruleInfoTooltip = document.getElementById("ruleInfoTooltip");
 
   // Modal de Regras
   var rulesModalBackdrop = document.getElementById("rulesModalBackdrop");
@@ -82,16 +148,19 @@
   var btnCloseRulesModalX = document.getElementById("btnCloseRulesModalX");
   var ruleTypeCheckboxes = document.querySelectorAll(".rule-type-chk");
   var chkRuleGroupExt = document.getElementById("chkRuleGroupExt");
+  var chkRuleGroupBySourceFolder = document.getElementById("chkRuleGroupBySourceFolder");
   var chkRuleGroupByMainComp = document.getElementById("chkRuleGroupByMainComp");
   var chkRulePsdBundles = document.getElementById("chkRulePsdBundles");
   var chkRuleCatchOthers = document.getElementById("chkRuleCatchOthers");
-  var extPresetBtns = document.querySelectorAll(".ext-preset-btn[data-pack]");
   var btnClearAllExts = document.getElementById("btnClearAllExts");
+  var rulePackCheckboxes = document.querySelectorAll(".rule-pack-chk");
   var inpNewExtension = document.getElementById("inpNewExtension");
   var btnAddExtension = document.getElementById("btnAddExtension");
   var extTagsContainer = document.getElementById("extTagsContainer");
-  var selNameFilterMode = document.getElementById("selNameFilterMode");
-  var inpNameFilter = document.getElementById("inpNameFilter");
+  var btnClearAllNameTags = document.getElementById("btnClearAllNameTags");
+  var inpNewNameTag = document.getElementById("inpNewNameTag");
+  var btnAddNameTag = document.getElementById("btnAddNameTag");
+  var nameTagsContainer = document.getElementById("nameTagsContainer");
   var btnCancelRulesModal = document.getElementById("btnCancelRulesModal");
   var btnApplyRulesModal = document.getElementById("btnApplyRulesModal");
 
@@ -115,6 +184,7 @@
   var activeColorPopoverNodeId = null;
   var editingRulesNodeId = null;
   var modalWorkingExts = [];
+  var modalWorkingNameTags = [];
   var pendingConfirmCallback = null;
   var draggedNodeId = null;
 
@@ -195,7 +265,6 @@
     }
 
     chkUsePrefixNumbering.checked = Boolean(currentPreset.settings.usePrefixNumbering);
-    chkDeleteEmptyFolders.checked = Boolean(currentPreset.settings.deleteEmptyFolders);
     inpUnusedFolderName.value = currentPreset.settings.unusedFolderName || "Nunca Usadas";
 
     setDirty(false);
@@ -232,6 +301,9 @@
     }
     if (rules.groupSubfoldersByExt) {
       pills.push({ text: "Subpastas: EXT", cls: "pill-ext" });
+    }
+    if (rules.groupBySourceFolder) {
+      pills.push({ text: "Pasta Origem", cls: "pill-ext" });
     }
 
     var exts = Array.isArray(rules.extensions) ? rules.extensions : [];
@@ -677,39 +749,97 @@
     closeColorLabelPopover();
   });
 
-  // Modal de Regras e Filtros
-  function renderModalExtensionTags() {
-    extTagsContainer.innerHTML = "";
-    if (modalWorkingExts.length === 0) {
-      var emptyMsg = document.createElement("span");
-      emptyMsg.className = "rule-empty-hint";
-      emptyMsg.textContent = "Nenhuma extensão específica filtrada (aceitará todas da categoria marcada ou use os pacotes acima).";
-      extTagsContainer.appendChild(emptyMsg);
-      return;
+  // Sincronização visual dos botões estilo Tile (Ativo #0d66d0 / Inativo #084083)
+  var allRuleToggleLabels = document.querySelectorAll(".rule-toggle-btn");
+
+  function syncAllRuleToggleButtons() {
+    for (var i = 0; i < allRuleToggleLabels.length; i++) {
+      var lbl = allRuleToggleLabels[i];
+      var chk = lbl.querySelector('input[type="checkbox"]');
+      if (chk) {
+        lbl.classList.toggle("active", Boolean(chk.checked));
+      }
     }
+  }
 
-    for (var i = 0; i < modalWorkingExts.length; i++) {
-      (function (ext, idx) {
-        var tag = document.createElement("span");
-        tag.className = "ext-tag";
-
-        var label = document.createElement("span");
-        label.textContent = "." + ext;
-
-        var btnRem = document.createElement("button");
-        btnRem.type = "button";
-        btnRem.textContent = "×";
-        btnRem.title = "Remover ." + ext;
-        btnRem.addEventListener("click", function () {
-          modalWorkingExts.splice(idx, 1);
-          renderModalExtensionTags();
+  for (var tIdx = 0; tIdx < allRuleToggleLabels.length; tIdx++) {
+    (function (lbl) {
+      var chk = lbl.querySelector('input[type="checkbox"]');
+      if (chk) {
+        chk.addEventListener("change", function () {
+          lbl.classList.toggle("active", Boolean(chk.checked));
         });
+      }
+    })(allRuleToggleLabels[tIdx]);
+  }
 
-        tag.appendChild(label);
-        tag.appendChild(btnRem);
-        extTagsContainer.appendChild(tag);
-      })(modalWorkingExts[i], i);
+  // Tooltip de informação amigável nos ícones (i)
+  function hideRuleTooltip() {
+    if (ruleInfoTooltip) {
+      ruleInfoTooltip.style.display = "none";
     }
+  }
+
+  var allInfoIcons = document.querySelectorAll(".info-icon");
+  for (var infIdx = 0; infIdx < allInfoIcons.length; infIdx++) {
+    (function (iconEl) {
+      iconEl.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+      });
+
+      iconEl.addEventListener("mouseenter", function () {
+        var text = iconEl.getAttribute("data-tooltip");
+        if (!text || !ruleInfoTooltip) return;
+        ruleInfoTooltip.textContent = text;
+        ruleInfoTooltip.style.display = "block";
+
+        var rect = iconEl.getBoundingClientRect();
+        var tipRect = ruleInfoTooltip.getBoundingClientRect();
+        var topPos = rect.top - tipRect.height - 6;
+        if (topPos < 8) {
+          topPos = rect.bottom + 6;
+        }
+        var leftPos = rect.left + rect.width / 2 - tipRect.width / 2;
+        if (leftPos + tipRect.width > window.innerWidth - 10) {
+          leftPos = window.innerWidth - tipRect.width - 10;
+        }
+        if (leftPos < 10) {
+          leftPos = 10;
+        }
+        ruleInfoTooltip.style.top = Math.round(topPos) + "px";
+        ruleInfoTooltip.style.left = Math.round(leftPos) + "px";
+      });
+
+      iconEl.addEventListener("mouseleave", hideRuleTooltip);
+    })(allInfoIcons[infIdx]);
+  }
+
+  // Modal de Regras e Filtros — Sincronização dos Pacotes de Extensões
+  function updateClearExtsButtonVisibility() {
+    if (btnClearAllExts) {
+      btnClearAllExts.style.display = modalWorkingExts.length > 0 ? "inline-flex" : "none";
+    }
+  }
+
+  var activeDefaultExtensions = presetManager.getDefaultExtensions();
+
+  function syncPackButtonsFromExts() {
+    for (var i = 0; i < rulePackCheckboxes.length; i++) {
+      var chk = rulePackCheckboxes[i];
+      var packName = chk.value;
+      var packExts = activeDefaultExtensions[packName] || [];
+      var hasAny = false;
+      for (var e = 0; e < packExts.length; e++) {
+        if (modalWorkingExts.indexOf(packExts[e]) !== -1) {
+          hasAny = true;
+          break;
+        }
+      }
+      chk.checked = hasAny;
+    }
+    syncAllRuleToggleButtons();
+    updateClearExtsButtonVisibility();
   }
 
   function addExtensionsFromInputString(rawStr) {
@@ -721,7 +851,89 @@
         modalWorkingExts.push(clean);
       }
     }
-    renderModalExtensionTags();
+    syncPackButtonsFromExts();
+  }
+
+  // Listener dos botões de pacote de extensão
+  for (var pIdx = 0; pIdx < rulePackCheckboxes.length; pIdx++) {
+    (function (chk) {
+      chk.addEventListener("change", function () {
+        var packName = chk.value;
+        var packList = activeDefaultExtensions[packName] || [];
+        if (chk.checked) {
+          for (var i = 0; i < packList.length; i++) {
+            if (modalWorkingExts.indexOf(packList[i]) === -1) {
+              modalWorkingExts.push(packList[i]);
+            }
+          }
+        } else {
+          modalWorkingExts = modalWorkingExts.filter(function (ext) {
+            return packList.indexOf(ext) === -1;
+          });
+        }
+        syncPackButtonsFromExts();
+      });
+    })(rulePackCheckboxes[pIdx]);
+  }
+
+  // Modal de Regras e Filtros — Tags de Nomenclatura
+  function renderModalNameTags() {
+    if (!nameTagsContainer) return;
+    nameTagsContainer.innerHTML = "";
+    if (btnClearAllNameTags) {
+      btnClearAllNameTags.style.display = modalWorkingNameTags.length > 0 ? "inline-flex" : "none";
+    }
+
+    if (modalWorkingNameTags.length === 0) {
+      var emptyMsg = document.createElement("span");
+      emptyMsg.className = "rule-empty-hint";
+      emptyMsg.textContent = "Nenhuma palavra filtrada.";
+      nameTagsContainer.appendChild(emptyMsg);
+      return;
+    }
+
+    for (var i = 0; i < modalWorkingNameTags.length; i++) {
+      (function (word, idx) {
+        var tag = document.createElement("span");
+        tag.className = "ext-tag";
+
+        var label = document.createElement("span");
+        label.textContent = word;
+
+        var btnRem = document.createElement("button");
+        btnRem.type = "button";
+        btnRem.textContent = "×";
+        btnRem.title = "Remover palavra '" + word + "'";
+        btnRem.addEventListener("click", function () {
+          modalWorkingNameTags.splice(idx, 1);
+          renderModalNameTags();
+        });
+
+        tag.appendChild(label);
+        tag.appendChild(btnRem);
+        nameTagsContainer.appendChild(tag);
+      })(modalWorkingNameTags[i], i);
+    }
+  }
+
+  function addNameTagsFromInputString(rawStr) {
+    if (!rawStr) return;
+    var parts = String(rawStr).split(/[,;]+/);
+    for (var i = 0; i < parts.length; i++) {
+      var clean = parts[i].trim();
+      if (!clean) continue;
+      var exists = false;
+      for (var j = 0; j < modalWorkingNameTags.length; j++) {
+        if (modalWorkingNameTags[j].toLowerCase() === clean.toLowerCase()) {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        modalWorkingNameTags.push(clean);
+      }
+    }
+    renderModalNameTags();
   }
 
   function openRulesModalForNode(nodeId) {
@@ -743,21 +955,33 @@
     }
 
     chkRuleGroupExt.checked = Boolean(rules.groupSubfoldersByExt);
+    if (chkRuleGroupBySourceFolder) {
+      chkRuleGroupBySourceFolder.checked = (rules.groupBySourceFolder !== undefined) ? Boolean(rules.groupBySourceFolder) : true;
+    }
     chkRuleGroupByMainComp.checked = Boolean(rules.groupByMainComp);
     chkRulePsdBundles.checked = Boolean(rules.handlePsdBundles);
     chkRuleCatchOthers.checked = Boolean(rules.catchOthers);
 
-    modalWorkingExts = Array.isArray(rules.extensions) ? rules.extensions.slice() : [];
-    renderModalExtensionTags();
+    syncAllRuleToggleButtons();
 
-    selNameFilterMode.value = rules.nameFilterMode === "regex" ? "regex" : "contains";
-    inpNameFilter.value = rules.nameFilter || "";
-    inpNewExtension.value = "";
+    modalWorkingExts = Array.isArray(rules.extensions) ? rules.extensions.slice() : [];
+    syncPackButtonsFromExts();
+
+    modalWorkingNameTags = [];
+    if (rules.nameFilter && String(rules.nameFilter).trim() !== "") {
+      addNameTagsFromInputString(String(rules.nameFilter));
+    } else {
+      renderModalNameTags();
+    }
+
+    if (inpNewExtension) inpNewExtension.value = "";
+    if (inpNewNameTag) inpNewNameTag.value = "";
 
     rulesModalBackdrop.classList.add("open");
   }
 
   function closeRulesModal() {
+    hideRuleTooltip();
     rulesModalBackdrop.classList.remove("open");
     editingRulesNodeId = null;
   }
@@ -765,37 +989,55 @@
   btnCloseRulesModalX.addEventListener("click", closeRulesModal);
   btnCancelRulesModal.addEventListener("click", closeRulesModal);
 
-  btnAddExtension.addEventListener("click", function () {
-    addExtensionsFromInputString(inpNewExtension.value);
-    inpNewExtension.value = "";
-    inpNewExtension.focus();
-  });
-
-  inpNewExtension.addEventListener("keydown", function (ev) {
-    if (ev.key === "Enter") {
-      ev.preventDefault();
+  if (btnAddExtension && inpNewExtension) {
+    btnAddExtension.addEventListener("click", function () {
       addExtensionsFromInputString(inpNewExtension.value);
       inpNewExtension.value = "";
-    }
-  });
-
-  for (var b = 0; b < extPresetBtns.length; b++) {
-    extPresetBtns[b].addEventListener("click", function () {
-      var packName = this.getAttribute("data-pack");
-      var list = PresetManager.DEFAULT_EXTENSIONS[packName] || [];
-      for (var i = 0; i < list.length; i++) {
-        if (modalWorkingExts.indexOf(list[i]) === -1) {
-          modalWorkingExts.push(list[i]);
-        }
-      }
-      renderModalExtensionTags();
+      inpNewExtension.focus();
     });
   }
 
-  btnClearAllExts.addEventListener("click", function () {
-    modalWorkingExts = [];
-    renderModalExtensionTags();
-  });
+  if (inpNewExtension) {
+    inpNewExtension.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        addExtensionsFromInputString(inpNewExtension.value);
+        inpNewExtension.value = "";
+      }
+    });
+  }
+
+  if (btnClearAllExts) {
+    btnClearAllExts.addEventListener("click", function () {
+      modalWorkingExts = [];
+      syncPackButtonsFromExts();
+    });
+  }
+
+  if (btnAddNameTag) {
+    btnAddNameTag.addEventListener("click", function () {
+      addNameTagsFromInputString(inpNewNameTag.value);
+      inpNewNameTag.value = "";
+      inpNewNameTag.focus();
+    });
+  }
+
+  if (inpNewNameTag) {
+    inpNewNameTag.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        addNameTagsFromInputString(inpNewNameTag.value);
+        inpNewNameTag.value = "";
+      }
+    });
+  }
+
+  if (btnClearAllNameTags) {
+    btnClearAllNameTags.addEventListener("click", function () {
+      modalWorkingNameTags = [];
+      renderModalNameTags();
+    });
+  }
 
   btnApplyRulesModal.addEventListener("click", function () {
     if (!editingRulesNodeId) return;
@@ -803,9 +1045,15 @@
     if (!found) return;
 
     // Se o usuário digitou algo no input de extensão e não clicou em [+], adiciona também
-    if (inpNewExtension.value.trim() !== "") {
+    if (inpNewExtension && inpNewExtension.value.trim() !== "") {
       addExtensionsFromInputString(inpNewExtension.value);
       inpNewExtension.value = "";
+    }
+
+    // Se o usuário digitou algo no input de nome e não clicou em [+], adiciona também
+    if (inpNewNameTag && inpNewNameTag.value.trim() !== "") {
+      addNameTagsFromInputString(inpNewNameTag.value);
+      inpNewNameTag.value = "";
     }
 
     var selectedTypes = [];
@@ -819,11 +1067,12 @@
       types: selectedTypes,
       extensions: modalWorkingExts.slice(),
       groupSubfoldersByExt: chkRuleGroupExt.checked,
+      groupBySourceFolder: chkRuleGroupBySourceFolder ? chkRuleGroupBySourceFolder.checked : true,
       groupByMainComp: chkRuleGroupByMainComp.checked,
       handlePsdBundles: chkRulePsdBundles.checked,
       catchOthers: chkRuleCatchOthers.checked,
-      nameFilterMode: selNameFilterMode.value === "regex" ? "regex" : "contains",
-      nameFilter: inpNameFilter.value.trim()
+      nameFilterMode: "contains",
+      nameFilter: modalWorkingNameTags.join(", ")
     };
 
     closeRulesModal();
@@ -911,14 +1160,9 @@
   chkUsePrefixNumbering.addEventListener("change", function () {
     if (!currentPreset) return;
     currentPreset.settings.usePrefixNumbering = chkUsePrefixNumbering.checked;
-    setDirty(true);
     renderTree();
-  });
-
-  chkDeleteEmptyFolders.addEventListener("change", function () {
-    if (!currentPreset) return;
-    currentPreset.settings.deleteEmptyFolders = chkDeleteEmptyFolders.checked;
-    setDirty(true);
+    presetManager.savePreset(currentPreset);
+    presetManager.notifyPresetsUpdated(currentPreset.presetName);
   });
 
   inpUnusedFolderName.addEventListener("input", function () {
@@ -997,6 +1241,11 @@
           presetManager.deletePreset(nameToDel);
           loadSelectedPresetIntoEditor(PresetManager.DEFAULT_PRESET_NAME);
           setStatus("Preset '" + nameToDel + "' excluído.", "warning");
+          try {
+            if (window.parent && window.parent !== window && typeof window.parent.onPresetBuilderUpdated === "function") {
+              window.parent.onPresetBuilderUpdated(PresetManager.DEFAULT_PRESET_NAME);
+            }
+          } catch (eSync3) {}
         } catch (err) {
           setStatus("Erro ao excluir: " + err.message, "error");
         }
@@ -1208,4 +1457,79 @@
   // Inicialização
   var initialPresetName = presetManager.getActivePresetName();
   loadSelectedPresetIntoEditor(initialPresetName);
+
+  // Espelha a troca de preset feita no Painel Principal
+  try {
+    csInterface.addEventListener("com.tidyflow.presetsUpdated", function (evt) {
+      try {
+        var d = evt && evt.data ? (typeof evt.data === "string" ? JSON.parse(evt.data) : evt.data) : null;
+        var incoming = d && d.activePreset;
+        if (!incoming) return;
+        if (currentPreset && currentPreset.presetName === incoming) {
+          // Mesmo preset: espelha Numeração Sequencial e Pasta de Origem alteradas no Painel Principal
+          var stored = presetManager.loadPreset(incoming);
+          var changed = false;
+
+          // Espelha Numeração Sequencial (usePrefixNumbering)
+          var storedPrefix = Boolean(stored.settings && stored.settings.usePrefixNumbering !== false);
+          if (Boolean(currentPreset.settings && currentPreset.settings.usePrefixNumbering !== false) !== storedPrefix) {
+            if (!currentPreset.settings) currentPreset.settings = {};
+            currentPreset.settings.usePrefixNumbering = storedPrefix;
+            if (chkUsePrefixNumbering) {
+              chkUsePrefixNumbering.checked = storedPrefix;
+            }
+            changed = true;
+          }
+
+          // Espelha Pasta de Origem nas regras das pastas
+          (function mirror(nodes) {
+            for (var i = 0; i < (nodes || []).length; i++) {
+              var f = findNodeAndParentById(currentPreset.tree, nodes[i].id);
+              if (f && f.node.rules && nodes[i].rules &&
+                  f.node.rules.groupBySourceFolder !== nodes[i].rules.groupBySourceFolder) {
+                f.node.rules.groupBySourceFolder = nodes[i].rules.groupBySourceFolder;
+                changed = true;
+              }
+              mirror(nodes[i].children);
+            }
+          })(stored.tree);
+          if (changed) renderTree();
+          return;
+        }
+        presetManager.setActivePresetNameSilent(incoming);
+        loadSelectedPresetIntoEditor(incoming);
+      } catch (eEvt) {}
+    });
+  } catch (eListen) {}
+
+  window.addEventListener("focus", function () {
+    try {
+      var activeName = presetManager.getActivePresetName();
+      if (currentPreset && currentPreset.presetName === activeName) {
+        var stored = presetManager.loadPreset(activeName);
+        var changed = false;
+        var storedPrefix = Boolean(stored.settings && stored.settings.usePrefixNumbering !== false);
+        if (Boolean(currentPreset.settings && currentPreset.settings.usePrefixNumbering !== false) !== storedPrefix) {
+          if (!currentPreset.settings) currentPreset.settings = {};
+          currentPreset.settings.usePrefixNumbering = storedPrefix;
+          if (chkUsePrefixNumbering) {
+            chkUsePrefixNumbering.checked = storedPrefix;
+          }
+          changed = true;
+        }
+        (function mirror(nodes) {
+          for (var i = 0; i < (nodes || []).length; i++) {
+            var f = findNodeAndParentById(currentPreset.tree, nodes[i].id);
+            if (f && f.node.rules && nodes[i].rules &&
+                f.node.rules.groupBySourceFolder !== nodes[i].rules.groupBySourceFolder) {
+              f.node.rules.groupBySourceFolder = nodes[i].rules.groupBySourceFolder;
+              changed = true;
+            }
+            mirror(nodes[i].children);
+          }
+        })(stored.tree);
+        if (changed) renderTree();
+      }
+    } catch (eFocus) {}
+  });
 })();

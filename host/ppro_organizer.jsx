@@ -194,6 +194,23 @@
         return trimStr(base.substring(lastDot + 1)).toLowerCase();
     }
 
+    function getParentFolderNameFromPath(filePath) {
+        if (!filePath) return "";
+        var clean = String(filePath).replace(/\\/g, "/");
+        while (clean.length > 0 && clean.charAt(clean.length - 1) === "/") {
+            clean = clean.substring(0, clean.length - 1);
+        }
+        var lastSlash = clean.lastIndexOf("/");
+        if (lastSlash === -1) return "";
+        var dirPath = clean.substring(0, lastSlash);
+        var prevSlash = dirPath.lastIndexOf("/");
+        var folderName = (prevSlash !== -1) ? dirPath.substring(prevSlash + 1) : dirPath;
+        if (folderName.indexOf(":") !== -1 || folderName.length === 0) {
+            return "";
+        }
+        return folderName;
+    }
+
     function getItemExtension(item) {
         var mediaPath = getMediaPathSafe(item);
         var ext = extractExtensionFromPath(mediaPath);
@@ -643,6 +660,9 @@
 
             var movedCount = 0;
             if (toMove.length > 0) {
+                if (typeof $.global.ppro_ensurePreOrganizeSnapshot === "function") {
+                    $.global.ppro_ensurePreOrganizeSnapshot();
+                }
                 var targetUnusedBin = existingUnusedBin;
                 if (!targetUnusedBin) {
                     targetUnusedBin = rootItem.createBin(unusedFolderName);
@@ -660,6 +680,9 @@
                             movedCount++;
                         }
                     }
+                }
+                if (typeof $.global.ppro_markPostOrganizeState === "function") {
+                    $.global.ppro_markPostOrganizeState();
                 }
             }
 
@@ -695,6 +718,7 @@
         var deleteEmptyFolders = (settings.deleteEmptyFolders !== false);
         var saveProjectBefore = (settings.saveProjectBefore === true);
         var reduceProject = (settings.reduceProject === true);
+        var groupBySourceFolderGlobal = (settings.groupBySourceFolder !== false);
         var unusedFolderName = settings.unusedFolderName || "Nunca Usadas";
 
         var projectSaved = false;
@@ -1040,13 +1064,13 @@
                 }
                 if (
                     isExtInNodesOfType(extLower, "Audios") ||
-                    /^(wav|bwf|mp3|mpa|mpe|aac|m4a|aif|aiff|flac|ogg|wma|mka)$/i.test(extLower)
+                    /^(wav|bwf|mp3|mpa|mpe|m2a|aac|m4a|aif|aiff|flac|ogg|wma|mka|asnd|ac3|caf|mid|midi)$/i.test(extLower)
                 ) {
                     return "Audios";
                 }
 
                 // 2. Dados / 3D / MOGRT / Legendas / XML / Projetos
-                var isExplicitDataExt = /^(json|mgjson|csv|tsv|jsx|bvh|obj|gltf|glb|fbx|c4d|prproj|aep|aepx|aet|mogrt|srt|vtt|scc|stl|xml|edl|aaf|omf|cube|look)$/i.test(extLower);
+                var isExplicitDataExt = /^(json|mgjson|csv|tsv|tab|txt|pbl|jsx|bvh|obj|gltf|glb|fbx|c4d|prproj|prel|chproj|aep|aepx|aet|mogrt|srt|vtt|scc|stl|mcc|dfxp|ttml|cap|sbv|xml|edl|aaf|omf|ale|cube|look)$/i.test(extLower);
                 if (
                     isExplicitDataExt ||
                     (isExtInNodesOfType(extLower, "DataFiles") && !isExtInNodesOfType(extLower, "StillImages"))
@@ -1055,7 +1079,7 @@
                 }
 
                 // 3. Vídeos nativos
-                var isNativeVideoExt = /^(mp4|m4v|mov|qt|prores|avi|mkv|webm|mxf|mpg|mpeg|m1v|mpv|m2p|m2v|m2t|m2ts|mts|ts|vob|3gp|3g2|amc|dv|wmv|asf|flv|f4v|r3d|ari|braw|crm|hevc|h264|264|ogv|cine|yuv|dnxhd|dnxhr)$/i.test(extLower);
+                var isNativeVideoExt = /^(mp4|m4v|mov|qt|prores|avi|mkv|webm|mxf|mpg|mpeg|m1v|mpv|m2p|m2v|m2t|m2ts|mts|ts|vob|mod|tod|3gp|3g2|amc|dv|wmv|asf|flv|f4v|r3d|ari|braw|crm|hevc|h264|264|ogv|cine|yuv|dnxhd|dnxhr)$/i.test(extLower);
                 if (isNativeVideoExt) {
                     return "Videos";
                 }
@@ -1081,7 +1105,7 @@
 
                 if (
                     isExtInNodesOfType(extLower, "StillImages") ||
-                    /^(psd|psb|pdd|ai|eps|ps|pdf|png|jpg|jpeg|jpe|webp|tif|tiff|bmp|rle|dib|gif|exr|sxr|mxr|tga|vda|icb|vst|hdr|rgbe|xyze|heif|heic|svg|iff|tdi|sgi|rgb|bw|pic|rla|rpf|ei|raw|crw|cr2|cr3|nef|nrw|arw|srf|sr2|raf|orf|rw2|pef|x3f|erf|kdc|dcr|mos|mrw|iiq|3fr|fff|srw|gpr|dxo|arq|rwl|mfw|mef)$/i.test(extLower)
+                    /^(psd|psb|pdd|ai|eps|ps|pdf|png|jpg|jpeg|jpe|jfif|webp|tif|tiff|bmp|rle|dib|ico|gif|exr|sxr|mxr|tga|vda|icb|vst|hdr|rgbe|xyze|heif|heic|svg|iff|tdi|sgi|rgb|bw|pic|rla|rpf|ei|raw|crw|cr2|cr3|nef|nrw|arw|srf|sr2|raf|orf|rw2|pef|x3f|erf|kdc|dcr|mos|mrw|iiq|3fr|fff|srw|gpr|dxo|arq|rwl|mfw|mef|dng)$/i.test(extLower)
                 ) {
                     return "StillImages";
                 }
@@ -1119,6 +1143,10 @@
             var movedFootages = 0;
             var cleanedFolders = 0;
             var reducedCount = 0;
+
+            if (typeof $.global.ppro_ensurePreOrganizeSnapshot === "function") {
+                $.global.ppro_ensurePreOrganizeSnapshot();
+            }
 
             // Executar Reduce Project (remover do projeto itens não referenciados pelas sequências principais selecionadas)
             if (reduceProject && targetMainSeqItems.length > 0) {
@@ -1327,8 +1355,29 @@
 
                         var targetPsdNodeBin = ensureNodeBin(psdBundleNodeRec.id);
                         var destContainer = targetPsdNodeBin;
+                        var psdSubPath = [];
                         if (psdBundleNodeRec.node.rules && psdBundleNodeRec.node.rules.groupSubfoldersByExt) {
-                            destContainer = getOrCreateSubBin(targetPsdNodeBin, [detectedType], psdBundleNodeRec.node.label);
+                            psdSubPath.push(detectedType);
+                        }
+                        var shouldGroupPsdBySource = (psdBundleNodeRec.node.rules && psdBundleNodeRec.node.rules.groupBySourceFolder !== undefined)
+                            ? Boolean(psdBundleNodeRec.node.rules.groupBySourceFolder)
+                            : groupBySourceFolderGlobal;
+                        if (shouldGroupPsdBySource && binCandidate.children) {
+                            var bundleSourceFolder = "";
+                            for (var bc = 0; bc < binCandidate.children.numItems; bc++) {
+                                var bChild = binCandidate.children[bc];
+                                var bPath = getMediaPathSafe(bChild);
+                                if (bPath) {
+                                    bundleSourceFolder = getParentFolderNameFromPath(bPath);
+                                    if (bundleSourceFolder) break;
+                                }
+                            }
+                            if (bundleSourceFolder) {
+                                psdSubPath.push(bundleSourceFolder);
+                            }
+                        }
+                        if (psdSubPath.length > 0) {
+                            destContainer = getOrCreateSubBin(targetPsdNodeBin, psdSubPath, psdBundleNodeRec.node.label);
                         }
 
                         if (!isSameBin(binCandidate, destContainer)) {
@@ -1337,8 +1386,8 @@
                             }
                         }
 
-                        registerBinContents(binCandidate);
                         protectedBins.push(binCandidate);
+                        registerBinContents(binCandidate);
                     }
                 }
             }
@@ -1443,13 +1492,27 @@
                             var nodeBin = ensureNodeBin(mediaMatch.rec.id);
                             var finalMediaBin = nodeBin;
 
+                            var shouldGroupBySource = (targetNode.rules && targetNode.rules.groupBySourceFolder !== undefined)
+                                ? Boolean(targetNode.rules.groupBySourceFolder)
+                                : groupBySourceFolderGlobal;
+
+                            var sourceFolderName = "";
+                            if (shouldGroupBySource) {
+                                var mediaPath = getMediaPathSafe(item);
+                                if (mediaPath) {
+                                    sourceFolderName = getParentFolderNameFromPath(mediaPath);
+                                }
+                            }
+
+                            var subPath = [];
                             if (targetNode.rules && targetNode.rules.groupSubfoldersByExt) {
                                 var subBinName = (mediaMatch.matchedViaCatchOthers || !fileExt)
                                     ? "OTHERS"
                                     : fileExt.toUpperCase();
-                                var subPath = [subBinName];
+                                subPath.push(subBinName);
 
                                 if (
+                                    !shouldGroupBySource &&
                                     !mediaMatch.matchedViaCatchOthers &&
                                     (fileExt === "psd" || fileExt === "psb" || fileExt === "ai") &&
                                     item.name
@@ -1462,6 +1525,13 @@
                                         }
                                     }
                                 }
+                            }
+
+                            if (sourceFolderName) {
+                                subPath.push(sourceFolderName);
+                            }
+
+                            if (subPath.length > 0) {
                                 finalMediaBin = getOrCreateSubBin(nodeBin, subPath, targetNode.label);
                             }
 
@@ -1555,6 +1625,10 @@
             }
 
             applyTreeNumberingAndLabels(preset.tree, rootItem);
+
+            if (typeof $.global.ppro_markPostOrganizeState === "function") {
+                $.global.ppro_markPostOrganizeState();
+            }
 
             return (
                 '{"success": true, "movedComps": ' +
@@ -1664,7 +1738,15 @@
                 }
             }
 
+            if (typeof $.global.ppro_ensurePreOrganizeSnapshot === "function") {
+                $.global.ppro_ensurePreOrganizeSnapshot();
+            }
+
             buildNodesInBin(preset.tree, rootItem);
+
+            if (typeof $.global.ppro_markPostOrganizeState === "function") {
+                $.global.ppro_markPostOrganizeState();
+            }
 
             return (
                 '{"success": true, "createdCount": ' +
@@ -1673,6 +1755,394 @@
                 existingCount +
                 ', "totalCount": ' +
                 (createdCount + existingCount) +
+                "}"
+            );
+        } catch (err) {
+            return '{"success": false, "error": "' + escapeJsonString(err.toString()) + '"}';
+        }
+    };
+
+    // =========================================================================
+    // 5. Sistema de Snapshot e Rollback para Premiere Pro (PPRO)
+    // =========================================================================
+    $.global._pproRollbackSnapshot = $.global._pproRollbackSnapshot || null;
+
+    $.global.ppro_captureRawSnapshot = function () {
+        if (!app.project || !app.project.rootItem) return null;
+        var rootItem = app.project.rootItem;
+        var bins = [];
+        var items = [];
+
+        function walk(containerBin, depth) {
+            if (!containerBin || !containerBin.children) return;
+            var count = containerBin.children.numItems || 0;
+            var parentId = isRoot(containerBin) ? "ROOT" : String(containerBin.nodeId || "ROOT");
+
+            for (var i = 0; i < count; i++) {
+                var ch = containerBin.children[i];
+                if (!ch || !ch.nodeId) continue;
+                var colorLbl = -1;
+                try {
+                    if (typeof ch.getColorLabel === "function") {
+                        colorLbl = ch.getColorLabel();
+                    }
+                } catch (eLbl) {}
+
+                if (isBin(ch)) {
+                    bins.push({
+                        nodeId: String(ch.nodeId),
+                        name: String(ch.name || ""),
+                        parentNodeId: parentId,
+                        colorLabel: colorLbl,
+                        depth: depth
+                    });
+                    walk(ch, depth + 1);
+                } else if (!isRoot(ch)) {
+                    items.push({
+                        nodeId: String(ch.nodeId),
+                        name: String(ch.name || ""),
+                        parentNodeId: parentId,
+                        colorLabel: colorLbl
+                    });
+                }
+            }
+        }
+
+        walk(rootItem, 0);
+
+        bins.sort(function (a, b) {
+            return a.depth - b.depth;
+        });
+
+        return {
+            host: "PPRO",
+            projectFile: app.project.path ? String(app.project.path) : "",
+            bins: bins,
+            items: items,
+            createdBinNodeIds: {},
+            movedItemParents: {}
+        };
+    };
+
+    $.global.ppro_ensurePreOrganizeSnapshot = function () {
+        if (!app.project || !app.project.rootItem) return;
+        var existing = $.global._pproRollbackSnapshot;
+        if (existing && existing.bins && existing.items) {
+            var curPath = app.project.path ? String(app.project.path) : "";
+            var sameProj = (!existing.projectFile || !curPath || existing.projectFile === curPath);
+            if (sameProj) {
+                var snap = takeProjectSnapshot();
+                var origBinMap = {};
+                for (var b = 0; b < existing.bins.length; b++) {
+                    origBinMap[existing.bins[b].nodeId] = existing.bins[b];
+                }
+                var origItemMap = {};
+                for (var im = 0; im < existing.items.length; im++) {
+                    origItemMap[existing.items[im].nodeId] = existing.items[im];
+                }
+
+                var stillOrganized = false;
+                for (var cb = 0; cb < snap.allBins.length; cb++) {
+                    var binIt = snap.allBins[cb];
+                    if (binIt && binIt.nodeId && existing.createdBinNodeIds && existing.createdBinNodeIds[binIt.nodeId] && !origBinMap[binIt.nodeId]) {
+                        stillOrganized = true;
+                        break;
+                    }
+                }
+                if (!stillOrganized) {
+                    for (var ci = 0; ci < snap.allNonBinItems.length; ci++) {
+                        var nonBin = snap.allNonBinItems[ci];
+                        if (!nonBin || !nonBin.nodeId) continue;
+                        var pBin = snap.parentByNodeId[nonBin.nodeId];
+                        var pNodeId = (pBin && !isRoot(pBin) && pBin.nodeId) ? String(pBin.nodeId) : "ROOT";
+                        if (
+                            existing.movedItemParents &&
+                            existing.movedItemParents[nonBin.nodeId] !== undefined &&
+                            origItemMap[nonBin.nodeId] &&
+                            pNodeId === existing.movedItemParents[nonBin.nodeId] &&
+                            pNodeId !== origItemMap[nonBin.nodeId].parentNodeId
+                        ) {
+                            stillOrganized = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (stillOrganized) {
+                    for (var k = 0; k < snap.allNonBinItems.length; k++) {
+                        var newIt = snap.allNonBinItems[k];
+                        if (newIt && newIt.nodeId && !origItemMap[newIt.nodeId]) {
+                            var curPBin = snap.parentByNodeId[newIt.nodeId];
+                            var curPId = (curPBin && !isRoot(curPBin) && curPBin.nodeId) ? String(curPBin.nodeId) : "ROOT";
+                            var safePId = origBinMap[curPId] ? curPId : "ROOT";
+                            existing.items.push({
+                                nodeId: String(newIt.nodeId),
+                                name: String(newIt.name || ""),
+                                parentNodeId: safePId,
+                                colorLabel: -1
+                            });
+                        }
+                    }
+                    return;
+                }
+            }
+        }
+
+        $.global._pproRollbackSnapshot = $.global.ppro_captureRawSnapshot();
+    };
+
+    $.global.ppro_markPostOrganizeState = function () {
+        var snap = $.global._pproRollbackSnapshot;
+        if (!snap || !app.project || !app.project.rootItem) return;
+        if (app.project.path) {
+            snap.projectFile = String(app.project.path);
+        }
+        var current = takeProjectSnapshot();
+        var createdBins = {};
+        var movedParents = {};
+        for (var i = 0; i < current.allBins.length; i++) {
+            if (current.allBins[i] && current.allBins[i].nodeId) {
+                createdBins[current.allBins[i].nodeId] = true;
+            }
+        }
+        for (var j = 0; j < current.allNonBinItems.length; j++) {
+            var it = current.allNonBinItems[j];
+            if (it && it.nodeId) {
+                var p = current.parentByNodeId[it.nodeId];
+                movedParents[it.nodeId] = (p && !isRoot(p) && p.nodeId) ? String(p.nodeId) : "ROOT";
+            }
+        }
+        snap.createdBinNodeIds = createdBins;
+        snap.movedItemParents = movedParents;
+    };
+
+    $.global.ppro_getRollbackSnapshotJson = function () {
+        var snap = $.global._pproRollbackSnapshot;
+        if (!snap || !snap.bins || !snap.items) return "";
+
+        var bParts = [];
+        for (var i = 0; i < snap.bins.length; i++) {
+            var b = snap.bins[i];
+            bParts.push(
+                '{"nodeId":"' + escapeJsonString(b.nodeId) + '"' +
+                ',"name":"' + escapeJsonString(b.name) + '"' +
+                ',"parentNodeId":"' + escapeJsonString(b.parentNodeId) + '"' +
+                ',"colorLabel":' + (b.colorLabel !== undefined ? b.colorLabel : -1) +
+                ',"depth":' + (b.depth || 0) + '}'
+            );
+        }
+
+        var iParts = [];
+        for (var j = 0; j < snap.items.length; j++) {
+            var it = snap.items[j];
+            iParts.push(
+                '{"nodeId":"' + escapeJsonString(it.nodeId) + '"' +
+                ',"name":"' + escapeJsonString(it.name) + '"' +
+                ',"parentNodeId":"' + escapeJsonString(it.parentNodeId) + '"' +
+                ',"colorLabel":' + (it.colorLabel !== undefined ? it.colorLabel : -1) + '}'
+            );
+        }
+
+        return (
+            '{"host":"PPRO","projectFile":"' + escapeJsonString(snap.projectFile || "") + '",' +
+            '"bins":[' + bParts.join(",") + '],' +
+            '"items":[' + iParts.join(",") + ']}'
+        );
+    };
+
+    $.global.ppro_rollbackProject = function (saveBefore, backupSnapshotJson) {
+        if (!app.project || !app.project.rootItem) {
+            return '{"success": false, "error": "Nenhum projeto aberto no Premiere Pro."}';
+        }
+
+        var shouldSave = (saveBefore === true || saveBefore === "true");
+        var projectSaved = false;
+        if (shouldSave) {
+            try {
+                app.project.save();
+                projectSaved = true;
+            } catch (saveErr) {}
+        }
+
+        var snapshot = $.global._pproRollbackSnapshot;
+        if (!snapshot && backupSnapshotJson) {
+            var candidateSnap = parseJson(backupSnapshotJson);
+            if (candidateSnap && candidateSnap.host === "PPRO" && candidateSnap.bins && candidateSnap.items) {
+                var curPath = app.project.path ? String(app.project.path) : "";
+                if (!candidateSnap.projectFile || !curPath || candidateSnap.projectFile === curPath) {
+                    snapshot = candidateSnap;
+                }
+            }
+        }
+
+        try {
+            var rootItem = app.project.rootItem;
+            var restoredItemsCount = 0;
+            var recreatedFoldersCount = 0;
+            var removedFoldersCount = 0;
+
+            if (snapshot && snapshot.bins && snapshot.items) {
+                var snap = takeProjectSnapshot();
+                var restoredBinByOldNodeId = { "ROOT": rootItem };
+                if (rootItem.nodeId) {
+                    restoredBinByOldNodeId[rootItem.nodeId] = rootItem;
+                }
+                var validBinNodeIds = {};
+
+                var snapBins = snapshot.bins.slice(0);
+                snapBins.sort(function (a, b) {
+                    return (a.depth || 0) - (b.depth || 0);
+                });
+
+                // 1. Restaurar ou recriar Bins originais
+                for (var b = 0; b < snapBins.length; b++) {
+                    var sb = snapBins[b];
+                    var targetParent = restoredBinByOldNodeId[sb.parentNodeId] || rootItem;
+                    var liveBin = snap.itemByNodeId[sb.nodeId];
+
+                    if (liveBin && isBin(liveBin)) {
+                        renameBinSafe(liveBin, sb.name);
+                        if (sb.colorLabel !== undefined && sb.colorLabel >= 0 && typeof liveBin.setColorLabel === "function") {
+                            try { liveBin.setColorLabel(sb.colorLabel); } catch (eL1) {}
+                        }
+                        var curP = snap.parentByNodeId[liveBin.nodeId];
+                        if (!isSameBin(curP, targetParent)) {
+                            liveBin.moveBin(targetParent);
+                            snap.parentByNodeId[liveBin.nodeId] = targetParent;
+                        }
+                        restoredBinByOldNodeId[sb.nodeId] = liveBin;
+                        validBinNodeIds[liveBin.nodeId] = true;
+                    } else {
+                        var recreated = targetParent.createBin(sb.name);
+                        if (!recreated || !recreated.nodeId) {
+                            if (targetParent.children) {
+                                for (var c = targetParent.children.numItems - 1; c >= 0; c--) {
+                                    var cand = targetParent.children[c];
+                                    if (isBin(cand) && cand.name === sb.name && !validBinNodeIds[cand.nodeId]) {
+                                        recreated = cand;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (recreated) {
+                            if (sb.colorLabel !== undefined && sb.colorLabel >= 0 && typeof recreated.setColorLabel === "function") {
+                                try { recreated.setColorLabel(sb.colorLabel); } catch (eL2) {}
+                            }
+                            restoredBinByOldNodeId[sb.nodeId] = recreated;
+                            if (recreated.nodeId) {
+                                validBinNodeIds[recreated.nodeId] = true;
+                                snap.parentByNodeId[recreated.nodeId] = targetParent;
+                            }
+                            recreatedFoldersCount++;
+                        }
+                    }
+                }
+
+                // 2. Mover todos os itens para suas Bins originais
+                snap = takeProjectSnapshot();
+                var snapItemMap = {};
+                for (var si = 0; si < snapshot.items.length; si++) {
+                    snapItemMap[snapshot.items[si].nodeId] = snapshot.items[si];
+                }
+
+                for (var k = 0; k < snap.allNonBinItems.length; k++) {
+                    var item = snap.allNonBinItems[k];
+                    if (!item || !item.nodeId) continue;
+                    var sItem = snapItemMap[item.nodeId];
+                    var targetBin = rootItem;
+
+                    if (sItem) {
+                        targetBin = (sItem.parentNodeId && restoredBinByOldNodeId[sItem.parentNodeId])
+                            ? restoredBinByOldNodeId[sItem.parentNodeId]
+                            : rootItem;
+                    } else {
+                        var curPBin = snap.parentByNodeId[item.nodeId];
+                        var insideInvalid = false;
+                        while (curPBin && !isSameBin(curPBin, rootItem)) {
+                            if (!validBinNodeIds[curPBin.nodeId]) {
+                                insideInvalid = true;
+                                break;
+                            }
+                            curPBin = curPBin.nodeId ? snap.parentByNodeId[curPBin.nodeId] : null;
+                        }
+                        if (!insideInvalid) continue;
+                        targetBin = rootItem;
+                    }
+
+                    var currentParent = snap.parentByNodeId[item.nodeId];
+                    if (!isSameBin(currentParent, targetBin)) {
+                        item.moveBin(targetBin);
+                        snap.parentByNodeId[item.nodeId] = targetBin;
+                        restoredItemsCount++;
+                    }
+                }
+
+                // 3. Remover Bins criadas pela organização
+                function removeNonSnapshotBinsBottomUp(container) {
+                    if (!container || !container.children) return 0;
+                    var removedHere = 0;
+                    for (var idx = container.children.numItems - 1; idx >= 0; idx--) {
+                        var ch = container.children[idx];
+                        if (ch && isBin(ch)) {
+                            removedHere += removeNonSnapshotBinsBottomUp(ch);
+                            if (!validBinNodeIds[ch.nodeId] && (!ch.children || ch.children.numItems === 0)) {
+                                try {
+                                    ch.deleteBin();
+                                    removedHere++;
+                                } catch (eDel) {}
+                            }
+                        }
+                    }
+                    return removedHere;
+                }
+
+                removedFoldersCount = removeNonSnapshotBinsBottomUp(rootItem);
+            } else {
+                // Fallback: mover todos os itens para a raiz e limpar Bins vazias
+                var fallbackSnap = takeProjectSnapshot();
+                for (var m = 0; m < fallbackSnap.allNonBinItems.length; m++) {
+                    var fItem = fallbackSnap.allNonBinItems[m];
+                    if (!fItem || !fItem.nodeId) continue;
+                    var fParent = fallbackSnap.parentByNodeId[fItem.nodeId];
+                    if (!isSameBin(fParent, rootItem)) {
+                        fItem.moveBin(rootItem);
+                        restoredItemsCount++;
+                    }
+                }
+
+                function removeAllEmptyBinsBottomUp(container) {
+                    if (!container || !container.children) return 0;
+                    var removedHere = 0;
+                    for (var idx = container.children.numItems - 1; idx >= 0; idx--) {
+                        var ch = container.children[idx];
+                        if (ch && isBin(ch)) {
+                            removedHere += removeAllEmptyBinsBottomUp(ch);
+                            if (!ch.children || ch.children.numItems === 0) {
+                                try {
+                                    ch.deleteBin();
+                                    removedHere++;
+                                } catch (eDel2) {}
+                            }
+                        }
+                    }
+                    return removedHere;
+                }
+
+                removedFoldersCount = removeAllEmptyBinsBottomUp(rootItem);
+            }
+
+            $.global._pproRollbackSnapshot = null;
+
+            return (
+                '{"success": true, "restoredItems": ' +
+                restoredItemsCount +
+                ', "recreatedFolders": ' +
+                recreatedFoldersCount +
+                ', "removedFolders": ' +
+                removedFoldersCount +
+                ', "projectSaved": ' +
+                (projectSaved ? "true" : "false") +
                 "}"
             );
         } catch (err) {

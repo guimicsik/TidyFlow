@@ -276,6 +276,23 @@ $.global.aeft_organizeAEProject = function (mainCompId, configJsonString) {
         return name.substring(lastDot + 1).toLowerCase();
     }
 
+    function getParentFolderNameFromPath(filePath) {
+        if (!filePath) return "";
+        var clean = String(filePath).replace(/\\/g, "/");
+        while (clean.length > 0 && clean.charAt(clean.length - 1) === "/") {
+            clean = clean.substring(0, clean.length - 1);
+        }
+        var lastSlash = clean.lastIndexOf("/");
+        if (lastSlash === -1) return "";
+        var dirPath = clean.substring(0, lastSlash);
+        var prevSlash = dirPath.lastIndexOf("/");
+        var folderName = (prevSlash !== -1) ? dirPath.substring(prevSlash + 1) : dirPath;
+        if (folderName.indexOf(":") !== -1 || folderName.length === 0) {
+            return "";
+        }
+        return folderName;
+    }
+
     function isInsideFolder(item, targetFolder) {
         if (!item || !targetFolder) return false;
         var parent = item.parentFolder;
@@ -346,6 +363,38 @@ $.global.aeft_organizeAEProject = function (mainCompId, configJsonString) {
             ]
         };
 
+        // Identificar e validar Composições Alvo (Output) antes de modificar o projeto
+        var isMediaOnly = (mainCompId === "media_only" || mainCompId === null || mainCompId === undefined || mainCompId === "");
+        var targetMainComps = [];
+        var isSelectionMode = (mainCompId === "selection");
+
+        if (isSelectionMode) {
+            var sel = app.project.selection;
+            if (sel && sel.length > 0) {
+                for (var s = 0; s < sel.length; s++) {
+                    if (sel[s] instanceof CompItem) {
+                        targetMainComps.push(sel[s]);
+                    }
+                }
+            }
+            if (targetMainComps.length === 0) {
+                throw new Error("Nenhuma composição selecionada.");
+            }
+        } else if (mainCompId !== null && mainCompId !== undefined && mainCompId !== "") {
+            var targetId = Number(mainCompId);
+            for (var m = 1; m <= app.project.numItems; m++) {
+                var candidate = app.project.item(m);
+                if (candidate instanceof CompItem && candidate.id === targetId) {
+                    targetMainComps.push(candidate);
+                    break;
+                }
+            }
+        }
+
+        if (typeof $.global.aeft_ensurePreOrganizeSnapshot === "function") {
+            $.global.aeft_ensurePreOrganizeSnapshot();
+        }
+
         var assetsFolder = getOrCreateFolder([assetsFolderName]);
         var processedIds = {};
         var protectedFolders = [];
@@ -391,14 +440,25 @@ $.global.aeft_organizeAEProject = function (mainCompId, configJsonString) {
         }
 
         function registerFolderContents(targetFolder) {
+            if (!targetFolder) return;
             processedIds[targetFolder.id] = true;
-            for (var idx = 1; idx <= targetFolder.numItems; idx++) {
-                var subItem = targetFolder.item(idx);
-                processedIds[subItem.id] = true;
-                if (subItem instanceof FolderItem) {
-                    registerFolderContents(subItem);
+            try {
+                var count = targetFolder.numItems || (targetFolder.items ? targetFolder.items.length : 0);
+                for (var idx = 1; idx <= count; idx++) {
+                    var subItem = null;
+                    if (targetFolder.items && targetFolder.items[idx]) {
+                        subItem = targetFolder.items[idx];
+                    } else if (typeof targetFolder.item === "function") {
+                        subItem = targetFolder.item(idx);
+                    }
+                    if (subItem) {
+                        processedIds[subItem.id] = true;
+                        if (subItem instanceof FolderItem) {
+                            registerFolderContents(subItem);
+                        }
+                    }
                 }
-            }
+            } catch (errReg) { }
         }
 
         function cleanEmptyFolders() {
@@ -436,34 +496,6 @@ $.global.aeft_organizeAEProject = function (mainCompId, configJsonString) {
                 protectedFolders.push(ufItem);
                 registerFolderContents(ufItem);
                 break;
-            }
-        }
-
-        // Identificar e validar Composições Alvo (Output)
-        var isMediaOnly = (mainCompId === "media_only" || mainCompId === null || mainCompId === undefined || mainCompId === "");
-        var targetMainComps = [];
-        var isSelectionMode = (mainCompId === "selection");
-
-        if (isSelectionMode) {
-            var sel = app.project.selection;
-            if (sel && sel.length > 0) {
-                for (var s = 0; s < sel.length; s++) {
-                    if (sel[s] instanceof CompItem) {
-                        targetMainComps.push(sel[s]);
-                    }
-                }
-            }
-            if (targetMainComps.length === 0) {
-                throw new Error("Nenhuma composição selecionada.");
-            }
-        } else if (mainCompId !== null && mainCompId !== undefined && mainCompId !== "") {
-            var targetId = Number(mainCompId);
-            for (var m = 1; m <= app.project.numItems; m++) {
-                var candidate = app.project.item(m);
-                if (candidate instanceof CompItem && candidate.id === targetId) {
-                    targetMainComps.push(candidate);
-                    break;
-                }
             }
         }
 
@@ -561,8 +593,8 @@ $.global.aeft_organizeAEProject = function (mainCompId, configJsonString) {
                     movedFootages++;
                 }
 
-                registerFolderContents(folder);
                 protectedFolders.push(folder);
+                registerFolderContents(folder);
             }
         }
 
@@ -672,8 +704,20 @@ $.global.aeft_organizeAEProject = function (mainCompId, configJsonString) {
                     var catType = getItemCategory(item, fileExt, extensionsCfg);
                     var catFolder = getCategoryFolder(assetsFolder, catType);
 
+                    var srcFolder = "";
+                    if (fileObj) {
+                        if (fileObj.fsName) {
+                            srcFolder = getParentFolderNameFromPath(fileObj.fsName);
+                        }
+                        if (!srcFolder && fileObj.parent && fileObj.parent.name) {
+                            srcFolder = fileObj.parent.name;
+                        }
+                    }
+
                     var subPath = [extUpper];
-                    if (fileExt === "psd" || fileExt === "psb" || fileExt === "ai") {
+                    if (srcFolder) {
+                        subPath.push(srcFolder);
+                    } else if (fileExt === "psd" || fileExt === "psb" || fileExt === "ai") {
                         var slashIndex = item.name.lastIndexOf("/");
                         if (slashIndex !== -1) {
                             var projectFileName = item.name.substring(slashIndex + 1);
@@ -700,6 +744,10 @@ $.global.aeft_organizeAEProject = function (mainCompId, configJsonString) {
 
         // 5. Ajustar numeração sequencial das pastas de categorias em 02_Assets
         updateSequentialCategoryFolderNames(assetsFolder);
+
+        if (typeof $.global.aeft_markPostOrganizeState === "function") {
+            $.global.aeft_markPostOrganizeState();
+        }
 
         return (
             '{"success": true, "movedComps": ' +
@@ -1000,6 +1048,9 @@ $.global.aeft_checkUnusedComps = function (configJsonString) {
         // Mover itens identificados para a pasta "Nunca Usadas"
         var movedCount = 0;
         if (toMove.length > 0) {
+            if (typeof $.global.aeft_ensurePreOrganizeSnapshot === "function") {
+                $.global.aeft_ensurePreOrganizeSnapshot();
+            }
             var targetFolder = getOrCreateFolder([unusedFolderName]);
             for (var t = 0; t < toMove.length; t++) {
                 var itemToMove = toMove[t];
@@ -1007,6 +1058,9 @@ $.global.aeft_checkUnusedComps = function (configJsonString) {
                     itemToMove.parentFolder = targetFolder;
                     movedCount++;
                 }
+            }
+            if (typeof $.global.aeft_markPostOrganizeState === "function") {
+                $.global.aeft_markPostOrganizeState();
             }
         }
 
@@ -1070,7 +1124,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
         if (!isNaN(num) && num >= 0 && num <= 16) {
             try {
                 folderItem.label = num;
-            } catch (e) {}
+            } catch (e) { }
         }
     }
 
@@ -1080,6 +1134,23 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
         var lastDot = name.lastIndexOf(".");
         if (lastDot === -1 || lastDot === name.length - 1) return "";
         return name.substring(lastDot + 1).toLowerCase();
+    }
+
+    function getParentFolderNameFromPath(filePath) {
+        if (!filePath) return "";
+        var clean = String(filePath).replace(/\\/g, "/");
+        while (clean.length > 0 && clean.charAt(clean.length - 1) === "/") {
+            clean = clean.substring(0, clean.length - 1);
+        }
+        var lastSlash = clean.lastIndexOf("/");
+        if (lastSlash === -1) return "";
+        var dirPath = clean.substring(0, lastSlash);
+        var prevSlash = dirPath.lastIndexOf("/");
+        var folderName = (prevSlash !== -1) ? dirPath.substring(prevSlash + 1) : dirPath;
+        if (folderName.indexOf(":") !== -1 || folderName.length === 0) {
+            return "";
+        }
+        return folderName;
     }
 
     function isSameFolder(a, b) {
@@ -1141,6 +1212,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
     var deleteEmptyFolders = (settings.deleteEmptyFolders !== false);
     var saveProjectBefore = (settings.saveProjectBefore === true);
     var reduceProject = (settings.reduceProject === true);
+    var groupBySourceFolderGlobal = (settings.groupBySourceFolder !== false);
     var unusedFolderName = settings.unusedFolderName || "Nunca Usadas";
 
     var projectSaved = false;
@@ -1155,7 +1227,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                     projectSaved = true;
                 }
             }
-        } catch (saveErr) {}
+        } catch (saveErr) { }
     }
 
     app.beginUndoGroup("Organizar Projeto (" + (preset.presetName || "Preset") + ")");
@@ -1485,14 +1557,25 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
         }
 
         function registerFolderContents(targetFolder) {
+            if (!targetFolder) return;
             processedIds[targetFolder.id] = true;
-            for (var idx = 1; idx <= targetFolder.numItems; idx++) {
-                var subItem = targetFolder.item(idx);
-                processedIds[subItem.id] = true;
-                if (subItem instanceof FolderItem) {
-                    registerFolderContents(subItem);
+            try {
+                var count = targetFolder.numItems || (targetFolder.items ? targetFolder.items.length : 0);
+                for (var idx = 1; idx <= count; idx++) {
+                    var subItem = null;
+                    if (targetFolder.items && targetFolder.items[idx]) {
+                        subItem = targetFolder.items[idx];
+                    } else if (typeof targetFolder.item === "function") {
+                        subItem = targetFolder.item(idx);
+                    }
+                    if (subItem) {
+                        processedIds[subItem.id] = true;
+                        if (subItem instanceof FolderItem) {
+                            registerFolderContents(subItem);
+                        }
+                    }
                 }
-            }
+            } catch (errReg) { }
         }
 
         // Proteger a pasta Nunca Usadas
@@ -1537,11 +1620,16 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
             }
         }
 
+        // Capturar snapshot da estrutura original antes de organizar
+        if (typeof $.global.aeft_ensurePreOrganizeSnapshot === "function") {
+            $.global.aeft_ensurePreOrganizeSnapshot();
+        }
+
         // Reduce Project se ativo
         if (reduceProject && targetMainComps.length > 0) {
             try {
                 reducedCount = app.project.reduceProject(targetMainComps);
-            } catch (reduceErr) {}
+            } catch (reduceErr) { }
         }
 
         // Encontrar nó que trata pacotes PSD/AI (handlePsdBundles)
@@ -1653,8 +1741,31 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
 
                     var targetPsdNodeFolder = ensureNodeFolder(psdBundleNodeRec.id);
                     var destContainer = targetPsdNodeFolder;
+                    var psdSubPath = [];
                     if (psdBundleNodeRec.node.rules && psdBundleNodeRec.node.rules.groupSubfoldersByExt) {
-                        destContainer = getOrCreateSubFolder(targetPsdNodeFolder, [detectedType], psdBundleNodeRec.node.label);
+                        psdSubPath.push(detectedType);
+                    }
+                    var shouldGroupPsdBySource = (psdBundleNodeRec.node.rules && psdBundleNodeRec.node.rules.groupBySourceFolder !== undefined)
+                        ? Boolean(psdBundleNodeRec.node.rules.groupBySourceFolder)
+                        : groupBySourceFolderGlobal;
+                    if (shouldGroupPsdBySource) {
+                        var bundleSourceFolder = "";
+                        for (var fch = 1; fch <= app.project.numItems; fch++) {
+                            var chItem = app.project.item(fch);
+                            if (chItem && isSameFolder(chItem.parentFolder, folder)) {
+                                var chFile = (chItem.mainSource && chItem.mainSource instanceof FileSource && chItem.mainSource.file) ? chItem.mainSource.file : chItem.file;
+                                if (chFile && chFile.fsName) {
+                                    bundleSourceFolder = getParentFolderNameFromPath(chFile.fsName);
+                                    if (bundleSourceFolder) break;
+                                }
+                            }
+                        }
+                        if (bundleSourceFolder) {
+                            psdSubPath.push(bundleSourceFolder);
+                        }
+                    }
+                    if (psdSubPath.length > 0) {
+                        destContainer = getOrCreateSubFolder(targetPsdNodeFolder, psdSubPath, psdBundleNodeRec.node.label);
                     }
 
                     if (!isSameFolder(folder, destContainer) && !isSameFolder(folder.parentFolder, destContainer)) {
@@ -1662,8 +1773,8 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                         movedFootages++;
                     }
 
-                    registerFolderContents(folder);
                     protectedFolders.push(folder);
+                    registerFolderContents(folder);
                 }
             }
         }
@@ -1789,13 +1900,29 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                         var nodeFolder = ensureNodeFolder(mediaMatch.rec.id);
                         var finalMediaFolder = nodeFolder;
 
+                        var shouldGroupBySource = (targetNode.rules && targetNode.rules.groupBySourceFolder !== undefined)
+                            ? Boolean(targetNode.rules.groupBySourceFolder)
+                            : groupBySourceFolderGlobal;
+
+                        var sourceFolderName = "";
+                        if (shouldGroupBySource && fileObj) {
+                            if (fileObj.fsName) {
+                                sourceFolderName = getParentFolderNameFromPath(fileObj.fsName);
+                            }
+                            if (!sourceFolderName && fileObj.parent && fileObj.parent.name) {
+                                sourceFolderName = fileObj.parent.name;
+                            }
+                        }
+
+                        var subPath = [];
                         if (targetNode.rules && targetNode.rules.groupSubfoldersByExt) {
                             var subFolderName = (mediaMatch.matchedViaCatchOthers || !fileExt)
                                 ? "OTHERS"
                                 : fileExt.toUpperCase();
-                            var subPath = [subFolderName];
+                            subPath.push(subFolderName);
 
                             if (
+                                !shouldGroupBySource &&
                                 !mediaMatch.matchedViaCatchOthers &&
                                 (fileExt === "psd" || fileExt === "psb" || fileExt === "ai")
                             ) {
@@ -1807,6 +1934,13 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                                     }
                                 }
                             }
+                        }
+
+                        if (sourceFolderName) {
+                            subPath.push(sourceFolderName);
+                        }
+
+                        if (subPath.length > 0) {
                             finalMediaFolder = getOrCreateSubFolder(nodeFolder, subPath, targetNode.label);
                         }
 
@@ -1901,6 +2035,10 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
 
         applyTreeNumberingAndLabels(preset.tree, app.project.rootFolder);
 
+        if (typeof $.global.aeft_markPostOrganizeState === "function") {
+            $.global.aeft_markPostOrganizeState();
+        }
+
         return (
             '{"success": true, "movedComps": ' +
             movedComps +
@@ -1955,7 +2093,7 @@ $.global.aeft_createPresetFolderStructure = function (presetJsonString) {
         if (!isNaN(num) && num >= 0 && num <= 16) {
             try {
                 folderItem.label = num;
-            } catch (e) {}
+            } catch (e) { }
         }
     }
 
@@ -2035,7 +2173,15 @@ $.global.aeft_createPresetFolderStructure = function (presetJsonString) {
             }
         }
 
+        if (typeof $.global.aeft_ensurePreOrganizeSnapshot === "function") {
+            $.global.aeft_ensurePreOrganizeSnapshot();
+        }
+
         buildNodesInFolder(preset.tree, app.project.rootFolder);
+
+        if (typeof $.global.aeft_markPostOrganizeState === "function") {
+            $.global.aeft_markPostOrganizeState();
+        }
 
         return (
             '{"success": true, "createdCount": ' +
@@ -2044,6 +2190,533 @@ $.global.aeft_createPresetFolderStructure = function (presetJsonString) {
             existingCount +
             ', "totalCount": ' +
             (createdCount + existingCount) +
+            "}"
+        );
+    } catch (err) {
+        return '{"success": false, "error": "' + escapeJsonString(err.toString()) + '"}';
+    } finally {
+        app.endUndoGroup();
+    }
+};
+
+// =========================================================================
+// 5. Sistema de Snapshot e Rollback para After Effects (AEFT)
+// =========================================================================
+$.global._aeftRollbackSnapshot = $.global._aeftRollbackSnapshot || null;
+
+$.global.aeft_captureRawSnapshot = function () {
+    if (!app.project) return null;
+    var folders = [];
+    var items = [];
+
+    function getFolderDepth(folder) {
+        var d = 0;
+        var cur = folder ? folder.parentFolder : null;
+        while (cur && cur !== app.project.rootFolder && d < 100) {
+            d++;
+            cur = cur.parentFolder;
+        }
+        return d;
+    }
+
+    for (var i = 1; i <= app.project.numItems; i++) {
+        var it = app.project.item(i);
+        if (!it) continue;
+        var parentId = (it.parentFolder && it.parentFolder !== app.project.rootFolder)
+            ? it.parentFolder.id
+            : 0;
+
+        if (it instanceof FolderItem) {
+            folders.push({
+                id: it.id,
+                name: String(it.name || ""),
+                parentId: parentId,
+                label: (typeof it.label === "number") ? it.label : 0,
+                comment: String(it.comment || ""),
+                depth: getFolderDepth(it)
+            });
+        } else {
+            items.push({
+                id: it.id,
+                name: String(it.name || ""),
+                parentId: parentId,
+                label: (typeof it.label === "number") ? it.label : 0
+            });
+        }
+    }
+
+    folders.sort(function (a, b) {
+        return a.depth - b.depth;
+    });
+
+    return {
+        host: "AEFT",
+        projectFile: (app.project.file && app.project.file.fsName) ? String(app.project.file.fsName) : "",
+        folders: folders,
+        items: items,
+        createdFolderIds: {},
+        movedItemParents: {}
+    };
+};
+
+$.global.aeft_ensurePreOrganizeSnapshot = function () {
+    if (!app.project) return;
+    var existing = $.global._aeftRollbackSnapshot;
+    if (existing && existing.folders && existing.items) {
+        var curFile = (app.project.file && app.project.file.fsName) ? String(app.project.file.fsName) : "";
+        var sameProjectFile = (!existing.projectFile || !curFile || existing.projectFile === curFile);
+
+        if (sameProjectFile) {
+            // Verificar se o projeto ainda se encontra no estado organizado anterior
+            var stillOrganized = false;
+            var origFolderMap = {};
+            for (var f = 0; f < existing.folders.length; f++) {
+                origFolderMap[existing.folders[f].id] = existing.folders[f];
+            }
+            var origItemMap = {};
+            for (var im = 0; im < existing.items.length; im++) {
+                origItemMap[existing.items[im].id] = existing.items[im];
+            }
+
+            for (var i = 1; i <= app.project.numItems; i++) {
+                var it = app.project.item(i);
+                if (!it) continue;
+                var curParentId = (it.parentFolder && it.parentFolder !== app.project.rootFolder) ? it.parentFolder.id : 0;
+                if (it instanceof FolderItem) {
+                    if (existing.createdFolderIds && existing.createdFolderIds[it.id] && !origFolderMap[it.id]) {
+                        stillOrganized = true;
+                        break;
+                    }
+                } else {
+                    if (
+                        existing.movedItemParents &&
+                        existing.movedItemParents[it.id] !== undefined &&
+                        origItemMap[it.id] &&
+                        curParentId === existing.movedItemParents[it.id] &&
+                        curParentId !== origItemMap[it.id].parentId
+                    ) {
+                        stillOrganized = true;
+                        break;
+                    }
+                }
+            }
+
+            if (stillOrganized) {
+                // Preservar o snapshot pré-organização original e apenas registrar novos itens importados depois
+                for (var k = 1; k <= app.project.numItems; k++) {
+                    var projIt = app.project.item(k);
+                    if (projIt && !(projIt instanceof FolderItem) && !origItemMap[projIt.id]) {
+                        var pId = (projIt.parentFolder && projIt.parentFolder !== app.project.rootFolder) ? projIt.parentFolder.id : 0;
+                        var safeParentId = origFolderMap[pId] ? pId : 0;
+                        existing.items.push({
+                            id: projIt.id,
+                            name: String(projIt.name || ""),
+                            parentId: safeParentId,
+                            label: (typeof projIt.label === "number") ? projIt.label : 0
+                        });
+                    }
+                }
+                return;
+            }
+        }
+    }
+
+    $.global._aeftRollbackSnapshot = $.global.aeft_captureRawSnapshot();
+};
+
+$.global.aeft_markPostOrganizeState = function () {
+    var snap = $.global._aeftRollbackSnapshot;
+    if (!snap || !app.project) return;
+    if (app.project.file && app.project.file.fsName) {
+        snap.projectFile = String(app.project.file.fsName);
+    }
+    var createdFolders = {};
+    var movedItems = {};
+    for (var i = 1; i <= app.project.numItems; i++) {
+        var it = app.project.item(i);
+        if (!it) continue;
+        if (it instanceof FolderItem) {
+            createdFolders[it.id] = true;
+        } else {
+            movedItems[it.id] = (it.parentFolder && it.parentFolder !== app.project.rootFolder) ? it.parentFolder.id : 0;
+        }
+    }
+    snap.createdFolderIds = createdFolders;
+    snap.movedItemParents = movedItems;
+};
+
+$.global.aeft_getRollbackSnapshotJson = function () {
+    function escapeStr(str) {
+        return String(str === undefined || str === null ? "" : str)
+            .replace(/\\/g, "\\\\")
+            .replace(/"/g, '\\"')
+            .replace(/\r/g, "\\r")
+            .replace(/\n/g, "\\n");
+    }
+
+    var snap = $.global._aeftRollbackSnapshot;
+    if (!snap || !snap.folders || !snap.items) return "";
+
+    var fParts = [];
+    for (var i = 0; i < snap.folders.length; i++) {
+        var f = snap.folders[i];
+        fParts.push(
+            '{"id":' + f.id +
+            ',"name":"' + escapeStr(f.name) + '"' +
+            ',"parentId":' + f.parentId +
+            ',"label":' + (f.label || 0) +
+            ',"comment":"' + escapeStr(f.comment || "") + '"' +
+            ',"depth":' + (f.depth || 0) + '}'
+        );
+    }
+
+    var iParts = [];
+    for (var j = 0; j < snap.items.length; j++) {
+        var it = snap.items[j];
+        iParts.push(
+            '{"id":' + it.id +
+            ',"name":"' + escapeStr(it.name) + '"' +
+            ',"parentId":' + it.parentId +
+            ',"label":' + (it.label || 0) + '}'
+        );
+    }
+
+    return (
+        '{"host":"AEFT","projectFile":"' + escapeStr(snap.projectFile || "") + '",' +
+        '"folders":[' + fParts.join(",") + '],' +
+        '"items":[' + iParts.join(",") + ']}'
+    );
+};
+
+$.global.aeft_rollbackProject = function (saveBefore, backupSnapshotJson) {
+    function escapeJsonString(str) {
+        return String(str === undefined || str === null ? "" : str)
+            .replace(/\\/g, "\\\\")
+            .replace(/"/g, '\\"')
+            .replace(/\r/g, "\\r")
+            .replace(/\n/g, "\\n");
+    }
+
+    function parseJson(jsonStr) {
+        if (!jsonStr) return null;
+        try {
+            if (typeof JSON !== "undefined" && JSON.parse) {
+                return JSON.parse(jsonStr);
+            }
+            return eval("(" + jsonStr + ")");
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function isSameFolder(a, b) {
+        if (!a || !b) return false;
+        if (a === b) return true;
+        if (a.id !== undefined && b.id !== undefined && a.id === b.id) return true;
+        return false;
+    }
+
+    function getFileExtension(file) {
+        if (!file || !file.name) return "";
+        var name = file.name;
+        var lastDot = name.lastIndexOf(".");
+        if (lastDot === -1 || lastDot === name.length - 1) return "";
+        return name.substring(lastDot + 1).toLowerCase();
+    }
+
+    if (!app.project) {
+        return '{"success": false, "error": "Nenhum projeto aberto no After Effects."}';
+    }
+
+    if (app.project.numItems === 0) {
+        return '{"success": false, "error": "O projeto está vazio."}';
+    }
+
+    var shouldSave = (saveBefore === true || saveBefore === "true");
+    var projectSaved = false;
+    if (shouldSave) {
+        try {
+            if (app.project.file) {
+                app.project.save(app.project.file);
+                projectSaved = true;
+            } else {
+                app.project.save();
+                if (app.project.file) {
+                    projectSaved = true;
+                }
+            }
+        } catch (saveErr) { }
+    }
+
+    // Localizar snapshot ativo em memória ou validar backup vindo do painel
+    var snapshot = $.global._aeftRollbackSnapshot;
+    if (!snapshot && backupSnapshotJson) {
+        var candidateSnap = parseJson(backupSnapshotJson);
+        if (candidateSnap && candidateSnap.host === "AEFT" && candidateSnap.items && candidateSnap.folders) {
+            var curPath = (app.project.file && app.project.file.fsName) ? String(app.project.file.fsName) : "";
+            var pathMatches = (!candidateSnap.projectFile || !curPath || candidateSnap.projectFile === curPath);
+            if (pathMatches) {
+                var matchedAny = (candidateSnap.items.length === 0 && candidateSnap.folders.length === 0);
+                var byId = {};
+                for (var c = 1; c <= app.project.numItems; c++) {
+                    var cit = app.project.item(c);
+                    if (cit) byId[cit.id] = cit;
+                }
+                for (var sIdx = 0; sIdx < candidateSnap.items.length; sIdx++) {
+                    var sIt = candidateSnap.items[sIdx];
+                    if (byId[sIt.id] && byId[sIt.id].name === sIt.name) {
+                        matchedAny = true;
+                        break;
+                    }
+                }
+                if (matchedAny) {
+                    snapshot = candidateSnap;
+                }
+            }
+        }
+    }
+
+    app.beginUndoGroup("Rollback de Organização");
+    try {
+        var restoredItemsCount = 0;
+        var recreatedFoldersCount = 0;
+        var removedFoldersCount = 0;
+
+        if (snapshot && snapshot.folders && snapshot.items) {
+            // MODO 1: Restaurar exatamente a estrutura original a partir do Snapshot
+            var currentFoldersById = {};
+            var allCurrentNonFolderItems = [];
+
+            for (var i = 1; i <= app.project.numItems; i++) {
+                var it = app.project.item(i);
+                if (!it) continue;
+                if (it instanceof FolderItem) {
+                    currentFoldersById[it.id] = it;
+                } else {
+                    allCurrentNonFolderItems.push(it);
+                }
+            }
+
+            var restoredFolderByOldId = {};
+            var validFolderIds = {};
+            var snapFolders = snapshot.folders.slice(0);
+            snapFolders.sort(function (a, b) {
+                return (a.depth || 0) - (b.depth || 0);
+            });
+
+            // 1. Restaurar ou recriar pastas originais (top-down)
+            for (var f = 0; f < snapFolders.length; f++) {
+                var sf = snapFolders[f];
+                var liveFolder = currentFoldersById[sf.id] || null;
+                if (liveFolder) {
+                    if (liveFolder.name !== sf.name) {
+                        liveFolder.name = sf.name;
+                    }
+                    if (sf.label !== undefined && sf.label !== null) {
+                        try { liveFolder.label = sf.label; } catch (eLbl1) { }
+                    }
+                    restoredFolderByOldId[sf.id] = liveFolder;
+                    validFolderIds[liveFolder.id] = true;
+                } else {
+                    var recreated = app.project.items.addFolder(sf.name);
+                    if (sf.label !== undefined && sf.label !== null) {
+                        try { recreated.label = sf.label; } catch (eLbl2) { }
+                    }
+                    if (sf.comment) {
+                        try { recreated.comment = sf.comment; } catch (eCmt) { }
+                    }
+                    restoredFolderByOldId[sf.id] = recreated;
+                    validFolderIds[recreated.id] = true;
+                    recreatedFoldersCount++;
+                }
+            }
+
+            // 2. Restaurar hierarquia de parentFolder das pastas originais
+            for (var fp = 0; fp < snapFolders.length; fp++) {
+                var sfp = snapFolders[fp];
+                var folderObj = restoredFolderByOldId[sfp.id];
+                if (!folderObj) continue;
+                var targetParent = (sfp.parentId && restoredFolderByOldId[sfp.parentId])
+                    ? restoredFolderByOldId[sfp.parentId]
+                    : app.project.rootFolder;
+                if (!isSameFolder(folderObj.parentFolder, targetParent)) {
+                    folderObj.parentFolder = targetParent;
+                }
+            }
+
+            // 3. Devolver todos os itens para suas pastas originais
+            var snapItemMap = {};
+            for (var si = 0; si < snapshot.items.length; si++) {
+                snapItemMap[snapshot.items[si].id] = snapshot.items[si];
+            }
+
+            for (var k = 0; k < allCurrentNonFolderItems.length; k++) {
+                var item = allCurrentNonFolderItems[k];
+                var sItem = snapItemMap[item.id];
+                var targetFolder = app.project.rootFolder;
+
+                if (sItem) {
+                    if (sItem.parentId && restoredFolderByOldId[sItem.parentId]) {
+                        targetFolder = restoredFolderByOldId[sItem.parentId];
+                    } else {
+                        targetFolder = app.project.rootFolder;
+                    }
+                    if (sItem.label !== undefined && sItem.label !== null) {
+                        try { item.label = sItem.label; } catch (eItLbl) { }
+                    }
+                } else {
+                    // Item adicionado após o snapshot: se estiver em pasta criada pelo organizador, mover para a raiz
+                    var curP = item.parentFolder;
+                    var insideInvalid = false;
+                    while (curP && !isSameFolder(curP, app.project.rootFolder)) {
+                        if (!validFolderIds[curP.id]) {
+                            insideInvalid = true;
+                            break;
+                        }
+                        curP = curP.parentFolder;
+                    }
+                    if (!insideInvalid) continue;
+                    targetFolder = app.project.rootFolder;
+                }
+
+                if (!isSameFolder(item.parentFolder, targetFolder)) {
+                    item.parentFolder = targetFolder;
+                    restoredItemsCount++;
+                }
+            }
+
+            // 4. Remover todas as pastas que foram criadas pela organização (não pertencentes ao snapshot)
+            var removedAny = true;
+            while (removedAny) {
+                removedAny = false;
+                for (var idx = app.project.numItems; idx >= 1; idx--) {
+                    var cand = app.project.item(idx);
+                    if (cand instanceof FolderItem && !validFolderIds[cand.id] && cand.numItems === 0) {
+                        cand.remove();
+                        removedFoldersCount++;
+                        removedAny = true;
+                    }
+                }
+            }
+        } else {
+            // MODO 2 (Fallback quando o projeto já estava organizado antes de abrir o painel):
+            // Desorganizar de volta para a raiz preservando pacotes nativos de camadas PSD/AI
+            var protectedPsdFolders = {};
+            var protectedItemIds = {};
+
+            var allFolders = [];
+            for (var fIdx = 1; fIdx <= app.project.numItems; fIdx++) {
+                var fi = app.project.item(fIdx);
+                if (fi instanceof FolderItem) {
+                    allFolders.push(fi);
+                }
+            }
+
+            for (var pf = 0; pf < allFolders.length; pf++) {
+                var folder = allFolders[pf];
+                if (/^(psd|ai|psb)$/i.test(folder.name) || /^(\d+[_-\s]*)?pre[-_]?comps?$/i.test(folder.name)) {
+                    continue;
+                }
+
+                var hasPsdAiLayers = false;
+                var hasOtherItems = false;
+                for (var c = 1; c <= folder.numItems; c++) {
+                    var ch = folder.item(c);
+                    if (ch instanceof CompItem) {
+                        continue;
+                    } else if (ch instanceof FolderItem) {
+                        if (!/^(\d+[_-\s]*)?pre[-_]?comps?$/i.test(ch.name)) {
+                            hasOtherItems = true;
+                        }
+                    } else if (ch instanceof FootageItem && ch.mainSource instanceof FileSource && ch.mainSource.file) {
+                        var ext = getFileExtension(ch.mainSource.file);
+                        if (ext === "psd" || ext === "psb" || ext === "ai") {
+                            hasPsdAiLayers = true;
+                        } else {
+                            hasOtherItems = true;
+                        }
+                    } else {
+                        hasOtherItems = true;
+                    }
+                }
+
+                if (hasPsdAiLayers && !hasOtherItems) {
+                    // Desfazer subpasta PreComps interna ao pacote PSD/AI se houver
+                    for (var c2 = folder.numItems; c2 >= 1; c2--) {
+                        var subCh = folder.item(c2);
+                        if (subCh instanceof FolderItem && /^(\d+[_-\s]*)?pre[-_]?comps?$/i.test(subCh.name)) {
+                            for (var sc = subCh.numItems; sc >= 1; sc--) {
+                                var compInPre = subCh.item(sc);
+                                if (compInPre) {
+                                    compInPre.parentFolder = folder;
+                                    restoredItemsCount++;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!isSameFolder(folder.parentFolder, app.project.rootFolder)) {
+                        folder.parentFolder = app.project.rootFolder;
+                        restoredItemsCount++;
+                    }
+                    protectedPsdFolders[folder.id] = true;
+                    for (var c3 = 1; c3 <= folder.numItems; c3++) {
+                        var member = folder.item(c3);
+                        if (member && !(member instanceof FolderItem)) {
+                            protectedItemIds[member.id] = true;
+                        }
+                    }
+                }
+            }
+
+            // Mover todos os demais itens de volta para a raiz do projeto
+            var allNonFolders = [];
+            for (var mIdx = 1; mIdx <= app.project.numItems; mIdx++) {
+                var mItem = app.project.item(mIdx);
+                if (mItem && !(mItem instanceof FolderItem)) {
+                    allNonFolders.push(mItem);
+                }
+            }
+
+            for (var u = 0; u < allNonFolders.length; u++) {
+                var looseItem = allNonFolders[u];
+                if (protectedItemIds[looseItem.id]) continue;
+                if (!isSameFolder(looseItem.parentFolder, app.project.rootFolder)) {
+                    looseItem.parentFolder = app.project.rootFolder;
+                    restoredItemsCount++;
+                }
+            }
+
+            // Apagar todas as pastas vazias restantes
+            var cleanLoop = true;
+            while (cleanLoop) {
+                cleanLoop = false;
+                for (var rIdx = app.project.numItems; rIdx >= 1; rIdx--) {
+                    var candFolder = app.project.item(rIdx);
+                    if (
+                        candFolder instanceof FolderItem &&
+                        !protectedPsdFolders[candFolder.id] &&
+                        candFolder.numItems === 0
+                    ) {
+                        candFolder.remove();
+                        removedFoldersCount++;
+                        cleanLoop = true;
+                    }
+                }
+            }
+        }
+
+        $.global._aeftRollbackSnapshot = null;
+
+        return (
+            '{"success": true, "restoredItems": ' +
+            restoredItemsCount +
+            ', "recreatedFolders": ' +
+            recreatedFoldersCount +
+            ', "removedFolders": ' +
+            removedFoldersCount +
+            ', "projectSaved": ' +
+            (projectSaved ? "true" : "false") +
             "}"
         );
     } catch (err) {
