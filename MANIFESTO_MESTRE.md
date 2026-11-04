@@ -574,7 +574,7 @@ Duas regras do host real foram reproduzidas de propósito, porque são onde bugs
 | Exclusão / resolução da pasta | `catch` vazios | `logWarn` com o motivo (ex.: arquivo não removido) |
 | Preset Builder | Dizia "salvo com sucesso" mesmo com falha | `reportSaveError()` é chamado nos **3 fluxos** (Salvar, Salvar Novo, Salvar e Organizar Agora) e **aborta** com mensagem de erro, mantendo o dirty flag |
 
-**Decisão de build (registrada):** `dist/` gerado pelo Vite **não é um pacote CEP** (contém apenas `index.html` + CSS com hash; não copia `CSXS/`, `host/` nem `tree_editor.html`). Decisão: **CEP estático** — `client/` + `host/` + `CSXS/` são a fonte de verdade e o que se instala; o Vite fica restrito ao servidor de desenvolvimento (`localhost:5173`, usado por `manifest.dev.xml`). Um empacotador dedicado (`npm run package` gerando ZIP instalável) fica para uma fase futura.
+**Decisão de build (registrada):** `dist/` gerado pelo Vite **não é um pacote CEP** (contém apenas `index.html` + CSS com hash; não copia `CSXS/`, `host/` nem `tree_editor.html`). Decisão: **CEP estático** — `client/` + `host/` + `CSXS/` são a fonte de verdade e o que se instala; o Vite fica restrito ao servidor de desenvolvimento (`localhost:5173`, usado por `manifest.dev.xml`). Não existe empacotador no projeto (ver **7.10**).
 
 **Validação da Fase 4:** `node --check` em `OrgLog.js`, `main.js`, `tree_editor.js` e `PresetManager.js` (4/4) · `npm test` → **72 asserções, 0 falhas** — incluindo `orglog_test` (8) e a nova verificação de `preset_manager_test`: com `writeFileSync` sabotado, `lastSaveError` é preenchido, o `OrgLog` recebe um `error` e, no salvamento seguinte bem-sucedido, `lastSaveError` volta a `null`.
 
@@ -617,7 +617,7 @@ O empacotador (`scripts/package.js` + `npm run package`) chegou a ser criado e f
 
 **Números finais do host:** `aeft_organizer.jsx` **2.582 → 1.823 linhas** (−29%), `ppro_organizer.jsx` 1.851, `_rules.jsx` 197, `_lib.jsx` 99, `organizer.jsx` ~200.
 
-**Validação da Fase 6:** `node --check` em `aeft_organizer.jsx`, `aeft_legacy.jsx` e `organizer.jsx` · **`npm test` → 87 asserções, 0 falhas** — incluindo 3 novas no harness do AE: o arquivo legado existe, **carrega sob demanda** e não afeta o motor atual · `npm run package` agora empacota **17 arquivos** (com `host/legacy/aeft_legacy.jsx`).
+**Validação da Fase 6:** `node --check` em `aeft_organizer.jsx`, `aeft_legacy.jsx` e `organizer.jsx` · **`npm test` → 87 asserções, 0 falhas** — incluindo 3 novas no harness do AE: o arquivo legado existe, **carrega sob demanda** e não afeta o motor atual.
 
 
 
