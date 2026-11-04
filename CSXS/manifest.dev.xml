@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="7.0" ExtensionBundleId="com.organizer.ae" ExtensionBundleVersion="1.0.0" ExtensionBundleName="AE Organizer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.tidyflow" ExtensionBundleVersion="1.0.0" ExtensionBundleName="TidyFlow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ExtensionList>
-    <Extension Id="com.organizer.ae" Version="1.0.0" />
+    <Extension Id="com.tidyflow" Version="1.0.0" />
+    <Extension Id="com.tidyflow.editor" Version="1.0.0" />
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>
@@ -16,13 +17,16 @@
     </RequiredRuntimeList>
   </ExecutionEnvironment>
   <DispatchInfoList>
-    <Extension Id="com.organizer.ae">
+    <Extension Id="com.tidyflow">
       <DispatchInfo>
         <Resources>
-          <MainPath>http://localhost:5173</MainPath>
+          <MainPath>http://localhost:5173/index.html</MainPath>
           <ScriptPath>./host/organizer.jsx</ScriptPath>
           <CEFCommandLine>
             <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
+            <Parameter>--allow-insecure-localhost</Parameter>
+            <Parameter>--allow-file-access-from-files</Parameter>
           </CEFCommandLine>
         </Resources>
         <Lifecycle>
@@ -30,12 +34,55 @@
         </Lifecycle>
         <UI>
           <Type>Panel</Type>
-          <Menu>AE Organizer</Menu>
+          <Menu>TidyFlow (dev)</Menu>
           <Geometry>
             <Size>
               <Height>440</Height>
-              <Width>260</Width>
+              <Width>360</Width>
             </Size>
+            <MinSize>
+              <Height>440</Height>
+              <Width>360</Width>
+            </MinSize>
+            <MaxSize>
+              <Height>440</Height>
+              <Width>360</Width>
+            </MaxSize>
+          </Geometry>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+    <Extension Id="com.tidyflow.editor">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>http://localhost:5173/tree_editor.html</MainPath>
+          <ScriptPath>./host/organizer.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--mixed-context</Parameter>
+            <Parameter>--allow-insecure-localhost</Parameter>
+            <Parameter>--allow-file-access-from-files</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>TidyFlow - Preset Builder (dev)</Menu>
+          <Geometry>
+            <Size>
+              <Height>640</Height>
+              <Width>740</Width>
+            </Size>
+            <MinSize>
+              <Height>380</Height>
+              <Width>420</Width>
+            </MinSize>
+            <MaxSize>
+              <Height>2160</Height>
+              <Width>3840</Width>
+            </MaxSize>
           </Geometry>
         </UI>
       </DispatchInfo>

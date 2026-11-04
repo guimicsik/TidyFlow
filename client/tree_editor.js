@@ -7,7 +7,7 @@
   var hostAppName = presetManager.getHostDisplayName();
 
   if (isPPro) {
-    document.title = "PPro Organizer — Preset Builder & Estrutura de Pastas";
+    document.title = "TidyFlow — Preset Builder (Premiere Pro)";
     var treeToolbarTitle = document.getElementById("treeToolbarTitle");
     if (treeToolbarTitle) {
       treeToolbarTitle.textContent =
@@ -1465,6 +1465,8 @@
         var d = evt && evt.data ? (typeof evt.data === "string" ? JSON.parse(evt.data) : evt.data) : null;
         var incoming = d && d.activePreset;
         if (!incoming) return;
+        // Outro painel pode ter salvo/excluído presets: descarta o cache antes de ler
+        presetManager.invalidatePresetCache();
         if (currentPreset && currentPreset.presetName === incoming) {
           // Mesmo preset: espelha Numeração Sequencial e Pasta de Origem alteradas no Painel Principal
           var stored = presetManager.loadPreset(incoming);
@@ -1504,6 +1506,8 @@
 
   window.addEventListener("focus", function () {
     try {
+      // Re-sincronização leve: mantém a listagem em cache e relê apenas o preset ativo
+      presetManager.invalidatePresetObjectCache();
       var activeName = presetManager.getActivePresetName();
       if (currentPreset && currentPreset.presetName === activeName) {
         var stored = presetManager.loadPreset(activeName);

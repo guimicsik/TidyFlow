@@ -7,7 +7,14 @@
   var compWordLowerPlural = isPPro ? "sequências" : "composições";
   var compWordSingular = isPPro ? "sequência" : "composição";
 
-  var headerTitle = document.getElementById("headerTitle");
+  // Chaves de storage centralizadas no PresetManager (fallback local por segurança)
+  var KEYS = (typeof PresetManager !== "undefined" && PresetManager.STORAGE_KEYS) || {
+    rollbackSnapshot: "ae_organizer_rollback_snapshot",
+    saveProject: "ae_organizer_save_project",
+    reduceProject: "ae_organizer_reduce_project",
+    deleteEmpty: "ae_organizer_delete_empty"
+  };
+
   var noticeText = document.getElementById("noticeText");
   var btnCheckCompsLabel = document.getElementById("btnCheckCompsLabel");
   var presetSelect = document.getElementById("presetSelect");
@@ -30,8 +37,7 @@
   var statusMsg = document.getElementById("statusMsg");
 
   if (isPPro) {
-    document.title = "PPro Organizer";
-    if (headerTitle) headerTitle.textContent = "PPro Organizer";
+    document.title = "TidyFlow — Premiere Pro";
     if (noticeText) {
       noticeText.textContent = "Selecione as sequências no painel Project antes de organizar.";
     }
@@ -97,7 +103,7 @@
       csInterface.evalScript("$.global.getRollbackSnapshotJson()", function (snapJson) {
         if (snapJson && snapJson !== "EvalScript error." && snapJson !== "undefined") {
           try {
-            localStorage.setItem("ae_organizer_rollback_snapshot", snapJson);
+            localStorage.setItem(KEYS.rollbackSnapshot, snapJson);
           } catch (eLs) {}
         }
       });
@@ -131,11 +137,11 @@
     }
 
     try {
-      var savedSave = localStorage.getItem("ae_organizer_save_project");
+      var savedSave = localStorage.getItem(KEYS.saveProject);
       if (chkSaveProject) {
         chkSaveProject.checked = savedSave !== null ? (savedSave === "true") : (s.saveProjectBefore !== false);
       }
-      var savedReduce = localStorage.getItem("ae_organizer_reduce_project");
+      var savedReduce = localStorage.getItem(KEYS.reduceProject);
       if (chkReduceProject) {
         chkReduceProject.checked = savedReduce !== null ? (savedReduce === "true") : Boolean(s.reduceProject);
       }
@@ -215,19 +221,19 @@
     if (chkSaveProject) {
       activePreset.settings.saveProjectBefore = chkSaveProject.checked;
       try {
-        localStorage.setItem("ae_organizer_save_project", chkSaveProject.checked ? "true" : "false");
+        localStorage.setItem(KEYS.saveProject, chkSaveProject.checked ? "true" : "false");
       } catch (e) {}
     }
     if (chkReduceProject) {
       activePreset.settings.reduceProject = chkReduceProject.checked;
       try {
-        localStorage.setItem("ae_organizer_reduce_project", chkReduceProject.checked ? "true" : "false");
+        localStorage.setItem(KEYS.reduceProject, chkReduceProject.checked ? "true" : "false");
       } catch (e) {}
     }
     if (chkDeleteEmptyFolders) {
       activePreset.settings.deleteEmptyFolders = chkDeleteEmptyFolders.checked;
       try {
-        localStorage.setItem("ae_organizer_delete_empty", chkDeleteEmptyFolders.checked ? "true" : "false");
+        localStorage.setItem(KEYS.deleteEmpty, chkDeleteEmptyFolders.checked ? "true" : "false");
       } catch (e) {}
     }
     if (chkGroupBySourceFolder) {
@@ -328,6 +334,8 @@
     if (typeof name === "string" && name) {
       presetManager.setActivePresetNameSilent(name);
     }
+    // O editor pode ter salvo/excluído presets: descarta o cache antes de re-sincronizar
+    presetManager.invalidatePresetCache();
     syncPresetsAndToggles();
   };
 
@@ -339,6 +347,7 @@
           presetManager.setActivePresetNameSilent(d.activePreset);
         }
       } catch (eEvt) {}
+      presetManager.invalidatePresetCache();
       syncPresetsAndToggles();
     });
   } catch (e) {}
@@ -571,7 +580,7 @@
 
     var backupSnap = "";
     try {
-      backupSnap = localStorage.getItem("ae_organizer_rollback_snapshot") || "";
+      backupSnap = localStorage.getItem(KEYS.rollbackSnapshot) || "";
     } catch (e) {}
 
     loadOrReloadHostScripts(function () {
@@ -593,7 +602,7 @@
             var response = JSON.parse(result);
             if (response && response.success) {
               try {
-                localStorage.removeItem("ae_organizer_rollback_snapshot");
+                localStorage.removeItem(KEYS.rollbackSnapshot);
               } catch (eRm) {}
 
               var restoredItems = response.restoredItems || 0;

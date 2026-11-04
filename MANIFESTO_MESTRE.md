@@ -36,6 +36,7 @@ O sistema resolve a desorganização em projetos de qualquer complexidade:
   - **Badges de estado:** `Padrão de Fábrica` e `Não salvo*` (dirty flag recalculada a cada edição).
   - **Rodapé:** `Salvar e Organizar Agora` (`btnRunNow`), que salva o preset e dispara a organização sem fechar o editor, e `Fechar`.
 - **Persistência Híbrida:** grava via Node.js `fs` em `%APPDATA%/TidyFlow/presets`, com **migração única** de `%APPDATA%/AE_Organizer/presets` (flag `ae_organizer_presets_migrated`) e fallback resiliente via `localStorage` quando `fs`/`path` não estão disponíveis. A exclusão limpa o arquivo nas **duas** pastas (nova e legada), evitando que presets removidos ressuscitem na migração.
+  - **Cache em memória (Fase 1):** `getPresetsFolderPath()` é memoizado e `listPresets()`/`loadPreset()` mantêm cache invalidado por `invalidatePresetCache()` em salvar/excluir/importar e no evento `com.tidyflow.presetsUpdated` — antes, cada evento `focus` disparava `readdirSync` + leitura de todos os JSONs.
 - **Sincronização com o Painel Principal:** `notifyPresetsUpdated()` avisa via `window.opener`/`window.parent` (`onPresetBuilderUpdated`) **e** dispara o CSEvent `com.tidyflow.presetsUpdated`; o painel escuta o evento, o `focus` da janela e re-sincroniza preset ativo + toggles.
 
 ### 2.2 Modos de Execução do Painel
@@ -458,11 +459,33 @@ Todos os demais elementos — layout, CSS, árvore de pastas, modal de regras, t
 
 ### 7.3 Pendências conhecidas (dívida técnica)
 
-1. **Preset único por design:** não existe `client/presets/default_preset_ppro.json` — o mesmo `default_preset.json` alimenta os dois hosts, com extensões e labels resolvidos em runtime. Criar um arquivo dedicado só será necessário se, no futuro, a árvore padrão precisar divergir entre AE e Premiere.
-2. **`client/main.js` referencia `#headerTitle`**, elemento removido no redesign; o título ainda é sobrescrito para "PPro Organizer" em `main.js` e `tree_editor.js`.
-3. **`package-lock.json`** continua com `"name": "ae-file-organizer"`, dessincronizado do `package.json` (`tidyflow`).
-4. **Painel com geometria travada** em 360×440 (`MinSize == MaxSize`); qualquer conteúdo novo precisa caber nesse limite.
-5. **`src/config.json`** é configuração legada do motor antigo e não é lido pelo fluxo atual (mantido apenas como referência).
-6. **`dist/`** é build gerado (`npm run build`) e não é versionado — não usar como fonte de verdade.
+| # | Pendência | Status |
+| :--- | :--- | :--- |
+| 1 | Preset único por design (sem `default_preset_ppro.json`) | Decisão de design — não é pendência |
+| 2 | `#headerTitle` órfão no `main.js` + títulos "PPro Organizer" | ✅ Resolvido na Fase 1 |
+| 3 | `package-lock.json` com `name` divergente do `package.json` | ✅ Resolvido na Fase 1 |
+| 4 | `manifest.dev.xml` no bundle antigo (`com.organizer.ae`), 1 extensão, sem `--mixed-context` | ✅ Resolvido na Fase 1 |
+| 5 | Painel com geometria travada em 360×440 (`MinSize == MaxSize`) | Decisão de design |
+| 6 | `src/config.json` legado, não lido pelo fluxo atual | Backlog — Fase 4 |
+| 7 | `dist/` gerado pelo Vite não empacota a extensão (sem `tree_editor.html`, `CSXS/`, `host/`) | Backlog — Fase 4 (decidir CEP estático × build real) |
+| 8 | 4 fontes de verdade das extensões (preset, `PresetManager`, `src/config.json`, regex hardcoded no host) | Backlog — Fase 3 |
+| 9 | Duplicação entre motores (~67% das linhas repetidas; 13 funções homônimas) | Backlog — Fase 2/3 |
+| 10 | Varreduras O(N²) do projeto no host (33 chamadas `app.project.item()` dentro de laços) | Backlog — Fase 2 |
+| 11 | 81 `catch` vazios de 114 (71% de falhas silenciosas) | Backlog — Fase 4 (`OrgLog`) |
+
+### 7.4 Fase 1 — Otimizações aplicadas (04/11/2026)
+
+| Item | Antes | Depois |
+| :--- | :--- | :--- |
+| Dead code no painel | `document.getElementById("headerTitle")` (id inexistente após o redesign) e títulos "PPro Organizer" | Removido; títulos agora "TidyFlow — Premiere Pro" e "TidyFlow — Preset Builder (Premiere Pro)" |
+| CSS morto | 4 seletores sem uso (`.header-row`, `.header-title`, `.btn-primary*`, `.btn-secondary*`) | Removidos — `index.css` com **0 seletores órfãos** (63 blocos, chaves balanceadas 63/63) |
+| Chaves de storage | literais `ae_organizer_*` espalhados em `main.js` e `PresetManager.js` | Centralizadas em `PresetManager.STORAGE_KEYS` (com fallback no painel); **valores preservados** para não perder preferências salvas |
+| I/O de presets | `getPresetsFolderPath()` fazia `existsSync`/`mkdirSync` a cada chamada; `listPresets()` lia **todos** os JSONs a cada evento `focus` | Path memoizado; `listPresets()`/`loadPreset()` em cache, invalidado por `invalidatePresetCache()` em salvar/excluir/importar e no evento `com.tidyflow.presetsUpdated` |
+| Carregamento de preset | `loadPreset()` relia o diretório inteiro quando o nome do arquivo divergia | Atalho por índice em memória (`_findIndexedPresetFilePath`) — sem `readdir` |
+| Manifest de dev | Bundle `com.organizer.ae`, 1 extensão, CEF sem `--mixed-context`/`--allow-file-access-from-files`, largura 260 | Bundle `com.tidyflow`, 2 extensões (painel + editor), parâmetros CEF iguais aos de produção, geometria 360×440 e 740×640 |
+| `package-lock.json` | `"name": "ae-file-organizer"` | `"name": "tidyflow"` (raiz e `packages[""]`) |
+
+**Validação da Fase 1:** `node --check` nos 3 scripts do cliente · `manifest.xml`/`manifest.dev.xml` parseados como XML · `package-lock.json` validado pelo Node · `npm run build` com exit 0 · harness Node simulando o ambiente CEP com **14/14 asserções aprovadas** (memoização sem syscall, cache de listagem/objeto, invalidação em salvar/excluir, atalho por índice sem `readdir`, compatibilidade das chaves de storage).
+
 
 

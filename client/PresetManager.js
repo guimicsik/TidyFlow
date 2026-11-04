@@ -5,6 +5,12 @@
   var STORAGE_KEY_ACTIVE = "ae_organizer_active_preset";
   var STORAGE_KEY_USER_PRESETS = "ae_organizer_user_presets_map";
   var STORAGE_KEY_DEFAULT_OVERRIDES = "ae_organizer_default_settings";
+  // Chaves de preferências do painel (prefixo legado mantido por compatibilidade)
+  var STORAGE_KEY_SAVE_PROJECT = "ae_organizer_save_project";
+  var STORAGE_KEY_REDUCE_PROJECT = "ae_organizer_reduce_project";
+  var STORAGE_KEY_DELETE_EMPTY = "ae_organizer_delete_empty";
+  var STORAGE_KEY_ROLLBACK_SNAPSHOT = "ae_organizer_rollback_snapshot";
+  var STORAGE_KEY_PRESETS_MIGRATED = "ae_organizer_presets_migrated";
 
   // 16 Color Labels nativos do After Effects + None (0)
   var AE_LABELS = [
@@ -388,6 +394,10 @@
     this.fs = this.req ? this.req("fs") : null;
     this.path = this.req ? this.req("path") : null;
     this.childProcess = this.req ? this.req("child_process") : null;
+    // Caches: undefined = path ainda não resolvido | null = indisponível
+    this._presetsDirCache = undefined;
+    this._presetListCache = null;
+    this._presetObjectCache = {};
   }
 
   PresetManager.AE_LABELS = AE_LABELS;
@@ -397,6 +407,16 @@
   PresetManager.DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS;
   PresetManager.DEFAULT_EXTENSIONS_AE = DEFAULT_EXTENSIONS_AE;
   PresetManager.DEFAULT_EXTENSIONS_PPRO = DEFAULT_EXTENSIONS_PPRO;
+  PresetManager.STORAGE_KEYS = {
+    active: STORAGE_KEY_ACTIVE,
+    userPresets: STORAGE_KEY_USER_PRESETS,
+    defaultOverrides: STORAGE_KEY_DEFAULT_OVERRIDES,
+    saveProject: STORAGE_KEY_SAVE_PROJECT,
+    reduceProject: STORAGE_KEY_REDUCE_PROJECT,
+    deleteEmpty: STORAGE_KEY_DELETE_EMPTY,
+    rollbackSnapshot: STORAGE_KEY_ROLLBACK_SNAPSHOT,
+    presetsMigrated: STORAGE_KEY_PRESETS_MIGRATED
+  };
 
   PresetManager.prototype.getDefaultExtensions = function () {
     return this.isPremierePro() ? DEFAULT_EXTENSIONS_PPRO : DEFAULT_EXTENSIONS_AE;
@@ -436,40 +456,50 @@
   };
 
   PresetManager.prototype.getPresetsFolderPath = function () {
-    if (!this.csInterface || !this.path) return null;
-    try {
-      var userData = this.csInterface.getSystemPath(SystemPath.USER_DATA);
-      if (!userData) return null;
-      var folder = this.path.join(userData, "TidyFlow", "presets");
-      var oldFolder = this.path.join(userData, "AE_Organizer", "presets");
-      if (this.fs) {
-        if (!this.fs.existsSync(folder)) {
-          this.fs.mkdirSync(folder, { recursive: true });
-        }
-        // Migração suave de presets antigos, se existirem
-        try {
-          // Migra apenas uma vez; do contrário presets excluídos reaparecem
-          var migrated = false;
-          try { migrated = localStorage.getItem("ae_organizer_presets_migrated") === "1"; } catch (eFlag) {}
-          if (!migrated) {
-            try { localStorage.setItem("ae_organizer_presets_migrated", "1"); } catch (eFlag2) {}
-          }
-          if (!migrated && this.fs.existsSync(oldFolder)) {
-            var files = this.fs.readdirSync(oldFolder);
-            for (var i = 0; i < files.length; i++) {
-              var srcFile = this.path.join(oldFolder, files[i]);
-              var destFile = this.path.join(folder, files[i]);
-              if (!this.fs.existsSync(destFile)) {
-                this.fs.copyFileSync(srcFile, destFile);
-              }
+    // Memoizado: resolver esse caminho envolve existsSync + mkdirSync (+ migração)
+    // e era repetido a cada listagem/leitura de preset (inclusive a cada foco de janela).
+    if (this._presetsDirCache !== undefined) return this._presetsDirCache;
+
+    var resolved = null;
+    if (this.csInterface && this.path) {
+      try {
+        var userData = this.csInterface.getSystemPath(SystemPath.USER_DATA);
+        if (userData) {
+          var folder = this.path.join(userData, "TidyFlow", "presets");
+          var oldFolder = this.path.join(userData, "AE_Organizer", "presets");
+          if (this.fs) {
+            if (!this.fs.existsSync(folder)) {
+              this.fs.mkdirSync(folder, { recursive: true });
             }
+            // Migração suave de presets antigos, se existirem
+            try {
+              // Migra apenas uma vez; do contrário presets excluídos reaparecem
+              var migrated = false;
+              try { migrated = localStorage.getItem(STORAGE_KEY_PRESETS_MIGRATED) === "1"; } catch (eFlag) {}
+              if (!migrated) {
+                try { localStorage.setItem(STORAGE_KEY_PRESETS_MIGRATED, "1"); } catch (eFlag2) {}
+              }
+              if (!migrated && this.fs.existsSync(oldFolder)) {
+                var files = this.fs.readdirSync(oldFolder);
+                for (var i = 0; i < files.length; i++) {
+                  var srcFile = this.path.join(oldFolder, files[i]);
+                  var destFile = this.path.join(folder, files[i]);
+                  if (!this.fs.existsSync(destFile)) {
+                    this.fs.copyFileSync(srcFile, destFile);
+                  }
+                }
+              }
+            } catch (migErr) {}
           }
-        } catch (migErr) {}
+          resolved = folder;
+        }
+      } catch (e) {
+        resolved = null;
       }
-      return folder;
-    } catch (e) {
-      return null;
     }
+
+    this._presetsDirCache = resolved;
+    return resolved;
   };
 
   PresetManager.prototype.getDefaultPresetFromBundle = function () {
@@ -545,6 +575,10 @@
   };
 
   PresetManager.prototype.listPresets = function () {
+    // Cache em memória: a listagem faz readdirSync + readFileSync de TODOS os
+    // presets e era repetida a cada foco de janela/sincronização de UI.
+    if (this._presetListCache) return this._presetListCache;
+
     var result = [
       {
         presetName: DEFAULT_PRESET_NAME,
@@ -608,10 +642,23 @@
       if (cleaned) this._saveLocalStorageMap(localMap);
     }
 
+    this._presetListCache = result;
     return result;
   };
 
   PresetManager.prototype.loadPreset = function (presetName) {
+    // Cache por preset: evita reler do disco a cada sincronização/foco de janela.
+    // Invalidado por savePreset/deletePreset/importPreset e pelo evento de presets atualizados.
+    var cacheKey = String(presetName || DEFAULT_PRESET_NAME).toLowerCase();
+    if (this._presetObjectCache[cacheKey]) {
+      return this._presetObjectCache[cacheKey];
+    }
+    var resolved = this._loadPresetFromDiskOrMemory(presetName);
+    this._presetObjectCache[cacheKey] = resolved;
+    return resolved;
+  };
+
+  PresetManager.prototype._loadPresetFromDiskOrMemory = function (presetName) {
     if (!presetName || presetName === DEFAULT_PRESET_NAME) {
       return this.getDefaultPreset();
     }
@@ -619,6 +666,13 @@
     var dir = this.getPresetsFolderPath();
     if (dir && this.fs && this.path) {
       try {
+        // Atalho: usa o caminho já indexado em cache (evita readdir + leitura de todos os arquivos)
+        var indexedFile = this._findIndexedPresetFilePath(presetName);
+        if (indexedFile && this.fs.existsSync(indexedFile)) {
+          var indexedParsed = JSON.parse(this.fs.readFileSync(indexedFile, "utf8"));
+          return normalizePreset(indexedParsed);
+        }
+
         var expectedFile = this.path.join(dir, sanitizeFileName(presetName) + ".json");
         if (this.fs.existsSync(expectedFile)) {
           var parsed = JSON.parse(this.fs.readFileSync(expectedFile, "utf8"));
@@ -646,6 +700,30 @@
     }
 
     return this.getDefaultPreset();
+  };
+
+  // Índice em memória: nome do preset -> caminho do arquivo (populado por listPresets)
+  PresetManager.prototype._findIndexedPresetFilePath = function (presetName) {
+    if (!this._presetListCache) return null;
+    var target = String(presetName || "").toLowerCase();
+    for (var i = 0; i < this._presetListCache.length; i++) {
+      var entry = this._presetListCache[i];
+      if (entry && entry.filePath && String(entry.presetName).toLowerCase() === target) {
+        return entry.filePath;
+      }
+    }
+    return null;
+  };
+
+  // Descarta listagem + objetos em cache (mudança estrutural: salvar/excluir/importar/evento)
+  PresetManager.prototype.invalidatePresetCache = function () {
+    this._presetListCache = null;
+    this._presetObjectCache = {};
+  };
+
+  // Descarta apenas os objetos em cache (mantém a listagem; usado em re-sincronização leve)
+  PresetManager.prototype.invalidatePresetObjectCache = function () {
+    this._presetObjectCache = {};
   };
 
   PresetManager.prototype.getActivePresetName = function () {
@@ -808,6 +886,9 @@
   };
 
   PresetManager.prototype.notifyPresetsUpdated = function (activePresetName) {
+    // O preset acabou de mudar: qualquer cache local fica obsoleto
+    this.invalidatePresetCache();
+
     try {
       if (global.opener && typeof global.opener.onPresetBuilderUpdated === "function") {
         global.opener.onPresetBuilderUpdated(activePresetName || this.getActivePresetName());
