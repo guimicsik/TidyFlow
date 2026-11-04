@@ -176,14 +176,7 @@ AE_File_Organizer/
 ├── scripts/
 │   ├── setup_dev.ps1               # Setup do ambiente de desenvolvimento (symlink CEP)
 │   ├── install_symlink.bat         # Instalação do symlink da extensão
-│   ├── rollback_ponto_retorno.bat  # Restaura o código para a tag ponto-de-retorno-ae-v1.0
-│   └── tests/                      # Suíte de testes sem dependências (npm test)
-│       ├── run_all.js              # Runner das 5 suítes
-│       ├── lib_test.js             # Testes unitários de host/_lib.jsx
-│       ├── orglog_test.js          # Níveis, dump e persistência do OrgLog
-│       ├── preset_manager_test.js  # Cache/memoização + falha de escrita do PresetManager
-│       ├── ae_engine_test.js       # Motor AE com projeto simulado (+ modo scale)
-│       └── ppro_engine_test.js     # Motor PPro (bins, moveBin, sequências, rollback)
+│   └── rollback_ponto_retorno.bat  # Restaura o código para a tag ponto-de-retorno-ae-v1.0
 └── dist/                   # Build de produção gerado pelo Vite (não versionado)
 ```
 
@@ -618,6 +611,9 @@ O empacotador (`scripts/package.js` + `npm run package`) chegou a ser criado e f
 **Números finais do host:** `aeft_organizer.jsx` **2.582 → 1.823 linhas** (−29%), `ppro_organizer.jsx` 1.851, `_rules.jsx` 197, `_lib.jsx` 99, `organizer.jsx` ~200.
 
 **Validação da Fase 6:** `node --check` em `aeft_organizer.jsx`, `aeft_legacy.jsx` e `organizer.jsx` · **`npm test` → 87 asserções, 0 falhas** — incluindo 3 novas no harness do AE: o arquivo legado existe, **carrega sob demanda** e não afeta o motor atual.
+
+> **Nota (04/11/2026):** a suíte de testes (`scripts/tests/` + scripts `npm test`/`test:scale`) foi **removida a pedido do desenvolvedor**, por não ser necessária durante o desenvolvimento. O plugin nunca dependeu dela: o CEP carrega apenas `client/index.html`, `client/tree_editor.html` e `host/organizer.jsx`. As validações descritas em 7.4–7.11 registram o que foi executado na época e a suíte completa permanece no histórico do git (commits `c8da12b`, `435f4c9`, `73c4a10`), podendo ser restaurada com `git checkout <commit> -- scripts/tests`.
+
 
 
 
