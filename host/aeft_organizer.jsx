@@ -2,14 +2,19 @@
    TidyFlow — Motor ExtendScript para Adobe After Effects
    ========================================================================== */
 
-/* Carrega a biblioteca compartilhada (host/_lib.jsx) se ainda nao estiver disponivel */
+/* Carrega as bibliotecas compartilhadas (host/_lib.jsx e host/_rules.jsx) */
 (function () {
-    if ($.global.OrgLib) return;
     try {
         var here = $.fileName ? new File($.fileName) : null;
-        if (here && here.parent) {
-            var libFile = new File(here.parent.fsName + "/_lib.jsx");
+        if (!here || !here.parent) return;
+        var baseDir = here.parent.fsName;
+        if (!$.global.OrgLib) {
+            var libFile = new File(baseDir + "/_lib.jsx");
             if (libFile.exists) $.evalFile(libFile);
+        }
+        if (!$.global.OrgRules) {
+            var rulesFile = new File(baseDir + "/_rules.jsx");
+            if (rulesFile.exists) $.evalFile(rulesFile);
         }
     } catch (eLibLoad) {}
 })();
@@ -1329,6 +1334,15 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
 
         indexTree(preset.tree, null, 0);
 
+        // --- Motor de regras compartilhado (host/_rules.jsx) ---
+        var _rules = $.global.OrgRules.createMatcher(nodeRecords);
+        var findMatchingNode = _rules.findMatchingNode;
+        var matchesNameFilter = $.global.OrgRules.matchesNameFilter;
+        var nodeSupportsType = $.global.OrgRules.nodeSupportsType;
+        function isExtInNodesOfType(extLower, targetType) {
+            return $.global.OrgRules.isExtInNodesOfType(nodeRecords, extLower, targetType);
+        }
+
         // Cria ou reaproveita a pasta de um nó apenas sob demanda (Regra A3: nunca criar pastas vazias da árvore)
         function ensureNodeFolder(nodeId) {
             if (!nodeId || !nodeRecordById[nodeId]) return app.project.rootFolder;
@@ -1375,214 +1389,9 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
         }
 
         // Helpers de avaliação de regras dos nós
-        function matchesNameFilter(itemName, rules) {
-            if (!rules || !rules.nameFilter) return false;
-            var filterStr = String(rules.nameFilter).replace(/^\s+|\s+$/g, "");
-            if (!filterStr) return false;
-            var targetName = String(itemName || "");
-
-            if (rules.nameFilterMode === "regex") {
-                try {
-                    var rx = new RegExp(filterStr, "i");
-                    return rx.test(targetName);
-                } catch (e) {
-                    return targetName.toLowerCase().indexOf(filterStr.toLowerCase()) !== -1;
-                }
-            } else {
-                // Suporta termos separados por vírgula ou termo único
-                var parts = filterStr.split(",");
-                var nameLower = targetName.toLowerCase();
-                for (var p = 0; p < parts.length; p++) {
-                    var token = parts[p].replace(/^\s+|\s+$/g, "").toLowerCase();
-                    if (token && nameLower.indexOf(token) !== -1) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
-
-        function nodeSupportsType(rules, itemType) {
-            if (!rules || !rules.types || rules.types.length === 0) return false;
-            var types = rules.types;
-
-            if (itemType === "MainComp") {
-                return arrayContains(types, "MainComp") || arrayContains(types, "Compositions");
-            }
-            if (itemType === "PreComps") {
-                return arrayContains(types, "PreComps");
-            }
-            if (itemType === "Solids") {
-                return arrayContains(types, "Solids");
-            }
-            if (itemType === "StillImages") {
-                return arrayContains(types, "StillImages") || arrayContains(types, "Images");
-            }
-            if (itemType === "Videos") {
-                return arrayContains(types, "Videos") || arrayContains(types, "Footages");
-            }
-            if (itemType === "ImageSequences") {
-                return arrayContains(types, "ImageSequences");
-            }
-            if (itemType === "DataFiles") {
-                return arrayContains(types, "DataFiles");
-            }
-            if (itemType === "Audios") {
-                return arrayContains(types, "Audios");
-            }
-            return false;
-        }
-
-        // --- Cache de classificacao (Fase 2) ---
-        // O resultado de (tipo, extensao) e deterministico dentro de uma execucao:
-        // centenas de itens repetem as mesmas extensoes. Com o cache trocamos
-        // O(itens x nos x extensoes) por O(combinacoes unicas).
-        // Se alguma pasta usa filtro por nomenclatura, o resultado depende do nome
-        // e o cache e desativado (mantendo o comportamento original).
-        var _classifyCache = {};
-        var _hasNameFilters = false;
-        for (var _nf = 0; _nf < nodeRecords.length; _nf++) {
-            var _nfRules = (nodeRecords[_nf].node && nodeRecords[_nf].node.rules) || {};
-            if (_nfRules.nameFilter && String(_nfRules.nameFilter).replace(/^\s+|\s+$/g, "") !== "") {
-                _hasNameFilters = true;
-                break;
-            }
-        }
 
         // Retorna { rec: nodeRecord, matchedViaCatchOthers: boolean } ou null
-        function findMatchingNode(itemType, fileExt, itemName) {
-            var extLower = fileExt ? String(fileExt).toLowerCase() : "";
-            var cacheKey = null;
-            if (!_hasNameFilters) {
-                cacheKey = itemType + "|" + extLower;
-                if (_classifyCache.hasOwnProperty(cacheKey)) {
-                    return _classifyCache[cacheKey];
-                }
-            }
-            var bestCandidate = null;
-            var bestScore = -1;
-
-            function evaluateForType(typeToTest) {
-                for (var i = 0; i < nodeRecords.length; i++) {
-                    var rec = nodeRecords[i];
-                    var rules = (rec.node && rec.node.rules) || {};
-                    var hasTypes = (rules.types && rules.types.length > 0);
-                    var hasExts = (rules.extensions && rules.extensions.length > 0);
-                    var hasNameRule = Boolean(rules.nameFilter && String(rules.nameFilter).replace(/^\s+|\s+$/g, "") !== "");
-
-                    if (!hasTypes && !hasExts && !hasNameRule) {
-                        continue; // Pasta puramente estrutural/contêiner (ex: Assets)
-                    }
-
-                    var typeOk = hasTypes ? nodeSupportsType(rules, typeToTest) : false;
-                    var extOk = (hasExts && extLower) ? arrayContainsIgnoreCase(rules.extensions, extLower) : false;
-
-                    // 1. Se o nó exige filtro de nome, só aceita se o nome bater
-                    if (hasNameRule) {
-                        if (!matchesNameFilter(itemName, rules)) {
-                            continue;
-                        }
-                        if (hasTypes && !typeOk) {
-                            continue;
-                        }
-                        if (hasExts && !extOk) {
-                            continue;
-                        }
-                        // Prioridade máxima (Tier 1: 1000 + profundidade)
-                        var nameScore = 1000 + rec.depth * 10;
-                        if (nameScore > bestScore) {
-                            bestScore = nameScore;
-                            bestCandidate = { rec: rec, matchedViaCatchOthers: false };
-                        }
-                        continue;
-                    }
-
-                    // Para tipos sem extensão (MainComp, PreComps, Solids)
-                    if (typeToTest === "MainComp" || typeToTest === "PreComps" || typeToTest === "Solids") {
-                        if (typeOk) {
-                            var specialScore = 500 + rec.depth * 10;
-                            if (specialScore > bestScore) {
-                                bestScore = specialScore;
-                                bestCandidate = { rec: rec, matchedViaCatchOthers: false };
-                            }
-                        }
-                        continue;
-                    }
-
-                    // Para mídias / arquivos com extensão
-                    // Caso A: Nó tem apenas lista de extensões (sem tipo marcado) e a extensão bateu
-                    if (!hasTypes && hasExts && extOk) {
-                        var extOnlyScore = 850 + rec.depth * 10 - Math.min(rules.extensions.length, 50);
-                        if (extOnlyScore > bestScore) {
-                            bestScore = extOnlyScore;
-                            bestCandidate = { rec: rec, matchedViaCatchOthers: false };
-                        }
-                        continue;
-                    }
-
-                    if (!typeOk) {
-                        continue;
-                    }
-
-                    // Caso B: Tipo bateu e extensão explícita bateu
-                    if (hasExts && extOk) {
-                        var specificityBonus = rules.catchOthers ? 0 : 100;
-                        var extCountPenalty = Math.min(rules.extensions.length, 80);
-                        var explicitScore = 700 + specificityBonus + rec.depth * 10 - extCountPenalty;
-                        if (explicitScore > bestScore) {
-                            bestScore = explicitScore;
-                            bestCandidate = { rec: rec, matchedViaCatchOthers: false };
-                        }
-                        continue;
-                    }
-
-                    // Caso C: Tipo bateu e o nó não restringe extensões (aceita todas do tipo)
-                    if (!hasExts && !rules.catchOthers) {
-                        var openTypeScore = 400 + rec.depth * 10;
-                        if (openTypeScore > bestScore) {
-                            bestScore = openTypeScore;
-                            bestCandidate = { rec: rec, matchedViaCatchOthers: false };
-                        }
-                        continue;
-                    }
-
-                    // Caso D: Pasta Coringa / Fallback (catchOthers = true)
-                    if (rules.catchOthers) {
-                        var fallbackScore = 200 + rec.depth * 10 + (hasExts ? 0 : 25);
-                        if (fallbackScore > bestScore) {
-                            bestScore = fallbackScore;
-                            bestCandidate = { rec: rec, matchedViaCatchOthers: true };
-                        }
-                    }
-                }
-            }
-
-            evaluateForType(itemType);
-
-            // Se ImageSequences ou DataFiles não tiverem nó dedicado no preset, faz fallback para Videos/Footages
-            if (!bestCandidate && (itemType === "ImageSequences" || itemType === "DataFiles")) {
-                evaluateForType("Videos");
-            }
-
-            if (cacheKey) {
-                _classifyCache[cacheKey] = bestCandidate;
-            }
-
-            return bestCandidate;
-        }
-
         // Coleta todos os arrays de extensões configurados na árvore para auxiliar a classificação
-        function isExtInNodesOfType(extLower, targetType) {
-            if (!extLower) return false;
-            for (var i = 0; i < nodeRecords.length; i++) {
-                var r = nodeRecords[i].node.rules;
-                if (r && nodeSupportsType(r, targetType) && arrayContainsIgnoreCase(r.extensions, extLower)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         function classifyFootageItem(item, extLower) {
             if (item.mainSource instanceof SolidSource) {
                 return "Solids";

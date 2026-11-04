@@ -159,7 +159,8 @@ AE_File_Organizer/
 │       └── default_preset.json # Preset padrão de fábrica (After Effects)
 ├── host/
 │   ├── _lib.jsx            # Biblioteca compartilhada (helpers puros: escape/parse/ext/labels)
-│   ├── organizer.jsx       # Roteador unificado de Host (detecta AEFT vs PPRO, carrega _lib)
+│   ├── _rules.jsx          # Motor de regras compartilhado (classificação por pontuação + cache)
+│   ├── organizer.jsx       # Roteador unificado de Host (detecta AEFT vs PPRO, carrega libs)
 │   ├── aeft_organizer.jsx  # Motor do After Effects (CompItem/FolderItem) + snapshot/rollback
 │   └── ppro_organizer.jsx  # Motor do Premiere Pro 22.x+ (ProjectItem/Bin/Sequence) + snapshot/rollback
 ├── design/
@@ -574,6 +575,30 @@ Duas regras do host real foram reproduzidas de propósito, porque são onde bugs
 **Decisão de build (registrada):** `dist/` gerado pelo Vite **não é um pacote CEP** (contém apenas `index.html` + CSS com hash; não copia `CSXS/`, `host/` nem `tree_editor.html`). Decisão: **CEP estático** — `client/` + `host/` + `CSXS/` são a fonte de verdade e o que se instala; o Vite fica restrito ao servidor de desenvolvimento (`localhost:5173`, usado por `manifest.dev.xml`). Um empacotador dedicado (`npm run package` gerando ZIP instalável) fica para uma fase futura.
 
 **Validação da Fase 4:** `node --check` em `OrgLog.js`, `main.js`, `tree_editor.js` e `PresetManager.js` (4/4) · `npm test` → **72 asserções, 0 falhas** — incluindo `orglog_test` (8) e a nova verificação de `preset_manager_test`: com `writeFileSync` sabotado, `lastSaveError` é preenchido, o `OrgLog` recebe um `error` e, no salvamento seguinte bem-sucedido, `lastSaveError` volta a `null`.
+
+### 7.9 Fase 5 — Cobertura de sequências e motor de regras unificado (04/11/2026)
+
+**7.9.1 Harness de sequências (Premiere)**
+Novo `scripts/tests/ppro_sequences_test.js` cobre o modo `selection`: dubla `app.project.sequences` (com `numSequences`) e trilhas (`videoTracks`/`audioTracks`/`captionTracks` → `clips` → `projectItem`). **12 asserções**: sequência principal → `Output`, aninhada → `PreComps/<nome da principal>` (regra `groupByMainComp`), dependências descobertas por trilha (mp4/png/wav), item avulso também classificado, sequências **nunca** tratadas como mídia e reexecução idempotente.
+
+> Durante a construção, o harness apontou um erro no próprio dublê (a coleção expunha `numItems` em vez de `numSequences`) — exatamente o tipo de divergência de API que ele existe para pegar.
+
+**7.9.2 Motor de regras unificado**
+`findMatchingNode`, `nodeSupportsType`, `matchesNameFilter` e `isExtInNodesOfType` existiam **duas vezes** (AE e PPro). A comparação automática das duas versões mostrou **0 diferenças semânticas** (apenas `trimStr` vs `replace` e estilo de chaves), então a lógica foi extraída para **`host/_rules.jsx`**:
+
+| Item | Antes | Depois |
+| :--- | :--- | :--- |
+| Implementações da pontuação | 2 (uma por motor) | **1** (`$.global.OrgRules`) |
+| Cache de classificação | duplicado em cada motor | dentro de `OrgRules.createMatcher(nodeRecords)` |
+| `nodeSupportsType` / `matchesNameFilter` / `isExtInNodesOfType` | duplicados | únicos, com adapter só de `nodeRecords` |
+| Tamanho | AE 2.543 / PPro 1.990 linhas | AE **2.371** / PPro **1.851** (−311) + `_rules.jsx` 197 |
+| Carregamento | — | bootstrap dos dois motores e `organizerLoadLib` carregam `_lib.jsx` **e** `_rules.jsx` |
+| Cópias locais | 8 definições | **0** (8 pontos de delegação) |
+
+Os pesos da pontuação foram preservados **exatamente** (1000 nome → 850 extensão isolada → 700 tipo+extensão → 500 tipos sem extensão → 400 tipo aberto → 200 `catchOthers`), incluindo o bônus de especificidade e a penalidade por tamanho da lista de extensões.
+
+**Validação da Fase 5:** `node --check` nos 5 scripts de host · **`npm test` → 84 asserções, 0 falhas** (lib 16, orglog 8, preset manager 16, AE 14, PPro 18, PPro sequências 12) · o harness do AE e os dois do PPro exercitam o motor de regras real, então a unificação foi validada por comportamento, não por inspeção.
+
 
 
 

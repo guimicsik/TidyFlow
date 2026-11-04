@@ -56,7 +56,13 @@
                 var libFile = new File(candidates[i]);
                 if (libFile.exists) {
                     $.evalFile(libFile);
-                    if ($.global.OrgLib) return true;
+                    if ($.global.OrgLib) {
+                        if (!$.global.OrgRules) {
+                            var rulesFile = new File(candidates[i].replace(/_lib\.jsx$/i, "_rules.jsx"));
+                            if (rulesFile.exists) $.evalFile(rulesFile);
+                        }
+                        return true;
+                    }
                 }
             } catch (eLib) {}
         }
