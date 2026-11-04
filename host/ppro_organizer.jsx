@@ -721,6 +721,10 @@
         var groupBySourceFolderGlobal = (settings.groupBySourceFolder !== false);
         var unusedFolderName = settings.unusedFolderName || "Nunca Usadas";
 
+        // --- Perfil de execucao (Fase 2): tempo total + varreduras de bins ---
+        var _profT0 = new Date().getTime();
+        var _scanCount = 0;
+
         var projectSaved = false;
         if (saveProjectBefore) {
             try {
@@ -797,6 +801,7 @@
                     var foundBin = null;
                     if (currentParent.children) {
                         for (var j = 0; j < currentParent.children.numItems; j++) {
+                            _scanCount++;
                             var child = currentParent.children[j];
                             if (isBin(child) && child.name === binName) {
                                 foundBin = child;
@@ -859,6 +864,7 @@
                 var found = null;
                 if (parentBin && parentBin.children) {
                     for (var i = 0; i < parentBin.children.numItems; i++) {
+                        _scanCount++;
                         var ch = parentBin.children[i];
                         if (isBin(ch) && ch.nodeId && !boundBinNodeIds[ch.nodeId]) {
                             var chCleanLower = stripNumericPrefix(ch.name).toLowerCase();
@@ -942,8 +948,27 @@
                 return false;
             }
 
+            // --- Cache de classificacao (Fase 2) ---
+            // Resultado deterministico por (tipo, extensao); desativado se houver nameFilter.
+            var _classifyCache = {};
+            var _hasNameFilters = false;
+            for (var _nf = 0; _nf < nodeRecords.length; _nf++) {
+                var _nfRules = (nodeRecords[_nf].node && nodeRecords[_nf].node.rules) || {};
+                if (_nfRules.nameFilter && trimStr(_nfRules.nameFilter) !== "") {
+                    _hasNameFilters = true;
+                    break;
+                }
+            }
+
             function findMatchingNode(itemType, fileExt, itemName) {
                 var extLower = fileExt ? String(fileExt).toLowerCase() : "";
+                var cacheKey = null;
+                if (!_hasNameFilters) {
+                    cacheKey = itemType + "|" + extLower;
+                    if (_classifyCache.hasOwnProperty(cacheKey)) {
+                        return _classifyCache[cacheKey];
+                    }
+                }
                 var bestCandidate = null;
                 var bestScore = -1;
 
@@ -1031,6 +1056,10 @@
 
                 if (!bestCandidate && (itemType === "ImageSequences" || itemType === "DataFiles")) {
                     evaluateForType("Videos");
+                }
+
+                if (cacheKey) {
+                    _classifyCache[cacheKey] = bestCandidate;
                 }
 
                 return bestCandidate;
@@ -1581,6 +1610,7 @@
 
                     // Localizar a bin viva dentro de parentBin.children (garante que não foi removida se estava vazia)
                     for (var j = 0; j < parentBin.children.numItems; j++) {
+                        _scanCount++;
                         var sub = parentBin.children[j];
                         if (isBin(sub)) {
                             if (nodeBinMap[n.id] && isSameBin(sub, nodeBinMap[n.id])) {
@@ -1641,6 +1671,10 @@
                 reducedCount +
                 ', "projectSaved": ' +
                 (projectSaved ? "true" : "false") +
+                ', "elapsedMs": ' +
+                (new Date().getTime() - _profT0) +
+                ', "scanCount": ' +
+                _scanCount +
                 "}"
             );
         } catch (err) {

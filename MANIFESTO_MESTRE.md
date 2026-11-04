@@ -487,5 +487,35 @@ Todos os demais elementos — layout, CSS, árvore de pastas, modal de regras, t
 
 **Validação da Fase 1:** `node --check` nos 3 scripts do cliente · `manifest.xml`/`manifest.dev.xml` parseados como XML · `package-lock.json` validado pelo Node · `npm run build` com exit 0 · harness Node simulando o ambiente CEP com **14/14 asserções aprovadas** (memoização sem syscall, cache de listagem/objeto, invalidação em salvar/excluir, atalho por índice sem `readdir`, compatibilidade das chaves de storage).
 
+### 7.5 Fase 2 — Instrumentação e ganho de desempenho no host (04/11/2026)
+
+**Instrumentação (base para medir):** `aeft_organizeWithPreset` e `ppro_organizeWithPreset` passaram a devolver dois campos extras no JSON de resposta:
+
+| Campo | Significado |
+| :--- | :--- |
+| `elapsedMs` | Tempo total da operação (ms) |
+| `scanCount` | Nº de iterações em varreduras de projeto/bins nos laços quentes (métrica direta do custo O(N²)) |
+
+**Otimizações aplicadas**
+
+| Item | Antes | Depois |
+| :--- | :--- | :--- |
+| Classificação de itens (`findMatchingNode`) | Varria todos os nós e todas as extensões **por item** — O(itens × nós × extensões) | Cache por `tipo|extensão` dentro da execução (desativado automaticamente se houver `nameFilter`, pois aí o resultado depende do nome) |
+| Busca/criação de pastas no AE | Varredura de `app.project.numItems` **para cada pasta do preset** — O(nós × N) | Índice `{ paiId: { nome: FolderItem } }` construído em **uma única passada**, mantido ao criar pastas e reconstruído só quando algo é removido |
+| Segurança do índice | — | Todo lookup valida se a pasta continua viva e no pai esperado; se o índice não puder ser construído, o código **cai na varredura original** (comportamento idêntico ao anterior) |
+| Numeração / labels (AE) | Varredura completa do projeto por nó quando a pasta não estava em `nodeFolderMap` | Lookup no índice com fallback linear apenas quando necessário |
+
+**Medições (harness Node simulando o After Effects, `media_only`)**
+
+| Cenário | `scanCount` antes (teórico/medido) | `scanCount` depois | Redução |
+| :--- | :--- | :--- | :--- |
+| Projeto novo, 4 itens / 5 nós (1ª execução) | 85 (medido no código com fallback linear) | **4** | **−95%** |
+| Mesmo projeto, 2ª execução (pastas existentes) | ~85 (mesmo caminho) | **13** | −85% |
+| **Escala: 301 itens, 35 pastas, 1ª execução** | ~1.505 (`5 nós × 301 itens`) | **301** (= 1 índice) | **−80%** |
+| Escala, 2ª execução | ~3.000 (varreduras + numeração) | **336** (= 1 índice) | −89% |
+
+**Validação da Fase 2:** `node --check` nos 3 scripts do host · harness Node com projeto AE simulado (**FolderItem/CompItem/FootageItem/FileSource reais**, `instanceof` funcional) executando o motor de verdade — **16/16 asserções aprovadas**: árvore final correta (`01_Assets/02_Footages/MP4/PastaA/a.mp4`, `01_Assets/01_Images/PNG/PastaB/b.png`, `01_Assets/03_Audios/WAV/c.wav`), comp preservada na raiz no modo *Apenas Mídias*, `groupBySourceFolder` respeitado por pasta, reexecução **idempotente** (0 movimentos e sem pastas duplicadas) e instrumentação exposta.
+
+
 
 

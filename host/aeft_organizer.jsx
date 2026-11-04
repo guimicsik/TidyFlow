@@ -1174,16 +1174,20 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
         var currentParent = parentFolder || app.project.rootFolder;
         for (var i = 0; i < pathArray.length; i++) {
             var folderName = pathArray[i];
-            var foundFolder = null;
-            for (var j = 1; j <= app.project.numItems; j++) {
-                var item = app.project.item(j);
-                if (
-                    item instanceof FolderItem &&
-                    isSameFolder(item.parentFolder, currentParent) &&
-                    item.name === folderName
-                ) {
-                    foundFolder = item;
-                    break;
+            var foundFolder = _findFolderInIndex(currentParent, folderName);
+            if (foundFolder === undefined) {
+                foundFolder = null;
+                for (var j = 1; j <= app.project.numItems; j++) {
+                    _scanCount++;
+                    var item = app.project.item(j);
+                    if (
+                        item instanceof FolderItem &&
+                        isSameFolder(item.parentFolder, currentParent) &&
+                        item.name === folderName
+                    ) {
+                        foundFolder = item;
+                        break;
+                    }
                 }
             }
             if (!foundFolder) {
@@ -1192,6 +1196,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                 if (inheritLabel !== undefined && inheritLabel !== null) {
                     applyLabelSafe(foundFolder, inheritLabel);
                 }
+                _indexOneFolder(foundFolder);
             }
             currentParent = foundFolder;
         }
@@ -1214,6 +1219,80 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
     var reduceProject = (settings.reduceProject === true);
     var groupBySourceFolderGlobal = (settings.groupBySourceFolder !== false);
     var unusedFolderName = settings.unusedFolderName || "Nunca Usadas";
+
+    // --- Perfil de execucao (Fase 2): tempo total + varreduras de projeto ---
+    var _profT0 = new Date().getTime();
+    var _scanCount = 0;
+
+    // --- Indice de pastas por pai (Fase 2) ---
+    // Mantem um mapa { parentId: { nomeEmMinusculas: FolderItem } } construido em UMA
+    // passada, em vez de varrer app.project.numItems a cada pasta do preset.
+    // Toda busca cai no fallback linear original quando o indice nao confirma o item,
+    // portanto o comportamento e identico ao anterior em qualquer caso de borda.
+    var _folderIndex = null;
+    var _folderIndexFailed = false;
+
+    function _folderKey(name) {
+        return String(name || "").toLowerCase();
+    }
+
+    function _indexOneFolder(folder) {
+        if (!_folderIndex || !folder) return;
+        try {
+            var pid = (folder.parentFolder && folder.parentFolder.id !== undefined) ? folder.parentFolder.id : 0;
+            if (!_folderIndex[pid]) _folderIndex[pid] = {};
+            var bucket = _folderIndex[pid];
+            var rawKey = _folderKey(folder.name);
+            if (!bucket[rawKey]) bucket[rawKey] = folder;
+            var cleanKey = _folderKey(stripNumericPrefix(folder.name));
+            if (cleanKey && !bucket[cleanKey]) bucket[cleanKey] = folder;
+        } catch (eIdx) {}
+    }
+
+    function _buildFolderIndex() {
+        if (_folderIndexFailed) return;
+        _folderIndex = {};
+        try {
+            for (var i = 1; i <= app.project.numItems; i++) {
+                _scanCount++;
+                var it = app.project.item(i);
+                if (it instanceof FolderItem) {
+                    _indexOneFolder(it);
+                }
+            }
+        } catch (eBuild) {
+            _folderIndex = null;
+            _folderIndexFailed = true;
+        }
+    }
+
+    // Retorna: FolderItem (achou) | null (nao existe, indice confiavel) | undefined (indice indisponivel)
+    function _findFolderInIndex(parentFolder, name) {
+        if (_folderIndex === null) _buildFolderIndex();
+        if (!_folderIndex) return undefined;
+        var pid = (parentFolder && parentFolder.id !== undefined) ? parentFolder.id : 0;
+        var bucket = _folderIndex[pid];
+        if (!bucket) return null;
+        var hit = bucket[_folderKey(name)];
+        if (hit === undefined) hit = bucket[_folderKey(stripNumericPrefix(name))];
+        if (hit === undefined) return null;
+        // Confirma que a pasta continua viva e no pai esperado (pode ter sido removida)
+        try {
+            var actualParent = hit.parentFolder;
+            if (!actualParent) return null;
+            if (pid === 0) {
+                if (actualParent === app.project.rootFolder ||
+                    (app.project.rootFolder && String(actualParent.id) === String(app.project.rootFolder.id))) {
+                    return hit;
+                }
+            } else if (String(actualParent.id) === String(pid)) {
+                return hit;
+            }
+        } catch (eHit) {
+            return null;
+        }
+        return null;
+    }
 
     var projectSaved = false;
     if (saveProjectBefore) {
@@ -1274,18 +1353,25 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
             var cleanTargetName = stripNumericPrefix(rec.node.name);
             var cleanTargetLower = cleanTargetName.toLowerCase();
 
-            var found = null;
-            for (var i = 1; i <= app.project.numItems; i++) {
-                var item = app.project.item(i);
-                if (
-                    item instanceof FolderItem &&
-                    isSameFolder(item.parentFolder, parentFolder) &&
-                    !boundFolderIds[item.id]
-                ) {
-                    var itemCleanLower = stripNumericPrefix(item.name).toLowerCase();
-                    if (item.name === rec.node.name || itemCleanLower === cleanTargetLower) {
-                        found = item;
-                        break;
+            var found = _findFolderInIndex(parentFolder, rec.node.name);
+            if (found && boundFolderIds[found.id]) {
+                found = undefined; // pasta ja vinculada a outro no: precisa procurar outra
+            }
+            if (found === undefined) {
+                found = null;
+                for (var i = 1; i <= app.project.numItems; i++) {
+                    _scanCount++;
+                    var item = app.project.item(i);
+                    if (
+                        item instanceof FolderItem &&
+                        isSameFolder(item.parentFolder, parentFolder) &&
+                        !boundFolderIds[item.id]
+                    ) {
+                        var itemCleanLower = stripNumericPrefix(item.name).toLowerCase();
+                        if (item.name === rec.node.name || itemCleanLower === cleanTargetLower) {
+                            found = item;
+                            break;
+                        }
                     }
                 }
             }
@@ -1293,6 +1379,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
             if (!found) {
                 found = app.project.items.addFolder(cleanTargetName);
                 found.parentFolder = parentFolder;
+                _indexOneFolder(found);
             }
 
             applyLabelSafe(found, rec.node.label);
@@ -1360,9 +1447,32 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
             return false;
         }
 
+        // --- Cache de classificacao (Fase 2) ---
+        // O resultado de (tipo, extensao) e deterministico dentro de uma execucao:
+        // centenas de itens repetem as mesmas extensoes. Com o cache trocamos
+        // O(itens x nos x extensoes) por O(combinacoes unicas).
+        // Se alguma pasta usa filtro por nomenclatura, o resultado depende do nome
+        // e o cache e desativado (mantendo o comportamento original).
+        var _classifyCache = {};
+        var _hasNameFilters = false;
+        for (var _nf = 0; _nf < nodeRecords.length; _nf++) {
+            var _nfRules = (nodeRecords[_nf].node && nodeRecords[_nf].node.rules) || {};
+            if (_nfRules.nameFilter && String(_nfRules.nameFilter).replace(/^\s+|\s+$/g, "") !== "") {
+                _hasNameFilters = true;
+                break;
+            }
+        }
+
         // Retorna { rec: nodeRecord, matchedViaCatchOthers: boolean } ou null
         function findMatchingNode(itemType, fileExt, itemName) {
             var extLower = fileExt ? String(fileExt).toLowerCase() : "";
+            var cacheKey = null;
+            if (!_hasNameFilters) {
+                cacheKey = itemType + "|" + extLower;
+                if (_classifyCache.hasOwnProperty(cacheKey)) {
+                    return _classifyCache[cacheKey];
+                }
+            }
             var bestCandidate = null;
             var bestScore = -1;
 
@@ -1466,6 +1576,10 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
             // Se ImageSequences ou DataFiles não tiverem nó dedicado no preset, faz fallback para Videos/Footages
             if (!bestCandidate && (itemType === "ImageSequences" || itemType === "DataFiles")) {
                 evaluateForType("Videos");
+            }
+
+            if (cacheKey) {
+                _classifyCache[cacheKey] = bestCandidate;
             }
 
             return bestCandidate;
@@ -1630,6 +1744,8 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
             try {
                 reducedCount = app.project.reduceProject(targetMainComps);
             } catch (reduceErr) { }
+            // Reduce pode remover itens: descarta o indice de pastas
+            _folderIndex = null;
         }
 
         // Encontrar nó que trata pacotes PSD/AI (handlePsdBundles)
@@ -1956,6 +2072,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
 
         // 4. Limpar pastas vazias (se ativo)
         if (deleteEmptyFolders) {
+            var cleanedBefore = cleanedFolders;
             var removedAny = true;
             while (removedAny) {
                 removedAny = false;
@@ -1972,6 +2089,10 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                     }
                 }
             }
+            // Pastas removidas invalidam o indice (sera reconstruido na proxima busca)
+            if (cleanedFolders !== cleanedBefore) {
+                _folderIndex = null;
+            }
         }
 
         // 5. Aplicar numeração sequencial (01_, 02_...) e Color Labels apenas nas pastas da árvore com itens (Regra A2 e A3)
@@ -1986,8 +2107,13 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                 var folder = nodeFolderMap[n.id] || null;
                 if (!folder) {
                     // Verificar se a pasta já existia no projeto com itens (ex: modo Apenas Mídias mantendo Output)
+                    folder = _findFolderInIndex(parentFolder, n.name);
+                }
+                if (folder === undefined) {
+                    folder = null;
                     var cleanN = stripNumericPrefix(n.name).toLowerCase();
                     for (var j = 1; j <= app.project.numItems; j++) {
+                        _scanCount++;
                         var sub = app.project.item(j);
                         if (
                             sub instanceof FolderItem &&
@@ -2050,6 +2176,10 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
             reducedCount +
             ', "projectSaved": ' +
             (projectSaved ? "true" : "false") +
+            ', "elapsedMs": ' +
+            (new Date().getTime() - _profT0) +
+            ', "scanCount": ' +
+            _scanCount +
             "}"
         );
     } catch (err) {
