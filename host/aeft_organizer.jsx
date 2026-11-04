@@ -1,11 +1,21 @@
+/* ==========================================================================
+   TidyFlow — Motor ExtendScript para Adobe After Effects
+   ========================================================================== */
+
+/* Carrega a biblioteca compartilhada (host/_lib.jsx) se ainda nao estiver disponivel */
+(function () {
+    if ($.global.OrgLib) return;
+    try {
+        var here = $.fileName ? new File($.fileName) : null;
+        if (here && here.parent) {
+            var libFile = new File(here.parent.fsName + "/_lib.jsx");
+            if (libFile.exists) $.evalFile(libFile);
+        }
+    } catch (eLibLoad) {}
+})();
+
 $.global.aeft_organizeAEProject = function (mainCompId, configJsonString) {
-    function escapeJsonString(str) {
-        return String(str)
-            .replace(/\\/g, "\\\\")
-            .replace(/"/g, '\\"')
-            .replace(/\r/g, "\\r")
-            .replace(/\n/g, "\\n");
-    }
+    var escapeJsonString = $.global.OrgLib.escapeJsonString;
 
     function parseConfig(jsonStr) {
         if (!jsonStr) return null;
@@ -770,13 +780,7 @@ $.global.aeft_organizeAEProject = function (mainCompId, configJsonString) {
 };
 
 $.global.aeft_getProjectComps = function () {
-    function escapeJsonString(str) {
-        return String(str)
-            .replace(/\\/g, "\\\\")
-            .replace(/"/g, '\\"')
-            .replace(/\r/g, "\\r")
-            .replace(/\n/g, "\\n");
-    }
+    var escapeJsonString = $.global.OrgLib.escapeJsonString;
 
     if (!app.project || !app.project.items) {
         return "[]";
@@ -794,13 +798,7 @@ $.global.aeft_getProjectComps = function () {
 };
 
 $.global.aeft_checkUnusedComps = function (configJsonString) {
-    function escapeJsonString(str) {
-        return String(str)
-            .replace(/\\/g, "\\\\")
-            .replace(/"/g, '\\"')
-            .replace(/\r/g, "\\r")
-            .replace(/\n/g, "\\n");
-    }
+    var escapeJsonString = $.global.OrgLib.escapeJsonString;
 
     function parseConfig(jsonStr) {
         if (!jsonStr) return null;
@@ -1081,21 +1079,9 @@ $.global.aeft_checkUnusedComps = function (configJsonString) {
 };
 
 $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
-    function escapeJsonString(str) {
-        return String(str)
-            .replace(/\\/g, "\\\\")
-            .replace(/"/g, '\\"')
-            .replace(/\r/g, "\\r")
-            .replace(/\n/g, "\\n");
-    }
+    var escapeJsonString = $.global.OrgLib.escapeJsonString;
 
-    function parseJson(jsonStr) {
-        if (!jsonStr) return null;
-        if (typeof JSON !== "undefined" && JSON.parse) {
-            return JSON.parse(jsonStr);
-        }
-        return eval("(" + jsonStr + ")");
-    }
+    var parseJson = $.global.OrgLib.parseJson;
 
     function stripNumericPrefix(name) {
         return String(name || "").replace(/^\d+[_-\s]+/, "");
@@ -2190,21 +2176,9 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
 };
 
 $.global.aeft_createPresetFolderStructure = function (presetJsonString) {
-    function escapeJsonString(str) {
-        return String(str)
-            .replace(/\\/g, "\\\\")
-            .replace(/"/g, '\\"')
-            .replace(/\r/g, "\\r")
-            .replace(/\n/g, "\\n");
-    }
+    var escapeJsonString = $.global.OrgLib.escapeJsonString;
 
-    function parseJson(jsonStr) {
-        if (!jsonStr) return null;
-        if (typeof JSON !== "undefined" && JSON.parse) {
-            return JSON.parse(jsonStr);
-        }
-        return eval("(" + jsonStr + ")");
-    }
+    var parseJson = $.global.OrgLib.parseJson;
 
     function stripNumericPrefix(name) {
         return String(name || "").replace(/^\d+[_-\s]+/, "");
@@ -2519,25 +2493,9 @@ $.global.aeft_getRollbackSnapshotJson = function () {
 };
 
 $.global.aeft_rollbackProject = function (saveBefore, backupSnapshotJson) {
-    function escapeJsonString(str) {
-        return String(str === undefined || str === null ? "" : str)
-            .replace(/\\/g, "\\\\")
-            .replace(/"/g, '\\"')
-            .replace(/\r/g, "\\r")
-            .replace(/\n/g, "\\n");
-    }
+    var escapeJsonString = $.global.OrgLib.escapeJsonString;
 
-    function parseJson(jsonStr) {
-        if (!jsonStr) return null;
-        try {
-            if (typeof JSON !== "undefined" && JSON.parse) {
-                return JSON.parse(jsonStr);
-            }
-            return eval("(" + jsonStr + ")");
-        } catch (e) {
-            return null;
-        }
-    }
+    var parseJson = $.global.OrgLib.parseJson;
 
     function isSameFolder(a, b) {
         if (!a || !b) return false;

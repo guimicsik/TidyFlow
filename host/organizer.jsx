@@ -33,11 +33,44 @@
         return false;
     }
 
+    // Carrega host/_lib.jsx (helpers compartilhados) uma unica vez.
+    // Deve rodar ANTES do motor, que consome $.global.OrgLib.
+    function loadSharedLib(explicitDirPath) {
+        if ($.global.OrgLib) return true;
+
+        var candidates = [];
+        if (explicitDirPath) {
+            candidates.push(String(explicitDirPath).replace(/\\/g, "/").replace(/\/+$/, "") + "/_lib.jsx");
+        }
+        try {
+            if ($.fileName) {
+                var currentScriptFile = new File($.fileName);
+                if (currentScriptFile && currentScriptFile.parent) {
+                    candidates.push(currentScriptFile.parent.fsName + "/_lib.jsx");
+                }
+            }
+        } catch (ePath) {}
+
+        for (var i = 0; i < candidates.length; i++) {
+            try {
+                var libFile = new File(candidates[i]);
+                if (libFile.exists) {
+                    $.evalFile(libFile);
+                    if ($.global.OrgLib) return true;
+                }
+            } catch (eLib) {}
+        }
+        return false;
+    }
+
+    $.global.organizerLoadLib = loadSharedLib;
+
     $.global.organizerLoadEngine = function (explicitHostDirPath) {
         var isPPro = detectIsPremierePro();
         var targetFileName = isPPro ? "ppro_organizer.jsx" : "aeft_organizer.jsx";
 
         if (explicitHostDirPath) {
+            loadSharedLib(explicitHostDirPath);
             var cleanDir = String(explicitHostDirPath).replace(/\\/g, "/").replace(/\/+$/, "");
             var explicitFile = new File(cleanDir + "/" + targetFileName);
             if (evalHostScriptFile(explicitFile)) {
@@ -49,6 +82,7 @@
             if ($.fileName) {
                 var currentScriptFile = new File($.fileName);
                 if (currentScriptFile && currentScriptFile.parent) {
+                    loadSharedLib(currentScriptFile.parent.fsName);
                     var siblingFile = new File(currentScriptFile.parent.fsName + "/" + targetFileName);
                     if (evalHostScriptFile(siblingFile)) {
                         return isPPro ? "PPRO" : "AEFT";
@@ -60,7 +94,8 @@
         return isPPro ? "PPRO" : "AEFT";
     };
 
-    // Carrega automaticamente o motor correspondente na inicialização do CEP
+    // Carrega automaticamente a biblioteca e o motor correspondente na inicialização do CEP
+    loadSharedLib();
     $.global.organizerLoadEngine();
 
     function ensureEngineReady() {

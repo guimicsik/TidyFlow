@@ -157,7 +157,8 @@ AE_File_Organizer/
 │   └── presets/
 │       └── default_preset.json # Preset padrão de fábrica (After Effects)
 ├── host/
-│   ├── organizer.jsx       # Roteador unificado de Host (detecta AEFT vs PPRO)
+│   ├── _lib.jsx            # Biblioteca compartilhada (helpers puros: escape/parse/ext/labels)
+│   ├── organizer.jsx       # Roteador unificado de Host (detecta AEFT vs PPRO, carrega _lib)
 │   ├── aeft_organizer.jsx  # Motor do After Effects (CompItem/FolderItem) + snapshot/rollback
 │   └── ppro_organizer.jsx  # Motor do Premiere Pro 22.x+ (ProjectItem/Bin/Sequence) + snapshot/rollback
 ├── design/
@@ -171,9 +172,12 @@ AE_File_Organizer/
 ├── scripts/
 │   ├── setup_dev.ps1               # Setup do ambiente de desenvolvimento (symlink CEP)
 │   ├── install_symlink.bat         # Instalação do symlink da extensão
-│   └── rollback_ponto_retorno.bat  # Restaura o código para a tag ponto-de-retorno-ae-v1.0
-├── src/
-│   └── config.json         # Config legado do motor antigo (referência histórica)
+│   ├── rollback_ponto_retorno.bat  # Restaura o código para a tag ponto-de-retorno-ae-v1.0
+│   └── tests/                      # Suíte de testes sem dependências (npm test)
+│       ├── run_all.js              # Runner das 3 suítes
+│       ├── lib_test.js             # Testes unitários de host/_lib.jsx
+│       ├── preset_manager_test.js  # Cache/memoização do PresetManager
+│       └── ae_engine_test.js       # Motor AE com projeto simulado (+ modo scale)
 └── dist/                   # Build de produção gerado pelo Vite (não versionado)
 ```
 
@@ -466,9 +470,9 @@ Todos os demais elementos — layout, CSS, árvore de pastas, modal de regras, t
 | 3 | `package-lock.json` com `name` divergente do `package.json` | ✅ Resolvido na Fase 1 |
 | 4 | `manifest.dev.xml` no bundle antigo (`com.organizer.ae`), 1 extensão, sem `--mixed-context` | ✅ Resolvido na Fase 1 |
 | 5 | Painel com geometria travada em 360×440 (`MinSize == MaxSize`) | Decisão de design |
-| 6 | `src/config.json` legado, não lido pelo fluxo atual | Backlog — Fase 4 |
+| 6 | `src/config.json` legado, não lido pelo fluxo atual | ✅ Resolvido na Fase 3 (removido) |
 | 7 | `dist/` gerado pelo Vite não empacota a extensão (sem `tree_editor.html`, `CSXS/`, `host/`) | Backlog — Fase 4 (decidir CEP estático × build real) |
-| 8 | 4 fontes de verdade das extensões (preset, `PresetManager`, `src/config.json`, regex hardcoded no host) | Backlog — Fase 3 |
+| 8 | 4 fontes de verdade das extensões (preset, `PresetManager`, `src/config.json`, regex hardcoded no host) | Parcial na Fase 3 (`config.json` removido) — restam preset/`PresetManager`/regex no host |
 | 9 | Duplicação entre motores (~67% das linhas repetidas; 13 funções homônimas) | Backlog — Fase 2/3 |
 | 10 | Varreduras O(N²) do projeto no host (33 chamadas `app.project.item()` dentro de laços) | Backlog — Fase 2 |
 | 11 | 81 `catch` vazios de 114 (71% de falhas silenciosas) | Backlog — Fase 4 (`OrgLog`) |
@@ -515,6 +519,21 @@ Todos os demais elementos — layout, CSS, árvore de pastas, modal de regras, t
 | Escala, 2ª execução | ~3.000 (varreduras + numeração) | **336** (= 1 índice) | −89% |
 
 **Validação da Fase 2:** `node --check` nos 3 scripts do host · harness Node com projeto AE simulado (**FolderItem/CompItem/FootageItem/FileSource reais**, `instanceof` funcional) executando o motor de verdade — **16/16 asserções aprovadas**: árvore final correta (`01_Assets/02_Footages/MP4/PastaA/a.mp4`, `01_Assets/01_Images/PNG/PastaB/b.png`, `01_Assets/03_Audios/WAV/c.wav`), comp preservada na raiz no modo *Apenas Mídias*, `groupBySourceFolder` respeitado por pasta, reexecução **idempotente** (0 movimentos e sem pastas duplicadas) e instrumentação exposta.
+
+### 7.6 Fase 3 — Consolidação de helpers, memoização no Premiere e suíte de testes (04/11/2026)
+
+| Item | Antes | Depois |
+| :--- | :--- | :--- |
+| Helpers puros duplicados | `escapeJsonString` definido **6× no AE** e 1× no PPro; `parseJson` 3× no AE e 1× no PPro — **11 cópias** | `host/_lib.jsx` expõe `$.global.OrgLib` (9 helpers: escape, parse, arrayContains, arrayContainsIgnoreCase, stripNumericPrefix, trimStr, getFileExtension, getParentFolderNameFromPath, isSameItem). As 11 cópias viraram delegação de 1 linha (`var X = $.global.OrgLib.X;`) |
+| Carregamento da lib | Cada motor trazia sua própria cópia | `host/organizer.jsx` carrega `_lib.jsx` **antes** do motor (função `organizerLoadLib`); cada motor tem bootstrap defensivo que resolve `_lib.jsx` pelo próprio diretório (`$.fileName`) |
+| Sequências no Premiere | `inspectSequenceTracks()` reexecutava a varredura completa de trilhas/clips a cada chamada (3 fluxos, um deles recursivo); `buildSequenceMap()` era reconstruído até 4× | Cache por `nodeId` durante a operação + mapa de sequências memoizado; `ppro_resetSequenceCache()` limpa no início de cada ação (organizar, criar estrutura, verificar comps) |
+| Config legada | `src/config.json` com 58 extensões de footage (divergente das 76 do preset), sem nenhum leitor no código | **Removido** |
+| Testes automatizados | Inexistiam | `scripts/tests/` com runner próprio: `npm test` (3 suítes) e `npm run test:scale` (cenário de 301 itens) |
+
+**Validação da Fase 3:** `node --check` nos 4 scripts de host (`_lib.jsx`, `organizer.jsx`, `aeft_organizer.jsx`, `ppro_organizer.jsx`) · **`npm test` → 43 asserções, 0 falhas** (`lib_test` 16/16, `preset_manager_test` 13/13, `ae_engine_test` 14/14) · o harness do AE exercita o **bootstrap real da lib** (o motor carrega `_lib.jsx` sozinho via `$.fileName` + `$.evalFile`), garantindo que a delegação funciona no caminho de produção.
+
+> **Requisito de deploy:** `host/_lib.jsx` precisa acompanhar `organizer.jsx` e os dois motores na mesma pasta — o roteador e os motores resolvem esse caminho relativo.
+
 
 
 

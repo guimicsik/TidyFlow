@@ -4,21 +4,32 @@
    ========================================================================== */
 
 (function () {
-    function escapeJsonString(str) {
-        return String(str === undefined || str === null ? "" : str)
-            .replace(/\\/g, "\\\\")
-            .replace(/"/g, '\\"')
-            .replace(/\r/g, "\\r")
-            .replace(/\n/g, "\\n");
-    }
+    /* Carrega a biblioteca compartilhada (host/_lib.jsx) se ainda nao estiver disponivel */
+    (function () {
+        if ($.global.OrgLib) return;
+        try {
+            var here = $.fileName ? new File($.fileName) : null;
+            if (here && here.parent) {
+                var libFile = new File(here.parent.fsName + "/_lib.jsx");
+                if (libFile.exists) $.evalFile(libFile);
+            }
+        } catch (eLibLoad) {}
+    })();
 
-    function parseJson(jsonStr) {
-        if (!jsonStr) return null;
-        if (typeof JSON !== "undefined" && JSON.parse) {
-            return JSON.parse(jsonStr);
-        }
-        return eval("(" + jsonStr + ")");
-    }
+    var escapeJsonString = $.global.OrgLib.escapeJsonString;
+
+    var parseJson = $.global.OrgLib.parseJson;
+
+    // --- Cache por operacao (Fase 3) ---
+    // As trilhas das sequencias nao mudam durante a organizacao; sem cache,
+    // inspectSequenceTracks era reexecutado para a mesma sequencia em varios fluxos.
+    var _seqMapCache = null;
+    var _seqTracksCache = {};
+
+    $.global.ppro_resetSequenceCache = function () {
+        _seqMapCache = null;
+        _seqTracksCache = {};
+    };
 
     function trimStr(str) {
         return String(str === undefined || str === null ? "" : str).replace(/^\s+|\s+$/g, "");
@@ -234,6 +245,7 @@
     }
 
     function buildSequenceMap() {
+        if (_seqMapCache) return _seqMapCache;
         var map = {};
         try {
             if (app.project && app.project.sequences && app.project.sequences.numSequences) {
@@ -245,10 +257,20 @@
                 }
             }
         } catch (e) {}
+        _seqMapCache = map;
         return map;
     }
 
     function inspectSequenceTracks(seqObj) {
+        // Cache por sequencia dentro da operacao (as trilhas nao mudam durante a organizacao)
+        var cacheKey = null;
+        try {
+            if (seqObj && seqObj.projectItem && seqObj.projectItem.nodeId) {
+                cacheKey = String(seqObj.projectItem.nodeId);
+                if (_seqTracksCache[cacheKey]) return _seqTracksCache[cacheKey];
+            }
+        } catch (eKey) {}
+
         var referencedProjectItems = [];
         var seenNodeIds = {};
         var totalClipInstances = 0;
@@ -285,10 +307,12 @@
             }
         } catch (eC) {}
 
-        return {
+        var result = {
             items: referencedProjectItems,
             totalClips: totalClipInstances
         };
+        if (cacheKey) _seqTracksCache[cacheKey] = result;
+        return result;
     }
 
     // Coleta itens selecionados no painel Project mesmo quando o foco acabou de ir para o painel CEP
@@ -416,6 +440,7 @@
     // 2. Verificar Sequências Vazias / Não Usadas (equivalente a checkUnusedComps)
     // =========================================================================
     $.global.ppro_checkUnusedComps = function (configJsonString) {
+        $.global.ppro_resetSequenceCache();
         try {
             if (!app.project || !app.project.rootItem) {
                 throw new Error("Nenhum projeto aberto no Premiere Pro.");
@@ -704,6 +729,7 @@
     // 3. Organizar Projeto com Preset Dinâmico (equivalente a organizeWithPreset)
     // =========================================================================
     $.global.ppro_organizeWithPreset = function (mainCompId, presetJsonString) {
+        $.global.ppro_resetSequenceCache();
         if (!app.project || !app.project.rootItem) {
             return '{"success": false, "error": "Nenhum projeto aberto no Premiere Pro."}';
         }
@@ -1686,6 +1712,7 @@
     // 4. Criar Estrutura Vazia de Bins do Preset (createPresetFolderStructure)
     // =========================================================================
     $.global.ppro_createPresetFolderStructure = function (presetJsonString) {
+        $.global.ppro_resetSequenceCache();
         if (!app.project || !app.project.rootItem) {
             return '{"success": false, "error": "Nenhum projeto aberto no Premiere Pro."}';
         }
