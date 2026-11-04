@@ -86,5 +86,17 @@
         return keyA !== undefined && keyA !== null && String(keyA) === String(keyB);
     };
 
+    // Logging de host: o painel pode registrar um hook (ex.: OrgLog do CEP) em $.global.OrgLogHook
+    Lib.log = function (level, scope, msg, detail) {
+        try {
+            if ($.global.OrgLogHook) {
+                $.global.OrgLogHook(String(level), String(scope), String(msg), detail === undefined ? "" : String(detail));
+            }
+        } catch (eLog) {}
+    };
+    Lib.warn = function (scope, msg, detail) { Lib.log("warn", scope, msg, detail); };
+    Lib.error = function (scope, msg, detail) { Lib.log("error", scope, msg, detail); };
+
+
     $.global.OrgLib = Lib;
 })();

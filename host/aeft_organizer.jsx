@@ -283,13 +283,7 @@ $.global.aeft_organizeAEProject = function (mainCompId, configJsonString) {
         }
     }
 
-    function getFileExtension(file) {
-        if (!file || !file.name) return "";
-        var name = file.name;
-        var lastDot = name.lastIndexOf(".");
-        if (lastDot === -1 || lastDot === name.length - 1) return "";
-        return name.substring(lastDot + 1).toLowerCase();
-    }
+    var getFileExtension = $.global.OrgLib.getFileExtension;
 
     function getParentFolderNameFromPath(filePath) {
         if (!filePath) return "";
@@ -1088,44 +1082,25 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
 
     var parseJson = $.global.OrgLib.parseJson;
 
-    function stripNumericPrefix(name) {
-        return String(name || "").replace(/^\d+[_-\s]+/, "");
-    }
+    var stripNumericPrefix = $.global.OrgLib.stripNumericPrefix;
 
-    function arrayContains(arr, val) {
-        if (!arr || !arr.length) return false;
-        for (var i = 0; i < arr.length; i++) {
-            if (arr[i] === val) return true;
-        }
-        return false;
-    }
+    var arrayContains = $.global.OrgLib.arrayContains;
 
-    function arrayContainsIgnoreCase(arr, val) {
-        if (!arr || !arr.length || !val) return false;
-        var target = String(val).toLowerCase();
-        for (var i = 0; i < arr.length; i++) {
-            if (String(arr[i]).toLowerCase() === target) return true;
-        }
-        return false;
-    }
+    var arrayContainsIgnoreCase = $.global.OrgLib.arrayContainsIgnoreCase;
 
     function applyLabelSafe(folderItem, labelIndex) {
         if (!folderItem) return;
         var num = parseInt(labelIndex, 10);
         if (!isNaN(num) && num >= 0 && num <= 16) {
             try {
-                folderItem.label = num;
+                if (folderItem.label !== num) {
+                    folderItem.label = num;
+                }
             } catch (e) { }
         }
     }
 
-    function getFileExtension(file) {
-        if (!file || !file.name) return "";
-        var name = file.name;
-        var lastDot = name.lastIndexOf(".");
-        if (lastDot === -1 || lastDot === name.length - 1) return "";
-        return name.substring(lastDot + 1).toLowerCase();
-    }
+    var getFileExtension = $.global.OrgLib.getFileExtension;
 
     function getParentFolderNameFromPath(filePath) {
         if (!filePath) return "";
@@ -1144,12 +1119,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
         return folderName;
     }
 
-    function isSameFolder(a, b) {
-        if (!a || !b) return false;
-        if (a === b) return true;
-        if (a.id !== undefined && b.id !== undefined && a.id === b.id) return true;
-        return false;
-    }
+    var isSameFolder = $.global.OrgLib.isSameItem;
 
     function isInsideFolder(item, targetFolder) {
         if (!item || !targetFolder) return false;
@@ -1989,23 +1959,18 @@ $.global.aeft_createPresetFolderStructure = function (presetJsonString) {
 
     var parseJson = $.global.OrgLib.parseJson;
 
-    function stripNumericPrefix(name) {
-        return String(name || "").replace(/^\d+[_-\s]+/, "");
-    }
+    var stripNumericPrefix = $.global.OrgLib.stripNumericPrefix;
 
-    function isSameFolder(a, b) {
-        if (!a || !b) return false;
-        if (a === b) return true;
-        if (a.id !== undefined && b.id !== undefined && a.id === b.id) return true;
-        return false;
-    }
+    var isSameFolder = $.global.OrgLib.isSameItem;
 
     function applyLabelSafe(folderItem, labelIndex) {
         if (!folderItem) return;
         var num = parseInt(labelIndex, 10);
         if (!isNaN(num) && num >= 0 && num <= 16) {
             try {
-                folderItem.label = num;
+                if (folderItem.label !== num) {
+                    folderItem.label = num;
+                }
             } catch (e) { }
         }
     }
@@ -2306,20 +2271,9 @@ $.global.aeft_rollbackProject = function (saveBefore, backupSnapshotJson) {
 
     var parseJson = $.global.OrgLib.parseJson;
 
-    function isSameFolder(a, b) {
-        if (!a || !b) return false;
-        if (a === b) return true;
-        if (a.id !== undefined && b.id !== undefined && a.id === b.id) return true;
-        return false;
-    }
+    var isSameFolder = $.global.OrgLib.isSameItem;
 
-    function getFileExtension(file) {
-        if (!file || !file.name) return "";
-        var name = file.name;
-        var lastDot = name.lastIndexOf(".");
-        if (lastDot === -1 || lastDot === name.length - 1) return "";
-        return name.substring(lastDot + 1).toLowerCase();
-    }
+    var getFileExtension = $.global.OrgLib.getFileExtension;
 
     if (!app.project) {
         return '{"success": false, "error": "Nenhum projeto aberto no After Effects."}';

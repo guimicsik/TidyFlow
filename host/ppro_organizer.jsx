@@ -43,30 +43,13 @@
         } catch (eDbg) {}
     }
 
-    function trimStr(str) {
-        return String(str === undefined || str === null ? "" : str).replace(/^\s+|\s+$/g, "");
-    }
+    var trimStr = $.global.OrgLib.trimStr;
 
-    function stripNumericPrefix(name) {
-        return String(name || "").replace(/^\d+[_-\s]+/, "");
-    }
+    var stripNumericPrefix = $.global.OrgLib.stripNumericPrefix;
 
-    function arrayContains(arr, val) {
-        if (!arr || !arr.length) return false;
-        for (var i = 0; i < arr.length; i++) {
-            if (arr[i] === val) return true;
-        }
-        return false;
-    }
+    var arrayContains = $.global.OrgLib.arrayContains;
 
-    function arrayContainsIgnoreCase(arr, val) {
-        if (!arr || !arr.length || !val) return false;
-        var target = String(val).toLowerCase();
-        for (var i = 0; i < arr.length; i++) {
-            if (String(arr[i]).toLowerCase() === target) return true;
-        }
-        return false;
-    }
+    var arrayContainsIgnoreCase = $.global.OrgLib.arrayContainsIgnoreCase;
 
     // Mapeamento bijetor 1:1 dos 16 slots do Preset Builder (1..16) para os 16 Color Labels do Premiere Pro (0..15)
     // Slot 0 = Nenhum / Manter cor padrão do Premiere Pro
@@ -98,7 +81,11 @@
         var pproColorIndex = AE_TO_PPRO_LABEL[num];
         if (pproColorIndex !== undefined) {
             try {
-                projectItem.setColorLabel(pproColorIndex);
+                // Só aplica se a cor mudou: evita entrada de undo e chamada IPC desnecessária
+                var currentColor = (typeof projectItem.getColorLabel === "function") ? projectItem.getColorLabel() : -1;
+                if (currentColor !== pproColorIndex) {
+                    projectItem.setColorLabel(pproColorIndex);
+                }
             } catch (e) {}
         }
     }
@@ -818,7 +805,15 @@
                 if (currentParent && isSameBin(currentParent, targetBin)) {
                     return false;
                 }
-                item.moveBin(targetBin);
+                try {
+                    item.moveBin(targetBin);
+                } catch (eMove) {
+                    // Um item bloqueado/especial nao deve abortar a organizacao inteira
+                    if ($.global.OrgLib) {
+                        $.global.OrgLib.warn("ppro.moveItemSafe", "falha ao mover " + (item && item.name), eMove);
+                    }
+                    return false;
+                }
                 parentByNodeId[item.nodeId] = targetBin;
                 return true;
             }
