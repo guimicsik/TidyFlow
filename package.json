@@ -6,8 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "test": "node scripts/tests/run_all.js",
-    "test:scale": "node scripts/tests/ae_engine_test.js scale",
-    "package": "node scripts/package.js"
+    "test:scale": "node scripts/tests/ae_engine_test.js scale"
   },
   "devDependencies": {
     "vite": "^8.3.5"

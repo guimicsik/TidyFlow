@@ -177,7 +177,6 @@ AE_File_Organizer/
 │   ├── setup_dev.ps1               # Setup do ambiente de desenvolvimento (symlink CEP)
 │   ├── install_symlink.bat         # Instalação do symlink da extensão
 │   ├── rollback_ponto_retorno.bat  # Restaura o código para a tag ponto-de-retorno-ae-v1.0
-│   ├── package.js                  # Empacotador CEP (gera release/tidyflow-<versao>.zip)
 │   └── tests/                      # Suíte de testes sem dependências (npm test)
 │       ├── run_all.js              # Runner das 5 suítes
 │       ├── lib_test.js             # Testes unitários de host/_lib.jsx
@@ -602,19 +601,9 @@ Os pesos da pontuação foram preservados **exatamente** (1000 nome → 850 exte
 
 **Validação da Fase 5:** `node --check` nos 5 scripts de host · **`npm test` → 84 asserções, 0 falhas** (lib 16, orglog 8, preset manager 16, AE 14, PPro 18, PPro sequências 12) · o harness do AE e os dois do PPro exercitam o motor de regras real, então a unificação foi validada por comportamento, não por inspeção.
 
-### 7.10 Empacotamento CEP — `npm run package` (04/11/2026)
+### 7.10 Empacotamento — removido durante o desenvolvimento (04/11/2026)
 
-Fecha a decisão de build registrada em **7.8**: em vez de depender do `dist/` do Vite (que não é pacote CEP), existe agora um empacotador dedicado e **sem dependências externas**.
-
-| Item | Detalhe |
-| :--- | :--- |
-| Script | `scripts/package.js` — escritor de ZIP próprio (deflate via `zlib` + CRC32), sem libs de terceiros |
-| Saída | `release/tidyflow-<versão>.zip` (`release/` no `.gitignore`) |
-| Conteúdo | `CSXS/manifest.xml` + `client/**` (painel, Preset Builder, CSS, `OrgLog.js`, `PresetManager.js`, preset de fábrica) + `host/**` (motor, `organizer.jsx`, `_lib.jsx`, `_rules.jsx`) |
-| Excluído | `.debug` (só dev), `dist/`, `scripts/`, `design/`, documentação, `node_modules` |
-| Guardas | falha se algum arquivo crítico faltar; valida que o manifesto aponta para `./client/index.html` e contém `com.tidyflow` |
-
-**Verificação executada:** ZIP com **16 entradas** (91,3 KB comprimido / 431,3 KB descompactado) · manifesto íntegro apontando para `./client/index.html` · extração para pasta temporária e `node --check` nos **9** arquivos JS/JSX empacotados (todos exit 0), provando que o artefato é completo e parseável fora do repositório.
+O empacotador (`scripts/package.js` + `npm run package`) chegou a ser criado e foi **removido**: o projeto está em desenvolvimento ativo e o artefato de distribuição não é necessário agora. A decisão de build de **7.8** continua valendo (CEP estático; Vite apenas como dev server). Quando for distribuir, o empacotador pode ser recriado — a implementação permanece no histórico do git.
 
 ### 7.11 Fase 6 — Consolidação final de helpers, labels e motor legado (04/11/2026)
 
