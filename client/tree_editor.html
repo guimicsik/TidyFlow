@@ -21,8 +21,6 @@
     </div>
 
     <div class="preset-actions">
-      <button type="button" id="btnSavePreset" class="btn btn-primary"
-        title="Salvar alterações no preset atual">Salvar</button>
       <button type="button" id="btnSaveAsPreset" class="btn" title="Salvar estrutura como um novo Preset">Salvar
         Novo</button>
       <button type="button" id="btnResetDefault" class="btn" title="Restaurar o preset padrão de fábrica">Reset
@@ -56,12 +54,6 @@
             <span>Numeração Sequencial (01_, 02_...)</span>
           </label>
         </div>
-
-        <div class="unused-folder-group">
-          <span>Pasta Não Usadas:</span>
-          <input type="text" id="inpUnusedFolderName" class="text-input" value="Nunca Usadas"
-            placeholder="Nunca Usadas">
-        </div>
       </div>
 
       <ul id="treeRootList" class="tree-list"></ul>
@@ -72,9 +64,9 @@
   <div class="footer-bar">
     <div id="editorStatus">Pronto. Configure as pastas e regras do preset.</div>
     <div class="footer-actions">
-      <button type="button" id="btnRunNow" class="btn btn-primary"
-        title="Salva o preset e executa a organização imediatamente no projeto aberto">Salvar e Organizar Agora</button>
-      <button type="button" id="btnCloseModal" class="btn">Fechar</button>
+      <button type="button" id="btnFooterSave" class="btn btn-primary btn-footer-action"
+        title="Salvar alterações no preset atual">Salvar</button>
+      <button type="button" id="btnCloseModal" class="btn btn-footer-action">Fechar</button>
     </div>
   </div>
 
@@ -308,6 +300,30 @@
       <div class="modal-footer">
         <button type="button" id="btnCancelConfirm" class="btn">Cancelar</button>
         <button type="button" id="btnAcceptConfirm" class="btn btn-danger">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Alterações Não Salvas ao Fechar -->
+  <div id="unsavedCloseModalBackdrop" class="modal-backdrop">
+    <div class="modal-card modal-card-unsaved">
+      <div class="modal-header">
+        <span class="modal-title">⚠️ Alterações Não Salvas</span>
+      </div>
+      <div class="modal-body">
+        <p class="modal-text">Deseja salvar o preset antes de fechar?</p>
+        <p class="modal-subtext">O preset possui alterações que ainda não foram salvas e serão perdidas.</p>
+      </div>
+      <div class="modal-footer modal-footer-vertical">
+        <button type="button" id="btnUnsavedSaveClose" class="btn modal-btn modal-btn-save">
+          Salvar e Fechar
+        </button>
+        <button type="button" id="btnUnsavedDiscard" class="btn modal-btn modal-btn-nosave">
+          Fechar sem Salvar
+        </button>
+        <button type="button" id="btnUnsavedCancel" class="btn modal-btn modal-btn-cancel">
+          Cancelar
+        </button>
       </div>
     </div>
   </div>

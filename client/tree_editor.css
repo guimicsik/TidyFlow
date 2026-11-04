@@ -607,7 +607,16 @@ body {
 .footer-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+}
+
+.btn-footer-action {
+  height: 34px;
+  min-width: 96px;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
 }
 
 /* Color Label Popover Menu */
@@ -681,6 +690,95 @@ body {
 
 .modal-card.modal-sm {
   max-width: 380px;
+}
+
+/* Modal específico para confirmação de saída (idêntico ao Rollback) */
+.modal-card.modal-card-unsaved {
+  max-width: 320px;
+}
+
+.modal-card-unsaved .modal-header {
+  padding: 10px 12px;
+}
+
+.modal-card-unsaved .modal-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ececec;
+}
+
+.modal-card-unsaved .modal-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-card-unsaved .modal-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.modal-card-unsaved .modal-subtext {
+  font-size: 11px;
+  color: #a8a8a8;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.modal-footer-vertical {
+  padding: 10px 12px 12px;
+  background-color: #202020;
+  border-top: 1px solid #333333;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-btn {
+  width: 100%;
+  min-height: 30px;
+  height: 32px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 5px;
+}
+
+.modal-btn-save {
+  background-color: #2ea043;
+  color: #ffffff;
+  border: 1px solid #1e7a30;
+}
+
+.modal-btn-save:hover:not(:disabled) {
+  background-color: #3bb552;
+  border-color: #26913b;
+}
+
+.modal-btn-nosave {
+  background-color: #c25e1a;
+  color: #ffffff;
+  border: 1px solid #8a4110;
+}
+
+.modal-btn-nosave:hover:not(:disabled) {
+  background-color: #d66b22;
+  border-color: #9e4b14;
+}
+
+.modal-btn-cancel {
+  background-color: #363636;
+  color: #d4d4d4;
+  border: 1px solid #4a4a4a;
+  font-weight: 600;
+}
+
+.modal-btn-cancel:hover:not(:disabled) {
+  background-color: #444444;
+  color: #ffffff;
 }
 
 .modal-header {

@@ -134,8 +134,14 @@
   var btnAddTopFolder = document.getElementById("btnAddTopFolder");
   var treeRootList = document.getElementById("treeRootList");
   var editorStatus = document.getElementById("editorStatus");
-  var btnRunNow = document.getElementById("btnRunNow");
+  var btnFooterSave = document.getElementById("btnFooterSave");
   var btnCloseModal = document.getElementById("btnCloseModal");
+
+  // Modal de Alterações Não Salvas (ao Fechar)
+  var unsavedCloseModalBackdrop = document.getElementById("unsavedCloseModalBackdrop");
+  var btnUnsavedCancel = document.getElementById("btnUnsavedCancel");
+  var btnUnsavedDiscard = document.getElementById("btnUnsavedDiscard");
+  var btnUnsavedSaveClose = document.getElementById("btnUnsavedSaveClose");
 
   // Popover de Cores AE e Tooltip de Info
   var labelPopover = document.getElementById("labelPopover");
@@ -187,6 +193,7 @@
   var modalWorkingNameTags = [];
   var pendingConfirmCallback = null;
   var draggedNodeId = null;
+  var closeAfterSaveAs = false;
 
   function setStatus(msg, type) {
     if (!editorStatus) return;
@@ -275,7 +282,9 @@
     }
 
     chkUsePrefixNumbering.checked = Boolean(currentPreset.settings.usePrefixNumbering);
-    inpUnusedFolderName.value = currentPreset.settings.unusedFolderName || "Nunca Usadas";
+    if (inpUnusedFolderName) {
+      inpUnusedFolderName.value = currentPreset.settings.unusedFolderName || "Nunca Usadas";
+    }
 
     setDirty(false);
     renderTree();
@@ -1125,7 +1134,10 @@
     saveAsModalBackdrop.classList.remove("open");
   }
 
-  btnCancelSaveAs.addEventListener("click", closeSaveAsModal);
+  btnCancelSaveAs.addEventListener("click", function () {
+    closeAfterSaveAs = false;
+    closeSaveAsModal();
+  });
 
   function executeSaveAs() {
     var newName = inpSaveAsName.value.trim();
@@ -1150,6 +1162,10 @@
         window.parent.onPresetBuilderUpdated(currentPreset.presetName);
       }
     } catch (eSync2) {}
+    if (closeAfterSaveAs) {
+      closeAfterSaveAs = false;
+      closeEditorWindow();
+    }
   }
 
   btnConfirmSaveAs.addEventListener("click", executeSaveAs);
@@ -1176,11 +1192,13 @@
     presetManager.notifyPresetsUpdated(currentPreset.presetName);
   });
 
-  inpUnusedFolderName.addEventListener("input", function () {
-    if (!currentPreset) return;
-    currentPreset.settings.unusedFolderName = inpUnusedFolderName.value.trim() || "Nunca Usadas";
-    setDirty(true);
-  });
+  if (inpUnusedFolderName) {
+    inpUnusedFolderName.addEventListener("input", function () {
+      if (!currentPreset) return;
+      currentPreset.settings.unusedFolderName = inpUnusedFolderName.value.trim() || "Nunca Usadas";
+      setDirty(true);
+    });
+  }
 
   btnAddTopFolder.addEventListener("click", function () {
     if (!currentPreset) return;
@@ -1219,9 +1237,11 @@
     }
   }
 
-  btnSavePreset.addEventListener("click", function () {
-    saveCurrentPresetOrPromptNew();
-  });
+  if (btnSavePreset) {
+    btnSavePreset.addEventListener("click", function () {
+      saveCurrentPresetOrPromptNew();
+    });
+  }
 
   btnSaveAsPreset.addEventListener("click", function () {
     var baseSuggestion = (currentPreset && currentPreset.presetName !== PresetManager.DEFAULT_PRESET_NAME)
@@ -1359,66 +1379,13 @@
     }
   });
 
-  // Botão Salvar e Organizar Agora
-  btnRunNow.addEventListener("click", function () {
-    if (!currentPreset) return;
-
-    // Salva se for preset de usuário; se for Default, salva as preferências de toggle
-    if (!currentPreset.isBuiltIn && currentPreset.presetName !== PresetManager.DEFAULT_PRESET_NAME) {
-      currentPreset = presetManager.savePreset(currentPreset);
-      if (reportSaveError()) return;
-      setDirty(false);
-    } else {
-      presetManager.savePreset(currentPreset);
-      if (reportSaveError()) return;
-    }
-
-    setStatus("Organizando projeto no " + hostAppName + "...", "");
-    btnRunNow.disabled = true;
-
-    var scriptCall =
-      '$.global.organizeWithPreset("selection", ' +
-      JSON.stringify(JSON.stringify(currentPreset)) +
-      ")";
-
-    csInterface.evalScript(scriptCall, function (result) {
-      btnRunNow.disabled = false;
-      if (!result || result === "EvalScript error.") {
-        setStatus("Erro ao executar organização no " + hostAppName + ".", "error");
-        return;
-      }
-
-      try {
-        var response = JSON.parse(result);
-        if (response && response.success) {
-          var unitLabel = isPPro ? "Sequências: " : "Comps: ";
-          setStatus(
-            "Projeto organizado! (" +
-              unitLabel +
-              (response.movedComps || 0) +
-              ", Mídias: " +
-              (response.movedFootages || 0) +
-              ", Pastas limpas: " +
-              (response.cleanedFolders || 0) +
-              ")",
-            "success"
-          );
-        } else {
-          var errMsg = (response && response.error) || "Falha ao organizar.";
-          if (errMsg.indexOf("Nenhuma composi") !== -1 || errMsg.indexOf("Nenhuma sequ") !== -1) {
-            var targetLabel = isPPro ? "Sequência Principal" : "Composição Principal";
-            setStatus("Selecione a " + targetLabel + " no painel Project (ou use 'Apenas Mídias' no painel).", "warning");
-          } else {
-            setStatus("Erro: " + errMsg, "error");
-          }
-        }
-      } catch (e) {
-        setStatus("Resposta inválida do " + hostAppName + ".", "error");
-      }
-    });
+  // Botão Salvar do rodapé (mesmo comportamento do Salvar da barra superior)
+  btnFooterSave.addEventListener("click", function () {
+    saveCurrentPresetOrPromptNew();
   });
 
-  btnCloseModal.addEventListener("click", function () {
+  // Fechar o editor (iframe pai, popup ou extensão CEP)
+  function closeEditorWindow() {
     if (window.parent && window.parent !== window && typeof window.parent.closePresetBuilderModal === "function") {
       window.parent.closePresetBuilderModal();
       return;
@@ -1432,6 +1399,42 @@
     } catch (e) {
       window.close();
     }
+  }
+
+  // Modal de Alterações Não Salvas
+  function openUnsavedCloseModal() {
+    unsavedCloseModalBackdrop.classList.add("open");
+  }
+
+  function closeUnsavedCloseModal() {
+    unsavedCloseModalBackdrop.classList.remove("open");
+  }
+
+  btnUnsavedCancel.addEventListener("click", closeUnsavedCloseModal);
+
+  btnUnsavedDiscard.addEventListener("click", function () {
+    closeUnsavedCloseModal();
+    setDirty(false);
+    closeEditorWindow();
+  });
+
+  btnUnsavedSaveClose.addEventListener("click", function () {
+    closeUnsavedCloseModal();
+    if (currentPreset && (currentPreset.presetName === PresetManager.DEFAULT_PRESET_NAME || currentPreset.isBuiltIn)) {
+      // Default protegido: abre "Salvar Como" e fecha após criar o novo preset
+      closeAfterSaveAs = true;
+    }
+    saveCurrentPresetOrPromptNew(function () {
+      closeEditorWindow();
+    });
+  });
+
+  btnCloseModal.addEventListener("click", function () {
+    if (isDirty) {
+      openUnsavedCloseModal();
+      return;
+    }
+    closeEditorWindow();
   });
 
   function loadOrReloadHostScripts(callback) {
