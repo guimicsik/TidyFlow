@@ -12,6 +12,14 @@
   var STORAGE_KEY_ROLLBACK_SNAPSHOT = "ae_organizer_rollback_snapshot";
   var STORAGE_KEY_PRESETS_MIGRATED = "ae_organizer_presets_migrated";
 
+  // Logging tolerante: funciona mesmo se OrgLog.js nao estiver carregado
+  function logWarn(scope, msg, detail) {
+    try { if (global.OrgLog) global.OrgLog.warn(scope, msg, detail); } catch (e) {}
+  }
+  function logError(scope, msg, detail) {
+    try { if (global.OrgLog) global.OrgLog.error(scope, msg, detail); } catch (e) {}
+  }
+
   // 16 Color Labels nativos do After Effects + None (0)
   var AE_LABELS = [
     { index: 0, name: "None", ptName: "Nenhum (None)", color: "#585858" },
@@ -398,6 +406,7 @@
     this._presetsDirCache = undefined;
     this._presetListCache = null;
     this._presetObjectCache = {};
+    this.lastSaveError = null;
   }
 
   PresetManager.AE_LABELS = AE_LABELS;
@@ -495,6 +504,7 @@
         }
       } catch (e) {
         resolved = null;
+        logWarn("PresetManager.getPresetsFolderPath", "Falha ao resolver a pasta de presets", e);
       }
     }
 
@@ -774,7 +784,15 @@
       try {
         var filePath = this.path.join(dir, sanitizeFileName(normalized.presetName) + ".json");
         this.fs.writeFileSync(filePath, JSON.stringify(normalized, null, 2), "utf8");
-      } catch (e) {}
+        this.lastSaveError = null;
+      } catch (e) {
+        // Falha de escrita NAO pode passar em silencio: o usuario perderia o preset
+        this.lastSaveError = "Nao foi possivel gravar o preset em disco: " + (e && e.message ? e.message : e);
+        logError("PresetManager.savePreset", this.lastSaveError, e);
+      }
+    } else {
+      this.lastSaveError = null;
+      logWarn("PresetManager.savePreset", "Disco indisponivel; preset salvo apenas em localStorage", normalized.presetName);
     }
 
     // 2. Salvar cópia em localStorage
@@ -816,7 +834,9 @@
               if (matchesName || matchesFile) {
                 this.fs.unlinkSync(full);
               }
-            } catch (e2) {}
+            } catch (e2) {
+              logWarn("PresetManager.deletePreset", "Falha ao remover arquivo de preset", e2);
+            }
           }
         }
       } catch (e) {}

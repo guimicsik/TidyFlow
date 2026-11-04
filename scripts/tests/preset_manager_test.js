@@ -82,6 +82,33 @@ check('STORAGE_KEYS mantem valores legados',
   PresetManager.STORAGE_KEYS.saveProject === 'ae_organizer_save_project' &&
   PresetManager.STORAGE_KEYS.deleteEmpty === 'ae_organizer_delete_empty');
 
+// --- Fase 4: falha de escrita nao pode ser silenciosa ---
+const logCalls = [];
+global.OrgLog = {
+  warn: function (s, m) { logCalls.push(['warn', s, m]); },
+  error: function (s, m) { logCalls.push(['error', s, m]); },
+  info: function () {},
+  debug: function () {}
+};
+const originalWrite = pm.fs.writeFileSync;
+pm.fs.writeFileSync = function () { throw new Error('disco cheio'); };
+pm.savePreset({
+  presetName: 'Falha Escrita',
+  settings: {},
+  tree: [{ id: 'nx', name: 'X', label: 0, rules: { types: [], extensions: [] }, children: [] }]
+});
+pm.fs.writeFileSync = originalWrite;
+
+check('savePreset expoe lastSaveError', /gravar o preset/.test(pm.lastSaveError || ''), pm.lastSaveError);
+check('savePreset registra erro no OrgLog', logCalls.some(function (c) { return c[0] === 'error'; }), JSON.stringify(logCalls));
+
+pm.savePreset({
+  presetName: 'Salva Ok',
+  settings: {},
+  tree: [{ id: 'ny', name: 'Y', label: 0, rules: { types: [], extensions: [] }, children: [] }]
+});
+check('savePreset limpa lastSaveError no sucesso', pm.lastSaveError === null, pm.lastSaveError);
+
 console.log('\nRESULTADO preset_manager_test: ' + ok + ' PASS / ' + fail + ' FAIL');
 try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch (e) {}
 process.exit(fail === 0 ? 0 : 1);

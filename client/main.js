@@ -81,6 +81,12 @@
   function setStatus(text, type) {
     statusMsg.textContent = text || "";
     statusMsg.className = type || "";
+    // Todo erro exibido no painel tambem vai para o OrgLog (diagnostico em campo)
+    if (type === "error") {
+      try {
+        if (window.OrgLog) OrgLog.error("panel", text || "");
+      } catch (eLog) {}
+    }
   }
 
   function setBusy(isBusy) {

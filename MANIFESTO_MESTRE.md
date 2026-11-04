@@ -147,6 +147,7 @@ AE_File_Organizer/
 │   └── manifest.dev.xml    # Manifesto de teste com live-server
 ├── client/
 │   ├── CSInterface.js      # Biblioteca ponte de comunicação CEP <-> Host
+│   ├── OrgLog.js           # Logger leve (níveis, ring buffer, dump) usado pelo painel e pelo editor
 │   ├── index.html          # Interface do Painel Principal (estrutura semântica)
 │   ├── index.css           # Design system do painel (Figma: dark UI, tiles, toggles, modais)
 │   ├── main.js             # Controladores do painel: modos, toggles, presets e rollback
@@ -174,9 +175,10 @@ AE_File_Organizer/
 │   ├── install_symlink.bat         # Instalação do symlink da extensão
 │   ├── rollback_ponto_retorno.bat  # Restaura o código para a tag ponto-de-retorno-ae-v1.0
 │   └── tests/                      # Suíte de testes sem dependências (npm test)
-│       ├── run_all.js              # Runner das 4 suítes
+│       ├── run_all.js              # Runner das 5 suítes
 │       ├── lib_test.js             # Testes unitários de host/_lib.jsx
-│       ├── preset_manager_test.js  # Cache/memoização do PresetManager
+│       ├── orglog_test.js          # Níveis, dump e persistência do OrgLog
+│       ├── preset_manager_test.js  # Cache/memoização + falha de escrita do PresetManager
 │       ├── ae_engine_test.js       # Motor AE com projeto simulado (+ modo scale)
 │       └── ppro_engine_test.js     # Motor PPro (bins, moveBin, sequências, rollback)
 └── dist/                   # Build de produção gerado pelo Vite (não versionado)
@@ -476,7 +478,7 @@ Todos os demais elementos — layout, CSS, árvore de pastas, modal de regras, t
 | 8 | 4 fontes de verdade das extensões (preset, `PresetManager`, `src/config.json`, regex hardcoded no host) | Parcial na Fase 3 (`config.json` removido) — restam preset/`PresetManager`/regex no host |
 | 9 | Duplicação entre motores (~67% das linhas repetidas; 13 funções homônimas) | Backlog — Fase 2/3 |
 | 10 | Varreduras O(N²) do projeto no host (33 chamadas `app.project.item()` dentro de laços) | Backlog — Fase 2 |
-| 11 | 81 `catch` vazios de 114 (71% de falhas silenciosas) | Backlog — Fase 4 (`OrgLog`) |
+| 11 | 81 `catch` vazios de 114 (71% de falhas silenciosas) | Parcial na Fase 4: caminhos críticos (salvar/excluir preset, resolver pasta, erros do painel) agora logam via `OrgLog` e falha de escrita aparece na UI |
 
 ### 7.4 Fase 1 — Otimizações aplicadas (04/11/2026)
 
@@ -555,6 +557,24 @@ Duas regras do host real foram reproduzidas de propósito, porque são onde bugs
 **Resultado:** `ppro_engine_test` **18/18** e suíte completa **61 asserções, 0 falhas** (`npm test`).
 
 > **Limite conhecido:** o harness valida lógica, não o host. Mídia offline real, bins bloqueados, variações entre versões do Premiere e a ponte CEP continuam exigindo o smoke test manual — que já foi executado nesta rodada com resultado OK.
+
+### 7.8 Fase 4 — Observabilidade: `OrgLog` e falhas visíveis (04/11/2026)
+
+**Problema:** 81 dos 114 blocos `catch` do projeto eram vazios (71%). O caso mais grave era `savePreset`: se a escrita em disco falhasse, o painel dizia *"salvo com sucesso"* e o usuário perdia o preset.
+
+| Item | Antes | Depois |
+| :--- | :--- | :--- |
+| Log | Nenhum. Falhas de escrita, exclusão, leitura e rollback desapareciam | **`client/OrgLog.js`** — níveis (`debug/info/warn/error`), buffer de 200 entradas em memória, persistência das 50 últimas em `localStorage`, `dump()` legível e `count(level)` para diagnóstico |
+| Carregamento | — | `OrgLog.js` incluído nos **dois** HTMLs antes de `PresetManager.js` / `main.js` / `tree_editor.js` |
+| Painel principal | `setStatus(..., "error")` só pintava o texto na tela | Todo erro exibido vai também para `OrgLog.error("panel", …)` |
+| `PresetManager.savePreset` | `catch (e) {}` silencioso | Expõe **`lastSaveError`** e loga `error`; no sucesso, limpa o campo. Se o disco estiver indisponível, loga `warn` explicando que salvou só em `localStorage` |
+| Exclusão / resolução da pasta | `catch` vazios | `logWarn` com o motivo (ex.: arquivo não removido) |
+| Preset Builder | Dizia "salvo com sucesso" mesmo com falha | `reportSaveError()` é chamado nos **3 fluxos** (Salvar, Salvar Novo, Salvar e Organizar Agora) e **aborta** com mensagem de erro, mantendo o dirty flag |
+
+**Decisão de build (registrada):** `dist/` gerado pelo Vite **não é um pacote CEP** (contém apenas `index.html` + CSS com hash; não copia `CSXS/`, `host/` nem `tree_editor.html`). Decisão: **CEP estático** — `client/` + `host/` + `CSXS/` são a fonte de verdade e o que se instala; o Vite fica restrito ao servidor de desenvolvimento (`localhost:5173`, usado por `manifest.dev.xml`). Um empacotador dedicado (`npm run package` gerando ZIP instalável) fica para uma fase futura.
+
+**Validação da Fase 4:** `node --check` em `OrgLog.js`, `main.js`, `tree_editor.js` e `PresetManager.js` (4/4) · `npm test` → **72 asserções, 0 falhas** — incluindo `orglog_test` (8) e a nova verificação de `preset_manager_test`: com `writeFileSync` sabotado, `lastSaveError` é preenchido, o `OrgLog` recebe um `error` e, no salvamento seguinte bem-sucedido, `lastSaveError` volta a `null`.
+
 
 
 

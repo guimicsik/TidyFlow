@@ -194,6 +194,16 @@
     editorStatus.className = type || "";
   }
 
+  // Falha de escrita em disco nao pode virar "salvo com sucesso"
+  function reportSaveError() {
+    if (!presetManager.lastSaveError) return false;
+    setStatus("Erro ao salvar: " + presetManager.lastSaveError, "error");
+    try {
+      if (window.OrgLog) OrgLog.error("tree_editor.save", presetManager.lastSaveError);
+    } catch (e) {}
+    return true;
+  }
+
   function setDirty(dirtyState) {
     isDirty = Boolean(dirtyState);
     if (badgeUnsaved) {
@@ -1131,6 +1141,7 @@
     currentPreset.presetName = newName;
     currentPreset.isBuiltIn = false;
     currentPreset = presetManager.savePreset(currentPreset);
+    if (reportSaveError()) return;
     closeSaveAsModal();
     loadSelectedPresetIntoEditor(currentPreset.presetName);
     setStatus("Novo preset '" + currentPreset.presetName + "' salvo com sucesso!", "success");
@@ -1191,6 +1202,10 @@
     }
 
     currentPreset = presetManager.savePreset(currentPreset);
+    if (reportSaveError()) {
+      setDirty(true);
+      return;
+    }
     setDirty(false);
     refreshPresetSelectDropdown(currentPreset.presetName);
     setStatus("Preset '" + currentPreset.presetName + "' salvo em disco!", "success");
@@ -1351,9 +1366,11 @@
     // Salva se for preset de usuário; se for Default, salva as preferências de toggle
     if (!currentPreset.isBuiltIn && currentPreset.presetName !== PresetManager.DEFAULT_PRESET_NAME) {
       currentPreset = presetManager.savePreset(currentPreset);
+      if (reportSaveError()) return;
       setDirty(false);
     } else {
       presetManager.savePreset(currentPreset);
+      if (reportSaveError()) return;
     }
 
     setStatus("Organizando projeto no " + hostAppName + "...", "");
