@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>TidyFlow — Preset Builder & Estrutura de Pastas</title>
+  <title>TidyFlow — Preset Builder</title>
   <link rel="stylesheet" href="tree_editor.css">
 </head>
 
@@ -16,7 +16,7 @@
       <select id="presetSelect" class="select-input"></select>
       <button type="button" id="btnDeletePreset" class="btn btn-danger"
         title="Excluir este preset de usuário">Excluir</button>
-      <span id="badgeBuiltIn" class="badge-builtin">Padrão de Fábrica</span>
+      <span id="badgeBuiltIn" class="badge-builtin">Padrão</span>
       <span id="badgeUnsaved" class="badge-unsaved">Não salvo*</span>
     </div>
 
@@ -39,8 +39,8 @@
   <div class="tree-workspace">
     <div class="tree-toolbar">
       <span id="treeToolbarTitle" class="tree-toolbar-title">Estrutura da Árvore de Pastas • Clique nas regras para
-        filtrar)</span>
-      <button type="button" id="btnAddTopFolder" class="btn btn-primary">+ Add Top Folder</button>
+        filtrar</span>
+      <button type="button" id="btnAddTopFolder" class="btn btn-primary">+ Add pasta</button>
     </div>
 
     <div id="treeScrollArea" class="tree-scroll-area">
@@ -51,7 +51,7 @@
             title="Adiciona automaticamente 01_, 02_, 03_ nas pastas da árvore que possuírem arquivos, pulando categorias vazias">
             <input type="checkbox" id="chkUsePrefixNumbering" checked>
             <span class="toggle-slider"></span>
-            <span>Numeração Sequencial (01_, 02_...)</span>
+            <span>Numeração Sequencial</span>
           </label>
         </div>
       </div>
@@ -62,7 +62,7 @@
 
   <!-- Barra Inferior: Status e Ações Finais -->
   <div class="footer-bar">
-    <div id="editorStatus">Pronto. Configure as pastas e regras do preset.</div>
+    <div id="editorStatus">Configure as pastas e regras do preset.</div>
     <div class="footer-actions">
       <button type="button" id="btnFooterSave" class="btn btn-primary btn-footer-action"
         title="Salvar alterações no preset atual">Salvar</button>
@@ -95,7 +95,7 @@
             <div class="rule-section">
               <div class="rule-section-header">
                 <div class="rule-section-title">
-                  <span id="ruleSectionHostTitle">1. Tipos Permitidos</span>
+                  <span id="ruleSectionHostTitle">1. Tipos</span>
                   <span class="info-icon"
                     data-tooltip="Escolha quais categorias de arquivos ou composições do projeto devem ser movidas para esta pasta.">i</span>
                 </div>
@@ -115,13 +115,13 @@
                 </label>
                 <label class="rule-toggle-btn">
                   <input type="checkbox" class="rule-type-chk" value="StillImages">
-                  <span class="btn-tile-label">Imagens Estáticas</span>
+                  <span class="btn-tile-label">Imagens</span>
                   <span class="info-icon"
                     data-tooltip="Fotos, artes, ilustrações e logotipos parados sem duração de vídeo.">i</span>
                 </label>
                 <label class="rule-toggle-btn">
                   <input type="checkbox" class="rule-type-chk" value="Videos">
-                  <span class="btn-tile-label">Vídeos / Footages</span>
+                  <span class="btn-tile-label">Vídeos</span>
                   <span class="info-icon"
                     data-tooltip="Gravações de câmera, clipes renderizados e arquivos de vídeo em movimento.">i</span>
                 </label>
@@ -191,6 +191,14 @@
                   <span class="info-icon" data-tooltip="Exemplos: .json, .c4d, .obj, .fbx, .csv, .prproj...">i</span>
                 </label>
               </div>
+
+              <div class="ext-add-row">
+                <input type="text" id="inpNewExtension" class="text-input"
+                  placeholder="Extensão avulsa (ex.: .dng) e Enter">
+                <button type="button" id="btnAddExtension" class="btn btn-primary">[+] Adicionar</button>
+              </div>
+
+              <div id="extTagsContainer" class="ext-tags-box"></div>
             </div>
           </div>
 
@@ -264,8 +272,8 @@
       </div>
 
       <div class="modal-footer">
+        <button type="button" id="btnApplyRulesModal" class="btn btn-primary">Aplicar</button>
         <button type="button" id="btnCancelRulesModal" class="btn">Cancelar</button>
-        <button type="button" id="btnApplyRulesModal" class="btn btn-primary">Aplicar Regras na Pasta</button>
       </div>
     </div>
   </div>
@@ -282,8 +290,8 @@
         <input type="text" id="inpSaveAsName" class="text-input" placeholder="Meu Preset Customizado">
       </div>
       <div class="modal-footer">
+        <button type="button" id="btnConfirmSaveAs" class="btn btn-primary">Salvar</button>
         <button type="button" id="btnCancelSaveAs" class="btn">Cancelar</button>
-        <button type="button" id="btnConfirmSaveAs" class="btn btn-primary">Criar e Salvar</button>
       </div>
     </div>
   </div>

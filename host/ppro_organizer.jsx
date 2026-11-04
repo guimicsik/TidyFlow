@@ -18,12 +18,43 @@
                 var rulesFile = new File(baseDir + "/_rules.jsx");
                 if (rulesFile.exists) $.evalFile(rulesFile);
             }
-        } catch (eLibLoad) {}
+        } catch (eLibLoad) { }
     })();
 
     var escapeJsonString = $.global.OrgLib.escapeJsonString;
 
     var parseJson = $.global.OrgLib.parseJson;
+
+    // --- Fronteira de desfazer (undo) ---
+    // As operacoes destrutivas (organizar, criar estrutura, rollback) devem formar
+    // um unico passo de desfazer no Premiere Pro, como ja acontece no After Effects.
+    // app.beginUndoGroup/endUndoGroup sao detectados em tempo de execucao para
+    // nao quebrar em versoes do host onde a API nao exista.
+    function ppro_supportsUndoGroup() {
+        try {
+            return Boolean(
+                app &&
+                typeof app.beginUndoGroup === "function" &&
+                typeof app.endUndoGroup === "function"
+            );
+        } catch (eUndoCheck) {
+            return false;
+        }
+    }
+
+    function ppro_beginUndoGroup(label) {
+        if (!ppro_supportsUndoGroup()) return;
+        try {
+            app.beginUndoGroup(label || "TidyFlow");
+        } catch (eBeginUndo) { }
+    }
+
+    function ppro_endUndoGroup() {
+        if (!ppro_supportsUndoGroup()) return;
+        try {
+            app.endUndoGroup();
+        } catch (eEndUndo) { }
+    }
 
     // --- Cache por operacao (Fase 3) ---
     // As trilhas das sequencias nao mudam durante a organizacao; sem cache,
@@ -40,7 +71,7 @@
     function _dbg(msg) {
         try {
             if ($.global._pproDebug) $.global._pproDebug(String(msg));
-        } catch (eDbg) {}
+        } catch (eDbg) { }
     }
 
     var trimStr = $.global.OrgLib.trimStr;
@@ -86,7 +117,7 @@
                 if (currentColor !== pproColorIndex) {
                     projectItem.setColorLabel(pproColorIndex);
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
     }
 
@@ -124,7 +155,7 @@
             if (a.nodeId !== undefined && b.nodeId !== undefined && a.nodeId === b.nodeId) {
                 return true;
             }
-        } catch (e) {}
+        } catch (e) { }
         return false;
     }
 
@@ -132,7 +163,7 @@
         if (!binItem || !newName) return;
         try {
             if (binItem.name === newName) return;
-        } catch (e0) {}
+        } catch (e0) { }
         try {
             if (typeof binItem.renameBin === "function") {
                 binItem.renameBin(newName);
@@ -142,7 +173,7 @@
         } catch (e1) {
             try {
                 binItem.name = newName;
-            } catch (e2) {}
+            } catch (e2) { }
         }
     }
 
@@ -239,7 +270,7 @@
             if (match && match[1]) {
                 return trimStr(match[1]);
             }
-        } catch (e) {}
+        } catch (e) { }
         return "";
     }
 
@@ -255,7 +286,7 @@
                     }
                 }
             }
-        } catch (e) {}
+        } catch (e) { }
         _seqMapCache = map;
         return map;
     }
@@ -268,7 +299,7 @@
                 cacheKey = String(seqObj.projectItem.nodeId);
                 if (_seqTracksCache[cacheKey]) return _seqTracksCache[cacheKey];
             }
-        } catch (eKey) {}
+        } catch (eKey) { }
 
         var referencedProjectItems = [];
         var seenNodeIds = {};
@@ -293,18 +324,18 @@
                             seenNodeIds[pItem.nodeId] = true;
                             referencedProjectItems.push(pItem);
                         }
-                    } catch (errClip) {}
+                    } catch (errClip) { }
                 }
             }
         }
 
-        try { scanTrackCollection(seqObj.videoTracks); } catch (eV) {}
-        try { scanTrackCollection(seqObj.audioTracks); } catch (eA) {}
+        try { scanTrackCollection(seqObj.videoTracks); } catch (eV) { }
+        try { scanTrackCollection(seqObj.audioTracks); } catch (eA) { }
         try {
             if (seqObj.captionTracks) {
                 scanTrackCollection(seqObj.captionTracks);
             }
-        } catch (eC) {}
+        } catch (eC) { }
 
         var result = {
             items: referencedProjectItems,
@@ -336,7 +367,7 @@
                 var directSel = app.getCurrentProjectViewSelection();
                 addSelectionArray(directSel);
             }
-        } catch (e1) {}
+        } catch (e1) { }
 
         if (result.length === 0) {
             try {
@@ -353,7 +384,7 @@
                                         belongsToActiveProject = false;
                                     }
                                 }
-                            } catch (eProj) {}
+                            } catch (eProj) { }
 
                             if (belongsToActiveProject) {
                                 var vSel = app.getProjectViewSelection(vid);
@@ -362,7 +393,7 @@
                         }
                     }
                 }
-            } catch (e2) {}
+            } catch (e2) { }
         }
 
         return result;
@@ -426,10 +457,10 @@
             if (seq && seq.projectItem) {
                 list.push(
                     '{"id": "' +
-                        escapeJsonString(seq.projectItem.nodeId) +
-                        '", "name": "' +
-                        escapeJsonString(seq.name) +
-                        '"}'
+                    escapeJsonString(seq.projectItem.nodeId) +
+                    '", "name": "' +
+                    escapeJsonString(seq.name) +
+                    '"}'
                 );
             }
         }
@@ -441,11 +472,12 @@
     // =========================================================================
     $.global.ppro_checkUnusedComps = function (configJsonString) {
         $.global.ppro_resetSequenceCache();
-        try {
-            if (!app.project || !app.project.rootItem) {
-                throw new Error("Nenhum projeto aberto no Premiere Pro.");
-            }
+        if (!app.project || !app.project.rootItem) {
+            return '{"success": false, "error": "Nenhum projeto aberto no Premiere Pro."}';
+        }
 
+        ppro_beginUndoGroup("Verificar Sequências Não Usadas");
+        try {
             var config = parseJson(configJsonString) || {};
             var foldersCfg = config.folders || {};
             var settingsCfg = config.settings || {};
@@ -722,6 +754,8 @@
             );
         } catch (err) {
             return '{"success": false, "error": "' + escapeJsonString(err.toString()) + '"}';
+        } finally {
+            ppro_endUndoGroup();
         }
     };
 
@@ -756,9 +790,10 @@
             try {
                 app.project.save();
                 projectSaved = true;
-            } catch (saveErr) {}
+            } catch (saveErr) { }
         }
 
+        ppro_beginUndoGroup("Organizar Projeto");
         try {
             var snap = takeProjectSnapshot();
             var rootItem = snap.rootItem;
@@ -1086,11 +1121,11 @@
                             try {
                                 itemsToDelete[delIdx].moveBin(tempTrashBin);
                                 reducedCount++;
-                            } catch (eMoveTrash) {}
+                            } catch (eMoveTrash) { }
                         }
                         try {
                             tempTrashBin.deleteBin();
-                        } catch (eDelTrash) {}
+                        } catch (eDelTrash) { }
 
                         // Recarregar snapshot limpo após a redução
                         snap = takeProjectSnapshot();
@@ -1449,7 +1484,7 @@
                                 try {
                                     ch.deleteBin();
                                     removedHere++;
-                                } catch (eDel) {}
+                                } catch (eDel) { }
                             }
                         }
                     }
@@ -1542,6 +1577,8 @@
             );
         } catch (err) {
             return '{"success": false, "error": "' + escapeJsonString(err.toString()) + '"}';
+        } finally {
+            ppro_endUndoGroup();
         }
     };
 
@@ -1562,6 +1599,7 @@
         var settings = preset.settings || {};
         var usePrefixNumbering = (settings.usePrefixNumbering !== false);
 
+        ppro_beginUndoGroup("Criar Estrutura de Pastas");
         try {
             var rootItem = app.project.rootItem;
             var createdCount = 0;
@@ -1657,6 +1695,8 @@
             );
         } catch (err) {
             return '{"success": false, "error": "' + escapeJsonString(err.toString()) + '"}';
+        } finally {
+            ppro_endUndoGroup();
         }
     };
 
@@ -1684,7 +1724,7 @@
                     if (typeof ch.getColorLabel === "function") {
                         colorLbl = ch.getColorLabel();
                     }
-                } catch (eLbl) {}
+                } catch (eLbl) { }
 
                 if (isBin(ch)) {
                     bins.push({
@@ -1859,7 +1899,7 @@
             try {
                 app.project.save();
                 projectSaved = true;
-            } catch (saveErr) {}
+            } catch (saveErr) { }
         }
 
         var snapshot = $.global._pproRollbackSnapshot;
@@ -1873,6 +1913,7 @@
             }
         }
 
+        ppro_beginUndoGroup("Restaurar Projeto");
         try {
             var rootItem = app.project.rootItem;
             var restoredItemsCount = 0;
@@ -1901,7 +1942,7 @@
                     if (liveBin && isBin(liveBin)) {
                         renameBinSafe(liveBin, sb.name);
                         if (sb.colorLabel !== undefined && sb.colorLabel >= 0 && typeof liveBin.setColorLabel === "function") {
-                            try { liveBin.setColorLabel(sb.colorLabel); } catch (eL1) {}
+                            try { liveBin.setColorLabel(sb.colorLabel); } catch (eL1) { }
                         }
                         var curP = snap.parentByNodeId[liveBin.nodeId];
                         if (!isSameBin(curP, targetParent)) {
@@ -1925,7 +1966,7 @@
                         }
                         if (recreated) {
                             if (sb.colorLabel !== undefined && sb.colorLabel >= 0 && typeof recreated.setColorLabel === "function") {
-                                try { recreated.setColorLabel(sb.colorLabel); } catch (eL2) {}
+                                try { recreated.setColorLabel(sb.colorLabel); } catch (eL2) { }
                             }
                             restoredBinByOldNodeId[sb.nodeId] = recreated;
                             if (recreated.nodeId) {
@@ -1988,7 +2029,7 @@
                                 try {
                                     ch.deleteBin();
                                     removedHere++;
-                                } catch (eDel) {}
+                                } catch (eDel) { }
                             }
                         }
                     }
@@ -2020,7 +2061,7 @@
                                 try {
                                     ch.deleteBin();
                                     removedHere++;
-                                } catch (eDel2) {}
+                                } catch (eDel2) { }
                             }
                         }
                     }
@@ -2045,6 +2086,8 @@
             );
         } catch (err) {
             return '{"success": false, "error": "' + escapeJsonString(err.toString()) + '"}';
+        } finally {
+            ppro_endUndoGroup();
         }
     };
 })();

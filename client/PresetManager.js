@@ -14,10 +14,10 @@
 
   // Logging tolerante: funciona mesmo se OrgLog.js nao estiver carregado
   function logWarn(scope, msg, detail) {
-    try { if (global.OrgLog) global.OrgLog.warn(scope, msg, detail); } catch (e) {}
+    try { if (global.OrgLog) global.OrgLog.warn(scope, msg, detail); } catch (e) { }
   }
   function logError(scope, msg, detail) {
-    try { if (global.OrgLog) global.OrgLog.error(scope, msg, detail); } catch (e) {}
+    try { if (global.OrgLog) global.OrgLog.error(scope, msg, detail); } catch (e) { }
   }
 
   // 16 Color Labels nativos do After Effects + None (0)
@@ -293,6 +293,51 @@
     return JSON.parse(JSON.stringify(obj));
   }
 
+  // O preset padrão NÃO grava sua árvore (é protegida), mas o usuário pode
+  // alternar a regra "Pasta de Origem" pasta a pasta no editor. Sem persistir
+  // isso por id de nó, o toggle voltava ao default ao reabrir o painel.
+  var DEFAULT_OVERRIDE_SETTING_KEYS = [
+    "usePrefixNumbering",
+    "deleteEmptyFolders",
+    "saveProjectBefore",
+    "reduceProject",
+    "groupBySourceFolder",
+    "unusedFolderName"
+  ];
+
+  function collectNodeGroupBySourceFolder(nodes, out) {
+    var result = out || {};
+    if (!nodes || !nodes.length) return result;
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes[i];
+      if (!node) continue;
+      var rules = node.rules || {};
+      result[String(node.id)] = rules.groupBySourceFolder !== undefined
+        ? Boolean(rules.groupBySourceFolder)
+        : true;
+      if (node.children && node.children.length) {
+        collectNodeGroupBySourceFolder(node.children, result);
+      }
+    }
+    return result;
+  }
+
+  function applyNodeGroupBySourceFolder(nodes, overrides) {
+    if (!nodes || !nodes.length || !overrides) return;
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes[i];
+      if (!node) continue;
+      var key = String(node.id);
+      if (overrides[key] !== undefined) {
+        if (!node.rules) node.rules = {};
+        node.rules.groupBySourceFolder = Boolean(overrides[key]);
+      }
+      if (node.children && node.children.length) {
+        applyNodeGroupBySourceFolder(node.children, overrides);
+      }
+    }
+  }
+
   function getNodeRequire() {
     if (global.cep_node && typeof global.cep_node.require === "function") {
       return global.cep_node.require;
@@ -439,7 +484,7 @@
           return String(env.appId).toUpperCase();
         }
       }
-    } catch (e) {}
+    } catch (e) { }
     return "AEFT";
   };
 
@@ -484,9 +529,9 @@
             try {
               // Migra apenas uma vez; do contrário presets excluídos reaparecem
               var migrated = false;
-              try { migrated = localStorage.getItem(STORAGE_KEY_PRESETS_MIGRATED) === "1"; } catch (eFlag) {}
+              try { migrated = localStorage.getItem(STORAGE_KEY_PRESETS_MIGRATED) === "1"; } catch (eFlag) { }
               if (!migrated) {
-                try { localStorage.setItem(STORAGE_KEY_PRESETS_MIGRATED, "1"); } catch (eFlag2) {}
+                try { localStorage.setItem(STORAGE_KEY_PRESETS_MIGRATED, "1"); } catch (eFlag2) { }
               }
               if (!migrated && this.fs.existsSync(oldFolder)) {
                 var files = this.fs.readdirSync(oldFolder);
@@ -498,7 +543,7 @@
                   }
                 }
               }
-            } catch (migErr) {}
+            } catch (migErr) { }
           }
           resolved = folder;
         }
@@ -515,23 +560,33 @@
   PresetManager.prototype.getDefaultPresetFromBundle = function () {
     try {
       if (this.csInterface && this.fs && this.path) {
+        var isPPro = this.isPremierePro();
         var extPath = this.csInterface.getSystemPath(SystemPath.EXTENSION);
-        var presetFileName = this.isPremierePro() ? "default_preset_ppro.json" : "default_preset.json";
+        var presetFileName = isPPro ? "default_preset_ppro.json" : "default_preset.json";
         var defaultFilePath = this.path.join(extPath, "client", "presets", presetFileName);
         if (this.fs.existsSync(defaultFilePath)) {
           var raw = this.fs.readFileSync(defaultFilePath, "utf8");
           var parsed = JSON.parse(raw);
           return normalizePreset(parsed);
         }
-        // Fallback para default_preset.json genérico
+        // Fallback para default_preset.json genérico.
+        // No Premiere Pro esse bundle traria as listas de extensões do After
+        // Effects (sem jfif/ico/mod/tod, etc.). Nesse caso o dicionário do host
+        // é a fonte correta, então pulamos o fallback genérico.
         var fallbackPath = this.path.join(extPath, "client", "presets", "default_preset.json");
-        if (this.fs.existsSync(fallbackPath)) {
+        if (!isPPro && this.fs.existsSync(fallbackPath)) {
           var rawFb = this.fs.readFileSync(fallbackPath, "utf8");
           var parsedFb = JSON.parse(rawFb);
           return normalizePreset(parsedFb);
         }
+        if (isPPro) {
+          logWarn(
+            "PresetManager.getDefaultPresetFromBundle",
+            "Bundle default_preset_ppro.json ausente; usando o dicionário de extensões do Premiere Pro"
+          );
+        }
       }
-    } catch (e) {}
+    } catch (e) { }
     return getFactoryPresetObject(this.isPremierePro());
   };
 
@@ -554,16 +609,26 @@
           if (savedSettings.reduceProject !== undefined) {
             base.settings.reduceProject = Boolean(savedSettings.reduceProject);
           }
+          if (savedSettings.groupBySourceFolder !== undefined) {
+            base.settings.groupBySourceFolder = Boolean(savedSettings.groupBySourceFolder);
+          }
+          if (savedSettings.unusedFolderName !== undefined) {
+            var savedUnusedName = String(savedSettings.unusedFolderName || "").trim();
+            if (savedUnusedName) base.settings.unusedFolderName = savedUnusedName;
+          }
+          if (savedSettings.nodeGroupBySourceFolder) {
+            applyNodeGroupBySourceFolder(base.tree, savedSettings.nodeGroupBySourceFolder);
+          }
         }
       }
-    } catch (e) {}
+    } catch (e) { }
     return base;
   };
 
   PresetManager.prototype.resetDefaultPreset = function () {
     try {
       localStorage.removeItem(STORAGE_KEY_DEFAULT_OVERRIDES);
-    } catch (e) {}
+    } catch (e) { }
     return this.getDefaultPresetFromBundle();
   };
 
@@ -574,14 +639,14 @@
         var map = JSON.parse(raw);
         if (map && typeof map === "object") return map;
       }
-    } catch (e) {}
+    } catch (e) { }
     return {};
   };
 
   PresetManager.prototype._saveLocalStorageMap = function (map) {
     try {
       localStorage.setItem(STORAGE_KEY_USER_PRESETS, JSON.stringify(map || {}));
-    } catch (e) {}
+    } catch (e) { }
   };
 
   PresetManager.prototype.listPresets = function () {
@@ -617,10 +682,10 @@
                   filePath: fullPath
                 });
               }
-            } catch (readErr) {}
+            } catch (readErr) { }
           }
         }
-      } catch (dirErr) {}
+      } catch (dirErr) { }
     }
 
     // 2. Fallback do localStorage: só quando o disco não está acessível.
@@ -698,10 +763,10 @@
               if (item && String(item.presetName).toLowerCase() === String(presetName).toLowerCase()) {
                 return normalizePreset(item);
               }
-            } catch (err2) {}
+            } catch (err2) { }
           }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     var localMap = this._loadLocalStorageMap();
@@ -747,7 +812,7 @@
           }
         }
       }
-    } catch (e) {}
+    } catch (e) { }
     return DEFAULT_PRESET_NAME;
   };
 
@@ -755,7 +820,7 @@
     var nameToSave = presetName || DEFAULT_PRESET_NAME;
     try {
       localStorage.setItem(STORAGE_KEY_ACTIVE, nameToSave);
-    } catch (e) {}
+    } catch (e) { }
     this.notifyPresetsUpdated(nameToSave);
   };
 
@@ -768,10 +833,17 @@
     var normalized = normalizePreset(presetObj);
 
     if (normalized.presetName === DEFAULT_PRESET_NAME) {
-      // O preset Default não tem sua árvore sobrescrita, mas salvamos preferências de toggle se o usuário mudar no painel
+      // O preset Default não tem sua árvore sobrescrita, mas as preferências
+      // (globais e a regra por pasta "Pasta de Origem") precisam persistir.
+      var defaultOverrides = {};
+      for (var k = 0; k < DEFAULT_OVERRIDE_SETTING_KEYS.length; k++) {
+        var settingsKey = DEFAULT_OVERRIDE_SETTING_KEYS[k];
+        defaultOverrides[settingsKey] = normalized.settings[settingsKey];
+      }
+      defaultOverrides.nodeGroupBySourceFolder = collectNodeGroupBySourceFolder(normalized.tree);
       try {
-        localStorage.setItem(STORAGE_KEY_DEFAULT_OVERRIDES, JSON.stringify(normalized.settings));
-      } catch (e) {}
+        localStorage.setItem(STORAGE_KEY_DEFAULT_OVERRIDES, JSON.stringify(defaultOverrides));
+      } catch (e) { }
       this.notifyPresetsUpdated(DEFAULT_PRESET_NAME);
       return normalized;
     }
@@ -779,6 +851,7 @@
     normalized.isBuiltIn = false;
 
     // 1. Salvar em disco via Node.js
+    var diskWriteFailed = false;
     var dir = this.getPresetsFolderPath();
     if (dir && this.fs && this.path) {
       try {
@@ -787,12 +860,21 @@
         this.lastSaveError = null;
       } catch (e) {
         // Falha de escrita NAO pode passar em silencio: o usuario perderia o preset
+        diskWriteFailed = true;
         this.lastSaveError = "Nao foi possivel gravar o preset em disco: " + (e && e.message ? e.message : e);
         logError("PresetManager.savePreset", this.lastSaveError, e);
       }
     } else {
       this.lastSaveError = null;
       logWarn("PresetManager.savePreset", "Disco indisponivel; preset salvo apenas em localStorage", normalized.presetName);
+    }
+
+    if (diskWriteFailed) {
+      // Nada foi gravado: espelhar em localStorage criaria um preset "fantasma"
+      // (não aparece em listPresets e não recarrega, porque o disco é a fonte da
+      // verdade). Também não trocamos o preset ativo: o painel mostra o erro e
+      // mantém o preset em edição marcado como não salvo.
+      return normalized;
     }
 
     // 2. Salvar cópia em localStorage
@@ -817,7 +899,7 @@
         // Pasta legada também precisa ser limpa, senão a migração recopia o arquivo
         var userData = this.csInterface.getSystemPath(SystemPath.USER_DATA);
         dirsToClean.push(this.path.join(userData, "AE_Organizer", "presets"));
-      } catch (eOld) {}
+      } catch (eOld) { }
     }
     for (var d = 0; d < dirsToClean.length; d++) {
       var targetDir = dirsToClean[d];
@@ -839,7 +921,7 @@
             }
           }
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     var map = this._loadLocalStorageMap();
@@ -865,7 +947,20 @@
     return true;
   };
 
-  PresetManager.prototype.importPresetFromJsonString = function (jsonStr) {
+  PresetManager.prototype.presetExists = function (presetName) {
+    var target = String(presetName || "").trim().toLowerCase();
+    if (!target) return false;
+    var list = this.listPresets();
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].presetName || "").toLowerCase() === target) return true;
+    }
+    return false;
+  };
+
+  // Sobrescrever um preset é destrutivo: por padrão a importação NÃO sobrescreve.
+  // O chamador confirma com o usuário e repete a chamada com { overwrite: true }.
+  PresetManager.prototype.importPresetFromJsonString = function (jsonStr, options) {
+    var opts = options || {};
     var parsed = JSON.parse(jsonStr);
     if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.tree)) {
       throw new Error("Arquivo JSON inválido: propriedade 'tree' não encontrada.");
@@ -874,6 +969,14 @@
       parsed.presetName = (parsed.presetName || "Preset Importado") + " (Importado)";
     }
     parsed.isBuiltIn = false;
+
+    if (opts.overwrite !== true && this.presetExists(parsed.presetName)) {
+      var existingErr = new Error("Já existe um preset chamado '" + parsed.presetName + "'.");
+      existingErr.code = "PRESET_EXISTS";
+      existingErr.presetName = parsed.presetName;
+      throw existingErr;
+    }
+
     return this.savePreset(parsed);
   };
 
@@ -894,7 +997,7 @@
           return true;
         }
       }
-    } catch (e) {}
+    } catch (e) { }
 
     return false;
   };
@@ -902,7 +1005,7 @@
   PresetManager.prototype.setActivePresetNameSilent = function (presetName) {
     try {
       localStorage.setItem(STORAGE_KEY_ACTIVE, presetName || DEFAULT_PRESET_NAME);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   PresetManager.prototype.notifyPresetsUpdated = function (activePresetName) {
@@ -913,19 +1016,19 @@
       if (global.opener && typeof global.opener.onPresetBuilderUpdated === "function") {
         global.opener.onPresetBuilderUpdated(activePresetName || this.getActivePresetName());
       }
-    } catch (e0) {}
+    } catch (e0) { }
     try {
       if (global.parent && global.parent !== global && typeof global.parent.onPresetBuilderUpdated === "function") {
         global.parent.onPresetBuilderUpdated(activePresetName || this.getActivePresetName());
       }
-    } catch (eParent) {}
+    } catch (eParent) { }
     try {
       if (this.csInterface && typeof CSEvent !== "undefined") {
         var evt = new CSEvent("com.tidyflow.presetsUpdated", "APPLICATION");
         evt.data = JSON.stringify({ activePreset: activePresetName || this.getActivePresetName() });
         this.csInterface.dispatchEvent(evt);
       }
-    } catch (e) {}
+    } catch (e) { }
   };
 
   PresetManager.prototype.createEmptyNode = function (name, label, useNumbering) {

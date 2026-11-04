@@ -1,0 +1,238 @@
+/* ==========================================================================
+   TidyFlow — Testes do motor After Effects (host/aeft_organizer.jsx)
+   Usa um simulador da API do AE (scripts/tests/lib/ae_mock.js).
+   Cobre: organização básica, idempotência, numeração/labels, limpeza de pastas
+   vazias e sobrevivência a pasta vinculada removida (P0-3).
+   ========================================================================== */
+"use strict";
+
+var harnessLib = require("./lib/harness");
+var aeMockLib = require("./lib/ae_mock");
+
+var h = harnessLib.createHarness("Engine AEFT");
+var test = h.test;
+var assert = h.assert;
+
+function newEngine(options) {
+  var mock = aeMockLib.createAeMock(options || {});
+  mock.evalHostFile("aeft_organizer.jsx");
+
+  var spy = { markCalls: 0, snapshotCalls: 0 };
+  var originalMark = mock.global().aeft_markPostOrganizeState;
+  var originalEnsure = mock.global().aeft_ensurePreOrganizeSnapshot;
+  mock.global().aeft_markPostOrganizeState = function () {
+    spy.markCalls++;
+    if (typeof originalMark === "function") return originalMark.apply(this, arguments);
+  };
+  mock.global().aeft_ensurePreOrganizeSnapshot = function () {
+    spy.snapshotCalls++;
+    if (typeof originalEnsure === "function") return originalEnsure.apply(this, arguments);
+  };
+  mock.spy = spy;
+  return mock;
+}
+
+function imagePreset(overrides) {
+  overrides = overrides || {};
+  return {
+    presetName: "Teste",
+    settings: {
+      usePrefixNumbering: overrides.usePrefixNumbering !== undefined ? overrides.usePrefixNumbering : true,
+      deleteEmptyFolders: overrides.deleteEmptyFolders !== undefined ? overrides.deleteEmptyFolders : true,
+      saveProjectBefore: false,
+      reduceProject: false,
+      groupBySourceFolder: overrides.groupBySourceFolder !== undefined ? overrides.groupBySourceFolder : false
+    },
+    tree: overrides.tree || [
+      {
+        id: "n_img",
+        name: "Images",
+        label: 4,
+        rules: {
+          types: ["StillImages"],
+          extensions: ["png"],
+          groupSubfoldersByExt: false,
+          groupBySourceFolder: false,
+          catchOthers: false
+        },
+        children: []
+      }
+    ]
+  };
+}
+
+function runOrganize(mock, preset, mainArg) {
+  var raw = mock.organize(mainArg || "media_only", JSON.stringify(preset));
+  var parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    throw new Error("resposta do motor não é JSON válido: " + raw);
+  }
+  return parsed;
+}
+
+h.test("organiza mídia em pasta do preset com numeração e label", function () {
+  var mock = newEngine();
+  mock.api.addFootage("a.png", "C:/origem/Src/a.png", { isStill: true });
+
+  var res = runOrganize(mock, imagePreset());
+
+  assert.eq(res.success, true, "operação deve concluir com sucesso: " + JSON.stringify(res));
+  assert.eq(res.movedFootages, 1, "uma mídia movida");
+
+  var imagesFolder = mock.api.find("01_Images");
+  assert.ok(imagesFolder, "pasta numerada 01_Images deve existir");
+  assert.eq(imagesFolder.numItems, 1, "a pasta deve conter a mídia");
+  assert.eq(imagesFolder.label, 4, "label do nó aplicado na pasta");
+  assert.eq(mock.spy.markCalls, 1, "estado pós-organização (rollback) deve ser marcado");
+});
+
+h.test("segunda execução é idempotente (sem 01_01_ e sem pasta duplicada)", function () {
+  var mock = newEngine();
+  mock.api.addFootage("a.png", "C:/origem/Src/a.png", { isStill: true });
+
+  runOrganize(mock, imagePreset());
+  var res2 = runOrganize(mock, imagePreset());
+
+  assert.eq(res2.success, true, "segunda execução deve concluir: " + JSON.stringify(res2));
+  assert.ok(mock.api.find("01_Images"), "nome numerado preservado");
+  assert.notOk(mock.api.find("01_01_Images"), "prefixo não pode acumular");
+  assert.eq(mock.api.countFolders(), 2, "root + 01_Images (nenhuma pasta extra)");
+  assert.eq(mock.api.find("01_Images").numItems, 1, "mídia continua dentro da pasta");
+});
+
+h.test("categorias vazias não geram pastas (Regra A3)", function () {
+  var mock = newEngine();
+  mock.api.addFootage("a.png", "C:/origem/Src/a.png", { isStill: true });
+
+  var preset = imagePreset({
+    tree: [
+      { id: "n_out", name: "Output", label: 9, rules: { types: ["MainComp"], extensions: [] }, children: [] },
+      { id: "n_img", name: "Images", label: 4, rules: { types: ["StillImages"], extensions: ["png"], groupBySourceFolder: false }, children: [] },
+      { id: "n_aud", name: "Audios", label: 7, rules: { types: ["Audios"], extensions: ["wav"], groupBySourceFolder: false }, children: [] }
+    ]
+  });
+
+  var res = runOrganize(mock, preset);
+
+  assert.eq(res.success, true, JSON.stringify(res));
+  assert.notOk(mock.api.find("Output"), "Output vazio não deve ser criado");
+  assert.notOk(mock.api.find("Audios"), "Audios vazio não deve ser criado");
+  assert.ok(mock.api.find("01_Images"), "apenas a pasta com itens é criada e numerada");
+});
+
+h.test("useNumbering=false mantém a pasta fora da numeração sequencial", function () {
+  var mock = newEngine();
+  mock.api.addFootage("a.png", "C:/origem/Src/a.png", { isStill: true });
+
+  var preset = imagePreset({
+    tree: [
+      { id: "n_img", name: "Images", label: 4, useNumbering: false, rules: { types: ["StillImages"], extensions: ["png"], groupBySourceFolder: false }, children: [] }
+    ]
+  });
+
+  var res = runOrganize(mock, preset);
+
+  assert.eq(res.success, true, JSON.stringify(res));
+  assert.ok(mock.api.find("Images"), "pasta sem prefixo");
+  assert.notOk(mock.api.find("01_Images"), "nada de prefixo quando useNumbering=false");
+});
+
+h.test("P0-3: pasta vinculada removida na limpeza não aborta a operação", function () {
+  var mock = newEngine({ silentMoveFail: { Images: true } });
+  mock.api.addFootage("a.png", "C:/origem/Src/a.png", { isStill: true });
+
+  var res = runOrganize(mock, imagePreset());
+
+  assert.eq(
+    res.success,
+    true,
+    "o motor não pode falhar depois de já ter mutado o projeto: " + JSON.stringify(res)
+  );
+  assert.ok(res.cleanedFolders >= 1, "a pasta ficou vazia e foi limpa");
+  assert.eq(mock.spy.markCalls, 1, "estado pós-organização deve ser marcado mesmo com limpeza");
+});
+
+h.test("limpeza remove todas as pastas vazias pré-existentes", function () {
+  var mock = newEngine();
+  for (var i = 0; i < 60; i++) {
+    mock.api.addFolder("Vazia_" + i);
+  }
+  mock.api.addFootage("a.png", "C:/origem/Src/a.png", { isStill: true });
+
+  var res = runOrganize(mock, imagePreset());
+
+  assert.eq(res.success, true, JSON.stringify(res));
+  assert.eq(res.cleanedFolders, 60, "todas as 60 pastas vazias devem ser removidas");
+  assert.eq(mock.api.countFolders(), 2, "sobram root + 01_Images");
+});
+
+h.test("pasta protegida 'Nunca Usadas' não é removida nem tem conteúdo movido", function () {
+  var mock = newEngine();
+  var unused = mock.api.addFolder("Nunca Usadas");
+  var comp = mock.api.addComp("Comp Vazia", unused);
+
+  var res = runOrganize(mock, imagePreset());
+
+  assert.eq(res.success, true, JSON.stringify(res));
+  assert.ok(mock.api.find("Nunca Usadas"), "pasta protegida permanece");
+  assert.eq(comp.parentFolder.name, "Nunca Usadas", "conteúdo protegido não foi movido");
+});
+
+h.test("modo seleção move a composição principal para Output", function () {
+  var mock = newEngine();
+  var comp = mock.api.addComp("Meu Filme");
+
+  var preset = imagePreset({
+    tree: [
+      { id: "n_out", name: "Output", label: 9, rules: { types: ["MainComp"], extensions: [] }, children: [] }
+    ]
+  });
+  mock.api.select([comp]);
+
+  var res = runOrganize(mock, preset, "selection");
+
+  assert.eq(res.success, true, JSON.stringify(res));
+  assert.eq(res.movedComps, 1, "uma composição movida");
+  var output = mock.api.find("01_Output");
+  assert.ok(output, "pasta Output criada e numerada");
+  assert.eq(comp.parentFolder.name, "01_Output", "comp dentro de Output");
+});
+
+h.test("pré-composições são movidas para PreComps agrupadas pela comp principal", function () {
+  var mock = newEngine();
+  var main = mock.api.addComp("Filme");
+  var pre = mock.api.addComp("Pre");
+  mock.api.addLayer(main, pre);
+
+  var preset = imagePreset({
+    tree: [
+      { id: "n_out", name: "Output", label: 9, rules: { types: ["MainComp"], extensions: [] }, children: [] },
+      { id: "n_pre", name: "PreComps", label: 5, rules: { types: ["PreComps"], extensions: [], groupByMainComp: true }, children: [] }
+    ]
+  });
+  mock.api.select([main]);
+
+  var res = runOrganize(mock, preset, "selection");
+
+  assert.eq(res.success, true, JSON.stringify(res));
+  assert.eq(res.movedComps, 2, "main comp + pré-comp movidas");
+  var precomps = mock.api.find("02_PreComps");
+  assert.ok(precomps, "pasta PreComps numerada em segundo");
+  assert.ok(mock.api.find("Filme", precomps), "subpasta com o nome da comp principal");
+  assert.eq(pre.parentFolder.name, "Filme", "pré-comp dentro da subpasta da main");
+});
+
+h.test("resposta inclui métricas de profiling (elapsedMs/scanCount)", function () {
+  var mock = newEngine();
+  mock.api.addFootage("a.png", "C:/origem/Src/a.png", { isStill: true });
+
+  var res = runOrganize(mock, imagePreset());
+
+  assert.eq(typeof res.elapsedMs, "number", "elapsedMs numérico");
+  assert.eq(typeof res.scanCount, "number", "scanCount numérico");
+  assert.ok(res.scanCount > 0, "houve varredura do projeto");
+});
+
+module.exports = h;

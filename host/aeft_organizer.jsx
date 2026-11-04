@@ -16,7 +16,7 @@
             var rulesFile = new File(baseDir + "/_rules.jsx");
             if (rulesFile.exists) $.evalFile(rulesFile);
         }
-    } catch (eLibLoad) {}
+    } catch (eLibLoad) { }
 })();
 
 $.global.aeft_getProjectComps = function () {
@@ -96,12 +96,14 @@ $.global.aeft_checkUnusedComps = function (configJsonString) {
         return false;
     }
 
+    // A checagem de projeto precisa vir ANTES de abrir o grupo de desfazer:
+    // app.beginUndoGroup sem projeto aberto lança e o evalScript devolve erro cru.
+    if (!app.project) {
+        return '{"success": false, "error": "Nenhum projeto aberto no After Effects."}';
+    }
+
     app.beginUndoGroup("Verificar Composições");
     try {
-        if (!app.project) {
-            throw new Error("Nenhum projeto aberto no After Effects.");
-        }
-
         var config = parseConfig(configJsonString) || {};
         var foldersCfg = config.folders || {};
         var settingsCfg = config.settings || {};
@@ -456,7 +458,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
             if (!bucket[rawKey]) bucket[rawKey] = folder;
             var cleanKey = _folderKey(stripNumericPrefix(folder.name));
             if (cleanKey && !bucket[cleanKey]) bucket[cleanKey] = folder;
-        } catch (eIdx) {}
+        } catch (eIdx) { }
     }
 
     function _buildFolderIndex() {
@@ -880,14 +882,23 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                         : groupBySourceFolderGlobal;
                     if (shouldGroupPsdBySource) {
                         var bundleSourceFolder = "";
-                        for (var fch = 1; fch <= app.project.numItems; fch++) {
-                            var chItem = app.project.item(fch);
-                            if (chItem && isSameFolder(chItem.parentFolder, folder)) {
-                                var chFile = (chItem.mainSource && chItem.mainSource instanceof FileSource && chItem.mainSource.file) ? chItem.mainSource.file : chItem.file;
-                                if (chFile && chFile.fsName) {
-                                    bundleSourceFolder = getParentFolderNameFromPath(chFile.fsName);
-                                    if (bundleSourceFolder) break;
-                                }
+                        // A fonte é procurada entre os itens já contidos na pasta do bundle.
+                        // Antes isso varria o projeto inteiro (O(pastas x itens)); agora
+                        // percorre apenas os filhos diretos da pasta.
+                        var bundleChildCount = 0;
+                        try {
+                            bundleChildCount = folder.numItems;
+                        } catch (eBundleCount) {
+                            bundleChildCount = 0;
+                        }
+                        for (var fch = 1; fch <= bundleChildCount; fch++) {
+                            _scanCount++;
+                            var chItem = folder.item(fch);
+                            if (!chItem) continue;
+                            var chFile = (chItem.mainSource && chItem.mainSource instanceof FileSource && chItem.mainSource.file) ? chItem.mainSource.file : chItem.file;
+                            if (chFile && chFile.fsName) {
+                                bundleSourceFolder = getParentFolderNameFromPath(chFile.fsName);
+                                if (bundleSourceFolder) break;
                             }
                         }
                         if (bundleSourceFolder) {
@@ -1084,28 +1095,72 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
             }
         }
 
+        // Helpers de limpeza/numeração (declarados antes do uso)
+        function isAliveFolderWithContent(candidate) {
+            if (!candidate) return false;
+            try {
+                return candidate.numItems > 0;
+            } catch (eInvalidFolder) {
+                // FolderItem removida do projeto: acessar qualquer propriedade lança
+                // "Object is invalid" no AE.
+                return false;
+            }
+        }
+
+        function getItemDepth(folderItem) {
+            var depth = 0;
+            var cursor = folderItem ? folderItem.parentFolder : null;
+            while (cursor && cursor !== app.project.rootFolder && depth < 100) {
+                depth++;
+                cursor = cursor.parentFolder;
+            }
+            return depth;
+        }
+
         // 4. Limpar pastas vazias (se ativo)
+        // Antes: varredura completa do projeto a cada pasta removida (O(N^2)).
+        // Agora: coleta candidatas uma unica vez, ordena por profundidade
+        // decrescente e remove em cascata (folha -> raiz).
         if (deleteEmptyFolders) {
             var cleanedBefore = cleanedFolders;
-            var removedAny = true;
-            while (removedAny) {
-                removedAny = false;
-                for (var idx = app.project.numItems; idx >= 1; idx--) {
-                    var candidateFolder = app.project.item(idx);
-                    if (
-                        candidateFolder instanceof FolderItem &&
-                        candidateFolder.numItems === 0 &&
-                        !isInsideProtectedFolder(candidateFolder)
-                    ) {
-                        candidateFolder.remove();
-                        cleanedFolders++;
-                        removedAny = true;
-                    }
+            var emptyCandidates = [];
+            for (var ci = 1; ci <= app.project.numItems; ci++) {
+                _scanCount++;
+                var candidateItem = app.project.item(ci);
+                if (candidateItem instanceof FolderItem) {
+                    emptyCandidates.push({
+                        folder: candidateItem,
+                        depth: getItemDepth(candidateItem)
+                    });
+                }
+            }
+            emptyCandidates.sort(function (a, b) {
+                return b.depth - a.depth;
+            });
+            for (var cf = 0; cf < emptyCandidates.length; cf++) {
+                var candidateFolder = emptyCandidates[cf].folder;
+                try {
+                    // rootFolder nao pode ser removido e nao tem pai
+                    if (!candidateFolder.parentFolder) continue;
+                    if (candidateFolder === app.project.rootFolder) continue;
+                    if (isInsideProtectedFolder(candidateFolder)) continue;
+                    if (candidateFolder.numItems !== 0) continue;
+                    candidateFolder.remove();
+                    cleanedFolders++;
+                } catch (eCleanFolder) {
+                    // Pasta já removida em cascata (filha de outra removida)
                 }
             }
             // Pastas removidas invalidam o indice (sera reconstruido na proxima busca)
+            // E o mapa de pastas por nó precisa ser limpo: manter referencia a uma
+            // FolderItem removida fazia applyTreeNumberingAndLabels lançar
+            // "Object is invalid" DEPOIS do projeto já ter sido modificado — o que
+            // abortava a operação, marcava success=false e pulava
+            // aeft_markPostOrganizeState (rollback ficava inconsistente).
             if (cleanedFolders !== cleanedBefore) {
                 _folderIndex = null;
+                nodeFolderMap = {};
+                boundFolderIds = {};
             }
         }
 
@@ -1140,7 +1195,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                     }
                 }
 
-                if (folder && folder.numItems > 0) {
+                if (folder && isAliveFolderWithContent(folder)) {
                     activeEntries.push({
                         node: n,
                         folder: folder

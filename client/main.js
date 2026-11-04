@@ -74,7 +74,7 @@
         });
         return;
       }
-    } catch (e) {}
+    } catch (e) { }
     if (typeof callback === "function") callback();
   }
 
@@ -85,7 +85,7 @@
     if (type === "error") {
       try {
         if (window.OrgLog) OrgLog.error("panel", text || "");
-      } catch (eLog) {}
+      } catch (eLog) { }
     }
   }
 
@@ -110,10 +110,32 @@
         if (snapJson && snapJson !== "EvalScript error." && snapJson !== "undefined") {
           try {
             localStorage.setItem(KEYS.rollbackSnapshot, snapJson);
-          } catch (eLs) {}
+          } catch (eLs) {
+            // Cota estourada: o snapshot continua vivo no host, mas o painel perde a
+            // copia de seguranca entre sessoes. Registrar para diagnostico.
+            try {
+              if (window.OrgLog) {
+                OrgLog.warn("panel", "Falha ao salvar snapshot de rollback no localStorage", eLs);
+              }
+            } catch (eLog) { }
+          }
         }
       });
-    } catch (e) {}
+    } catch (e) { }
+  }
+
+  // Reduzir o projeto remove itens (acao destrutiva). Sempre que estiver ativo, o
+  // salvamento previo do projeto é obrigatório: sem isso o usuario nao teria como
+  // voltar atras. Os toggles vem de chaves independentes no localStorage, entao o
+  // par invalido (reduzir=on, salvar=off) pode reaparecer a cada carga.
+  function enforceReduceRequiresSave() {
+    if (!chkReduceProject || !chkSaveProject) return;
+    if (chkReduceProject.checked && !chkSaveProject.checked) {
+      chkSaveProject.checked = true;
+      try {
+        localStorage.setItem(KEYS.saveProject, "true");
+      } catch (e) { }
+    }
   }
 
   function syncPresetsAndToggles() {
@@ -163,8 +185,9 @@
         })(activePreset.tree);
         chkGroupBySourceFolder.checked = (anyOn || anyOff) ? anyOn : (s.groupBySourceFolder !== false);
       }
-    } catch (e) {}
+    } catch (e) { }
 
+    enforceReduceRequiresSave();
     updateGroupSourceIndicator();
     updateReduceProjectWarning();
   }
@@ -228,19 +251,19 @@
       activePreset.settings.saveProjectBefore = chkSaveProject.checked;
       try {
         localStorage.setItem(KEYS.saveProject, chkSaveProject.checked ? "true" : "false");
-      } catch (e) {}
+      } catch (e) { }
     }
     if (chkReduceProject) {
       activePreset.settings.reduceProject = chkReduceProject.checked;
       try {
         localStorage.setItem(KEYS.reduceProject, chkReduceProject.checked ? "true" : "false");
-      } catch (e) {}
+      } catch (e) { }
     }
     if (chkDeleteEmptyFolders) {
       activePreset.settings.deleteEmptyFolders = chkDeleteEmptyFolders.checked;
       try {
         localStorage.setItem(KEYS.deleteEmpty, chkDeleteEmptyFolders.checked ? "true" : "false");
-      } catch (e) {}
+      } catch (e) { }
     }
     if (chkGroupBySourceFolder) {
       activePreset.settings.groupBySourceFolder = chkGroupBySourceFolder.checked;
@@ -257,7 +280,8 @@
 
     presetManager.savePreset(activePreset);
     updateGroupSourceIndicator();
-    presetManager.notifyPresetsUpdated(activePreset.presetName);
+    // savePreset() ja dispara notifyPresetsUpdated (invalida cache e avisa o editor);
+    // chamar de novo aqui duplicava o evento com.tidyflow.presetsUpdated.
   }
 
   if (presetSelect) {
@@ -274,17 +298,23 @@
   }
   if (chkSaveProject) {
     chkSaveProject.addEventListener("change", function () {
+      // Nao permitir salvar=off com reduzir=on (perderia a protecao do projeto)
+      if (!chkSaveProject.checked && chkReduceProject && chkReduceProject.checked) {
+        chkSaveProject.checked = true;
+        setStatus(
+          "Salvar projeto antes é obrigatório enquanto 'Reduzir Projeto' estiver ativo.",
+          "warning"
+        );
+        updateReduceProjectWarning();
+        return;
+      }
       persistTogglesToActivePreset();
       updateReduceProjectWarning();
     });
   }
   if (chkReduceProject) {
     chkReduceProject.addEventListener("change", function () {
-      if (chkReduceProject.checked) {
-        if (chkSaveProject) {
-          chkSaveProject.checked = true;
-        }
-      }
+      enforceReduceRequiresSave();
       updateReduceProjectWarning();
       persistTogglesToActivePreset();
     });
@@ -305,14 +335,14 @@
         if (window.__adobe_cep__) {
           csInterface.requestOpenExtension("com.tidyflow.editor", "");
         }
-      } catch (e1) {}
+      } catch (e1) { }
 
       try {
         if (floatingEditorWin && !floatingEditorWin.closed) {
           floatingEditorWin.focus();
           return;
         }
-      } catch (eFocus) {}
+      } catch (eFocus) { }
 
       var winFeatures = "width=740,height=640,resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no";
       try {
@@ -321,7 +351,7 @@
           floatingEditorWin.focus();
           return;
         }
-      } catch (e2) {}
+      } catch (e2) { }
 
       try {
         var extPath = csInterface.getSystemPath(SystemPath.EXTENSION);
@@ -332,7 +362,7 @@
             floatingEditorWin.focus();
           }
         }
-      } catch (e3) {}
+      } catch (e3) { }
     });
   }
 
@@ -352,11 +382,11 @@
         if (d && d.activePreset) {
           presetManager.setActivePresetNameSilent(d.activePreset);
         }
-      } catch (eEvt) {}
+      } catch (eEvt) { }
       presetManager.invalidatePresetCache();
       syncPresetsAndToggles();
     });
-  } catch (e) {}
+  } catch (e) { }
 
   window.addEventListener("focus", function () {
     syncPresetsAndToggles();
@@ -369,17 +399,20 @@
     activePreset = presetManager.getActivePreset();
     if (!activePreset.settings) activePreset.settings = {};
     activePreset.settings.usePrefixNumbering = chkPrefixNumbering ? chkPrefixNumbering.checked : true;
-    activePreset.settings.saveProjectBefore = chkSaveProject ? chkSaveProject.checked : true;
-    activePreset.settings.reduceProject = chkReduceProject ? chkReduceProject.checked : false;
+    var reduceProjectOn = chkReduceProject ? chkReduceProject.checked : false;
+    activePreset.settings.reduceProject = reduceProjectOn;
+    // Reduzir projeto e destrutivo: exigir salvamento previo mesmo que o toggle
+    // esteja desmarcado (estado herdado de localStorage antigo).
+    activePreset.settings.saveProjectBefore = (chkSaveProject ? chkSaveProject.checked : true) || reduceProjectOn;
     activePreset.settings.deleteEmptyFolders = chkDeleteEmptyFolders ? chkDeleteEmptyFolders.checked : true;
     activePreset.settings.groupBySourceFolder = chkGroupBySourceFolder ? chkGroupBySourceFolder.checked : true;
 
     csInterface.evalScript(
       "$.global.organizeWithPreset(" +
-        mainCompArg +
-        ", " +
-        JSON.stringify(JSON.stringify(activePreset)) +
-        ")",
+      mainCompArg +
+      ", " +
+      JSON.stringify(JSON.stringify(activePreset)) +
+      ")",
       function (result) {
         setBusy(false);
 
@@ -418,6 +451,9 @@
             syncRollbackSnapshotToLocalStorage();
           } else {
             var errMsg = (response && response.error) || "Falha desconhecida.";
+            // Mesmo em falha o host pode ja ter mutado o projeto: manter a copia do
+            // snapshot atualizada para o botao Restaurar continuar funcionando.
+            syncRollbackSnapshotToLocalStorage();
             if (errMsg.indexOf("Nenhuma composi") !== -1 || errMsg.indexOf("Nenhuma sequ") !== -1) {
               setStatus("Nenhuma " + compWordSingular + " selecionada.", "warning");
             } else {
@@ -446,8 +482,8 @@
 
       csInterface.evalScript(
         "$.global.createPresetFolderStructure(" +
-          JSON.stringify(JSON.stringify(activePreset)) +
-          ")",
+        JSON.stringify(JSON.stringify(activePreset)) +
+        ")",
         function (result) {
           setBusy(false);
 
@@ -504,8 +540,8 @@
 
       csInterface.evalScript(
         "$.global.checkUnusedComps(" +
-          JSON.stringify(JSON.stringify(activePreset)) +
-          ")",
+        JSON.stringify(JSON.stringify(activePreset)) +
+        ")",
         function (result) {
           setBusy(false);
 
@@ -541,13 +577,13 @@
                 var movedLabel = isPPro ? "sequência(s)" : "composição(ões)";
                 setStatus(
                   moved +
-                    " " +
-                    movedLabel +
-                    " movida(s) para '" +
-                    unusedFolderLabel +
-                    "'" +
-                    detailsStr +
-                    ".",
+                  " " +
+                  movedLabel +
+                  " movida(s) para '" +
+                  unusedFolderLabel +
+                  "'" +
+                  detailsStr +
+                  ".",
                   "success"
                 );
                 syncRollbackSnapshotToLocalStorage();
@@ -587,15 +623,15 @@
     var backupSnap = "";
     try {
       backupSnap = localStorage.getItem(KEYS.rollbackSnapshot) || "";
-    } catch (e) {}
+    } catch (e) { }
 
     loadOrReloadHostScripts(function () {
       csInterface.evalScript(
         "$.global.rollbackProject(" +
-          (saveBefore ? "true" : "false") +
-          ", " +
-          JSON.stringify(backupSnap) +
-          ")",
+        (saveBefore ? "true" : "false") +
+        ", " +
+        JSON.stringify(backupSnap) +
+        ")",
         function (result) {
           setBusy(false);
 
@@ -609,7 +645,7 @@
             if (response && response.success) {
               try {
                 localStorage.removeItem(KEYS.rollbackSnapshot);
-              } catch (eRm) {}
+              } catch (eRm) { }
 
               var restoredItems = response.restoredItems || 0;
               var recreatedFolders = response.recreatedFolders || 0;

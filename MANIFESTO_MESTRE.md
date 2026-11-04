@@ -37,6 +37,8 @@ O sistema resolve a desorganização em projetos de qualquer complexidade:
   - **Rodapé:** `Salvar` (`btnFooterSave`, mesmo fluxo do `Salvar` superior) e `Fechar`. Se houver alterações não salvas (`isDirty`), `Fechar` abre o modal *Alterações Não Salvas* com `Salvar e Fechar`, `Fechar sem Salvar` e `Cancelar` (no preset de fábrica, `Salvar e Fechar` passa pelo modal *Salvar Como* e fecha após criar o novo preset).
   - **Pasta de Não Usados:** o campo de edição foi removido da UI; `settings.unusedFolderName` continua no preset (padrão `Nunca Usadas`).
 - **Persistência Híbrida:** grava via Node.js `fs` em `%APPDATA%/TidyFlow/presets`, com **migração única** de `%APPDATA%/AE_Organizer/presets` (flag `ae_organizer_presets_migrated`) e fallback resiliente via `localStorage` quando `fs`/`path` não estão disponíveis. A exclusão limpa o arquivo nas **duas** pastas (nova e legada), evitando que presets removidos ressuscitem na migração.
+  - **Falha de escrita não cria preset fantasma:** se `writeFileSync` falhar, `savePreset()` **não** espelha o objeto em `localStorage`, **não** troca o preset ativo e devolve o preset normalizado com `lastSaveError` preenchido (o editor mostra o erro e mantém `Não salvo*`). Espelhar nesse momento criaria uma entrada que `listPresets()` (fonte = disco) nunca lista e que `_loadPresetFromDiskOrMemory()` não recarrega.
+  - **Overrides do `Default Clean`:** a árvore do preset de fábrica é protegida, mas `savePreset()` persiste em `localStorage["ae_organizer_default_settings"]` os toggles globais (`usePrefixNumbering`, `deleteEmptyFolders`, `saveProjectBefore`, `reduceProject`, `groupBySourceFolder`, `unusedFolderName`) **e** a regra por pasta `nodeGroupBySourceFolder` (mapa `id → bool`). `getDefaultPreset()` reaplica ambos, então alternar "Pasta de Origem" em uma pasta sobrevive a reload do painel.
   - **Cache em memória (Fase 1):** `getPresetsFolderPath()` é memoizado e `listPresets()`/`loadPreset()` mantêm cache invalidado por `invalidatePresetCache()` em salvar/excluir/importar e no evento `com.tidyflow.presetsUpdated` — antes, cada evento `focus` disparava `readdirSync` + leitura de todos os JSONs.
 - **Sincronização com o Painel Principal:** `notifyPresetsUpdated()` avisa via `window.opener`/`window.parent` (`onPresetBuilderUpdated`) **e** dispara o CSEvent `com.tidyflow.presetsUpdated`; o painel escuta o evento, o `focus` da janela e re-sincroniza preset ativo + toggles.
 
@@ -57,7 +59,8 @@ Todas as chamadas retornam um JSON padronizado (`success`, `movedComps`, `movedF
 - `groupBySourceFolder`: cria uma subpasta com o nome da pasta em que o arquivo reside em disco (ex: `02_Assets > 03_Footages > MP4 > Teste > Teste.mp4`). Ativo por padrão **por pasta** (`rules.groupBySourceFolder`, com fallback global em `settings.groupBySourceFolder`) e sincronizado entre After Effects e Premiere Pro.
   - O toggle do painel grava `settings.groupBySourceFolder` **e propaga o valor para todos os nós** da árvore.
   - Se apenas algumas pastas desativarem a opção, o tile entra em estado **parcial** (classe `.partial` + `#groupSourceNote`) listando as pastas divergentes.
-- **Persistência dos toggles:** gravados no preset ativo via `presetManager.savePreset()` e espelhados em `localStorage` (`ae_organizer_save_project`, `ae_organizer_reduce_project`, `ae_organizer_delete_empty`), garantindo que o painel reabra no último estado usado.
+- **Persistência dos toggles:** gravados no preset ativo via `presetManager.savePreset()` (que já dispara `com.tidyflow.presetsUpdated` — não há segundo dispatch) e espelhados em `localStorage` (`ae_organizer_save_project`, `ae_organizer_reduce_project`, `ae_organizer_delete_empty`), garantindo que o painel reabra no último estado usado.
+  - **Invariante `reduceProject ⇒ saveProjectBefore`:** as três chaves são independentes, então o par inválido pode reaparecer. `enforceReduceRequiresSave()` roda em `syncPresetsAndToggles()`, no handler de `#chkReduceProject`, em `runOrganizer()` (`saveProjectBefore || reduceProject`) e no handler de `#chkSaveProject` (desmarcar "Salvar" com "Reduzir" ligado é bloqueado com aviso) — reduzir o projeto remove itens e exige ponto de retorno salvo.
 
 ### 2.4 Snapshot & Rollback (Desfazer Organização)
 Sistema que devolve o projeto ao estado exato anterior à organização, em ambos os hosts.
@@ -73,7 +76,7 @@ Sistema que devolve o projeto ao estado exato anterior à organização, em ambo
 | `aeft_rollbackProject()` / `ppro_rollbackProject()` | Restaura o `parentFolder` (AE) ou executa `moveBin` (Premiere), recria pastas removidas com nome + label, remove pastas/bins que não pertencem ao snapshot e, opcionalmente, salva o projeto |
 
 **Fluxo no painel:**
-1. Toda operação bem-sucedida (Organizar, Criar estrutura, Apenas Mídias, Verificar comps) chama `syncRollbackSnapshotToLocalStorage()`, espelhando o resultado de `$.global.getRollbackSnapshotJson()` em `localStorage["ae_organizer_rollback_snapshot"]` — o snapshot sobrevive a reload do painel.
+1. Toda operação bem-sucedida (Organizar, Criar estrutura, Apenas Mídias, Verificar comps) chama `syncRollbackSnapshotToLocalStorage()`, espelhando o resultado de `$.global.getRollbackSnapshotJson()` em `localStorage["ae_organizer_rollback_snapshot"]` — o snapshot sobrevive a reload do painel. **Também em falha do Organizar:** o host pode ter mutado o projeto antes de abortar, então o espelho é atualizado antes de exibir o erro. Falha de cota do `localStorage` agora vai para o `OrgLog` (`warn`).
 2. Clicar em **Rollback** abre `#rollbackModalBackdrop` com **Salvar e Continuar**, **Continuar sem Salvar** e **Cancelar** (Esc e clique no backdrop fecham).
 3. Ao concluir, o painel exibe `Itens restaurados`, `Pastas recriadas`, `Pastas removidas` e `Projeto salvo`, e limpa o snapshot do `localStorage`.
 4. O roteador expõe `$.global.rollbackProject` e `$.global.getRollbackSnapshotJson` (também em `organizerRouter`), mantendo o frontend 100% agnóstico de host.
@@ -473,9 +476,11 @@ Todos os demais elementos — layout, CSS, árvore de pastas, modal de regras, t
 | 6 | `src/config.json` legado, não lido pelo fluxo atual | ✅ Resolvido na Fase 3 (removido) |
 | 7 | `dist/` gerado pelo Vite não empacota a extensão (sem `tree_editor.html`, `CSXS/`, `host/`) | Backlog — Fase 4 (decidir CEP estático × build real) |
 | 8 | 4 fontes de verdade das extensões (preset, `PresetManager`, `src/config.json`, regex hardcoded no host) | Parcial na Fase 3 (`config.json` removido) — restam preset/`PresetManager`/regex no host |
-| 9 | Duplicação entre motores (~67% das linhas repetidas; 13 funções homônimas) | Backlog — Fase 2/3 |
-| 10 | Varreduras O(N²) do projeto no host (33 chamadas `app.project.item()` dentro de laços) | Backlog — Fase 2 |
-| 11 | 81 `catch` vazios de 114 (71% de falhas silenciosas) | Parcial na Fase 4: caminhos críticos (salvar/excluir preset, resolver pasta, erros do painel) agora logam via `OrgLog` e falha de escrita aparece na UI |
+| 9 | Duplicação entre motores (~67% das linhas repetidas; 13 funções homônimas) | **Parcial na Fase 7** — helpers puros delegam ao `OrgLib`, mas os motores ainda não compartilham a camada de organização; restam `getParentFolderNameFromPath`, `applyLabelSafe`, `isInsideFolder` e um `escapeStr` local (ver **7.12**) |
+| 10 | Varreduras O(N²) do projeto no host (33 chamadas `app.project.item()` dentro de laços) | **Parcial na Fase 7** — AE: `cleanEmptyFolders` virou coleta única + remoção em cascata (folha→raiz) e a busca de fonte de bundles PSD/AI passou a varrer só os filhos da pasta. Ainda pendente: laços O(N²) do motor PPRO |
+| 11 | 81 `catch` vazios de 114 (71% de falhas silenciosas) | Parcial na Fase 4 (caminhos críticos com `OrgLog`) e na Fase 7: cota do `localStorage` no snapshot e falha de escrita de preset deixaram de ser silenciosas |
+| 12 | Importar JSON / "Salvar como" sobrescreve preset existente **sem confirmação** | ✅ Resolvido na Fase 8 (ver **7.13**) |
+| 13 | Handlers `focus` / `com.tidyflow.presetsUpdated` / `presetSelect` do editor reaplicavam o estado do disco por cima de edições não salvas | ✅ Resolvido na Fase 8 (ver **7.13**) |
 
 ### 7.4 Fase 1 — Otimizações aplicadas (04/11/2026)
 
@@ -613,7 +618,58 @@ O empacotador (`scripts/package.js` + `npm run package`) chegou a ser criado e f
 
 **Validação da Fase 6:** `node --check` em `aeft_organizer.jsx`, `aeft_legacy.jsx` e `organizer.jsx` · **`npm test` → 87 asserções, 0 falhas** — incluindo 3 novas no harness do AE: o arquivo legado existe, **carrega sob demanda** e não afeta o motor atual.
 
-> **Nota (04/11/2026):** a suíte de testes (`scripts/tests/` + scripts `npm test`/`test:scale`) foi **removida a pedido do desenvolvedor**, por não ser necessária durante o desenvolvimento. O plugin nunca dependeu dela: o CEP carrega apenas `client/index.html`, `client/tree_editor.html` e `host/organizer.jsx`. As validações descritas em 7.4–7.11 registram o que foi executado na época e a suíte completa permanece no histórico do git (commits `c8da12b`, `435f4c9`, `73c4a10`), podendo ser restaurada com `git checkout <commit> -- scripts/tests`.
+> **Nota (04/11/2026):** a suíte antiga (`scripts/tests/` da Fase 6) foi removida naquela data por não ser necessária durante o desenvolvimento. Na **Fase 7** a suíte foi **recriada do zero** em Node puro (`scripts/tests/`, `npm test`), agora com foco em regressão dos contratos descritos neste manifesto e com um simulador do host de After Effects (`scripts/tests/lib/ae_mock.js`) — ver **7.12**.
+
+### 7.12 Fase 7 — Correções de integridade, undo no Premiere e suíte de regressão (04/11/2026)
+
+| # | Defeito | Correção |
+| :--- | :--- | :--- |
+| P0-1 | `#chkUsePrefixNumbering` no editor chamava `savePreset()` a cada clique, gravando em disco **alterações não salvas** da árvore/regras sem avisar | o handler só muta `settings`, chama `setDirty(true)` e informa no rodapé; persistência continua sendo ação explícita de **Salvar** |
+| P0-2 | O modal de regras anunciava campo livre `[+] Adicionar` + chips `×` (2.1), mas `inpNewExtension`/`btnAddExtension`/`extTagsContainer` **não existiam no HTML** — `addExtensionsFromInputString()` era código morto e só restava "Limpar tudo" | markup criado em `tree_editor.html` e `renderModalExts()` (chips `.ext-tag` com `×`, estado vazio e `#btnClearAllExts` sincronizado) chamada por `syncPackButtonsFromExts()` |
+| P0-3 | **AE:** `cleanEmptyFolders` invalidava `_folderIndex`, mas não `nodeFolderMap`/`boundFolderIds`; `applyTreeNumberingAndLabels` acessava `numItems` de `FolderItem` removida → `"Object is invalid"` **depois** de mutar o projeto, devolvendo `success:false` e pulando `aeft_markPostOrganizeState()` (rollback inconsistente) | limpeza agora zera `_folderIndex`, `nodeFolderMap` e `boundFolderIds`, e a checagem de conteúdo passa por `isAliveFolderWithContent()` (try/catch por pasta) |
+| P0-4 | `getDefaultPreset()` ignorava `groupBySourceFolder`, `unusedFolderName` e as regras por pasta do `Default Clean` | overrides persistidos por `savePreset()` e reaplicados por `applyNodeGroupBySourceFolder()` (ver **2.1**) |
+| P0-5 | Falha de `writeFileSync` seguia adiante: espelhava em `localStorage` e trocava o preset ativo, criando preset **fantasma** | `savePreset()` retorna antes do espelho/ativação quando a escrita falha, mantendo `lastSaveError` (ver **2.1**) |
+| P1-1 | `reduceProject` podia ficar ativo com `saveProjectBefore` desligado (chaves independentes de `localStorage`) | invariante `reduceProject ⇒ saveProjectBefore` em `enforceReduceRequiresSave()` (ver **2.3**) |
+| P1-2 | `aeft_checkUnusedComps` abria `app.beginUndoGroup` **antes** de checar `app.project` | checagem movida para antes do grupo de desfazer |
+| P1-3 | **PPRO:** 6.6 prometia `beginUndoGroup/endUndoGroup` nos dois hosts, mas o motor PPRO não tinha nenhum — desfazer desfazia item a item | `ppro_beginUndoGroup()`/`ppro_endUndoGroup()` (com detecção de `app.beginUndoGroup`) + `finally` em `ppro_checkUnusedComps`, `ppro_organizeWithPreset`, `ppro_createPresetFolderStructure` e `ppro_rollbackProject` |
+| P1-4 | `getDefaultPresetFromBundle()` no Premiere caía em `default_preset.json` (listas do After Effects: sem `jfif`, `ico`, `mod`, `tod`) quando o bundle PPro não existia | fallback genérico passa a ser usado **só no AE**; no PPro cai em `getFactoryPresetObject(true)` (`DEFAULT_EXTENSIONS_PPRO`) com `warn` no `OrgLog` |
+| P1-5 | Snapshot do rollback só era espelhado em caso de sucesso; cota do `localStorage` era engolida | espelho também em falha do Organizar + `OrgLog.warn` na falha de cota (ver **2.4**) |
+| P1-6 | `persistTogglesToActivePreset()` disparava `notifyPresetsUpdated()` duas vezes (o `savePreset()` já dispara) | dispatch duplicado removido (ver **2.3**) |
+| P1-7 | Busca de fonte de bundles PSD/AI varria o projeto inteiro dentro do laço de pastas (O(pastas × itens)); `cleanEmptyFolders` revarria o projeto a cada remoção (O(N²)) | varredura só dos filhos da pasta do bundle + coleta única ordenada por profundidade, com `_scanCount` cobrindo as duas |
+| P2 | `tree_editor.js` referenciava `#btnSavePreset`, `#inpUnusedFolderName` e `#chkDeleteEmptyFolders`, controles que não existem no HTML (toggles vivem no painel principal) | referências e listeners mortos removidos |
+
+**Suíte de regressão (`npm test` → `node scripts/tests/run.js`)** — 30 testes, 0 falhas:
+
+| Arquivo | Cobertura |
+| :--- | :--- |
+| `preset_manager_test.js` | disco × `localStorage`, preset fantasma (P0-5), overrides do Default + por pasta (P0-4), `resetDefaultPreset`, exclusão, dicionário PPro (P1-4). Roda o `client/PresetManager.js` real com `localStorage`/`fs` simulados |
+| `ae_engine_test.js` | `host/aeft_organizer.jsx` real sobre um **simulador da API do AE** (`lib/ae_mock.js`): organização, idempotência (`01_01_`), Regra A3, `useNumbering:false`, label aplicado, limpeza de vazias, pasta protegida, modo seleção, pré-comps por comp principal, profiling e **P0-3** (pasta vinculada removida não aborta) |
+| `client_refs_test.js` | todo `getElementById`/`querySelector` de `main.js`/`tree_editor.js` existe no HTML correspondente; presença dos chips de extensão (P0-2); ausência de controles mortos (P2); IDs do painel citados em 2.3 |
+| `host_static_test.js` | **ES3 estrito** em `host/*.jsx` (sem `let`/`const`/arrow/template literal/`forEach`/`map`/`filter`/`Object.keys`, ignorando comentários), contratos de snapshot dos dois motores, fronteiras de desfazer do PPRO (P1-3) e ordem `beginUndoGroup` × projeto aberto no AE (P1-2) |
+
+**Backup/restauração:** `scripts/restore_backup.ps1 -BackupDir _backup/<pasta>` (ou sem argumento = backup mais recente) devolve `client/`, `host/`, `MANIFESTO_MESTRE.md` e `package.json`, com `-WhatIf` para simular.
+
+**Validação da Fase 7:** `npm test` 30/30 · `node --check` em `aeft_organizer.jsx`, `ppro_organizer.jsx`, `_lib.jsx`, `_rules.jsx`, `organizer.jsx`, `PresetManager.js`, `main.js`, `tree_editor.js` · ES3 do host revalidado pela suíte.
+
+### 7.13 Fase 8 — Sobrescrita protegida e edições não salvas (04/11/2026)
+
+| # | Defeito | Correção |
+| :--- | :--- | :--- |
+| P8-1 | **Importar JSON** chamava `importPresetFromJsonString(raw)` e gravava por cima de um preset de mesmo nome sem perguntar | `importPresetFromJsonString(jsonStr, { overwrite })` **não sobrescreve por padrão**: lança `Error` com `code: "PRESET_EXISTS"` e `presetName`. O editor intercepta o código, abre o modal de confirmação e repete a chamada com `{ overwrite: true }` |
+| P8-2 | **Salvar como** sobrescrevia um preset existente direto em `executeSaveAs()` | a gravação foi isolada em `doSaveAs(nome)`; `executeSaveAs()` consulta `presetManager.presetExists(nome)` e pede confirmação antes de reutilizar o nome |
+| P8-3 | `#presetSelect` do editor descartava a árvore em edição ao trocar de preset | com `isDirty`, o `<select>` volta ao preset real **antes** do modal, e a troca só ocorre no callback de confirmação (cancelar não altera nada) |
+| P8-4 | `window.focus` reaplicava `usePrefixNumbering`/`groupBySourceFolder` do disco sobre edições do editor | `if (isDirty) return;` no início do handler |
+| P8-5 | `com.tidyflow.presetsUpdated` recarregava o preset vindo de outro painel, perdendo o trabalho em andamento | mesmo preset: mirror ignorado quando `isDirty`; preset diferente: o editor mantém a edição e avisa no rodapé para salvar ou descartar |
+
+**Novo contrato de dados (2.1):**
+
+| API | Comportamento |
+| :--- | :--- |
+| `presetManager.presetExists(name)` | compara sem diferenciar caixa contra `listPresets()` (disco + fallback); nome vazio → `false` |
+| `presetManager.importPresetFromJsonString(jsonStr, options)` | `options.overwrite !== true` + nome existente → lança erro com `code: "PRESET_EXISTS"` e `presetName` (nada é gravado). Com `overwrite: true`, grava normalmente. JSON sem `tree` continua lançando erro genérico (sem `code`) |
+| Preset de fábrica na importação | `Default Clean` é renomeado para `Default Clean (Importado)` antes da checagem, então nunca sobrescreve o padrão |
+
+**Validação da Fase 8:** `npm test` → **38 testes, 0 falhas** (novo `preset_import_test.js` com 6 casos + 2 casos estáticos de guarda em `client_refs_test.js`) · `node --check` nos arquivos de cliente alterados · `vite build` OK.
 
 
 

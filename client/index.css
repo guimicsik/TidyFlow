@@ -216,7 +216,7 @@ body {
   flex-direction: column;
   gap: 8px;
   padding-top: 8px;
-  border-top: 1px solid #2e2e2e;
+  border-top: 3px solid #2e2e2e;
 }
 
 /* ===== TOGGLES EM BOTÕES (grid 3 + 2) ===== */
@@ -263,10 +263,10 @@ body {
   font-weight: 700;
   line-height: 1.25;
   text-shadow: 1px 2px 5px rgba(0, 0, 0, .35);
-  background-color: #c25e1a;
+  background-color: #c2201a;
   color: #ffffff;
-  border: 1px solid #8a4110;
-  border-bottom: 2px solid #8a4110;
+  border: 1px solid #c2201a9d;
+  border-bottom: 2px solid #c2201a9d;
   cursor: pointer;
   outline: none;
   transition: background-color 0.15s, border-color 0.15s, transform 0.1s, color 0.15s;

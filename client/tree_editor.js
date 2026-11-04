@@ -116,7 +116,6 @@
   var presetSelect = document.getElementById("presetSelect");
   var badgeBuiltIn = document.getElementById("badgeBuiltIn");
   var badgeUnsaved = document.getElementById("badgeUnsaved");
-  var btnSavePreset = document.getElementById("btnSavePreset");
   var btnSaveAsPreset = document.getElementById("btnSaveAsPreset");
   var btnResetDefault = document.getElementById("btnResetDefault");
   var btnImportJson = document.getElementById("btnImportJson");
@@ -127,8 +126,6 @@
 
   // Elementos DOM - Barra de Configurações
   var chkUsePrefixNumbering = document.getElementById("chkUsePrefixNumbering");
-  var chkDeleteEmptyFolders = document.getElementById("chkDeleteEmptyFolders");
-  var inpUnusedFolderName = document.getElementById("inpUnusedFolderName");
 
   // Elementos DOM - Árvore e Rodapé
   var btnAddTopFolder = document.getElementById("btnAddTopFolder");
@@ -207,7 +204,7 @@
     setStatus("Erro ao salvar: " + presetManager.lastSaveError, "error");
     try {
       if (window.OrgLog) OrgLog.error("tree_editor.save", presetManager.lastSaveError);
-    } catch (e) {}
+    } catch (e) { }
     return true;
   }
 
@@ -282,9 +279,6 @@
     }
 
     chkUsePrefixNumbering.checked = Boolean(currentPreset.settings.usePrefixNumbering);
-    if (inpUnusedFolderName) {
-      inpUnusedFolderName.value = currentPreset.settings.unusedFolderName || "Nunca Usadas";
-    }
 
     setDirty(false);
     renderTree();
@@ -858,7 +852,45 @@
       chk.checked = hasAny;
     }
     syncAllRuleToggleButtons();
+    renderModalExts();
+  }
+
+  // Chips das extensões efetivamente filtradas (pacotes + avulsas) — MANIFESTO §2.1
+  function renderModalExts() {
+    if (!extTagsContainer) return;
+    extTagsContainer.innerHTML = "";
     updateClearExtsButtonVisibility();
+
+    if (modalWorkingExts.length === 0) {
+      var emptyMsg = document.createElement("span");
+      emptyMsg.className = "rule-empty-hint";
+      emptyMsg.textContent = "Nenhuma extensão filtrada.";
+      extTagsContainer.appendChild(emptyMsg);
+      return;
+    }
+
+    for (var i = 0; i < modalWorkingExts.length; i++) {
+      (function (ext, idx) {
+        var tag = document.createElement("span");
+        tag.className = "ext-tag";
+
+        var label = document.createElement("span");
+        label.textContent = "." + ext;
+
+        var btnRem = document.createElement("button");
+        btnRem.type = "button";
+        btnRem.textContent = "×";
+        btnRem.title = "Remover extensão '." + ext + "'";
+        btnRem.addEventListener("click", function () {
+          modalWorkingExts.splice(idx, 1);
+          syncPackButtonsFromExts();
+        });
+
+        tag.appendChild(label);
+        tag.appendChild(btnRem);
+        extTagsContainer.appendChild(tag);
+      })(modalWorkingExts[i], i);
+    }
   }
 
   function addExtensionsFromInputString(rawStr) {
@@ -1150,6 +1182,26 @@
       return;
     }
 
+    // Sobrescrever outro preset é destrutivo: confirma antes (AGENTS §4)
+    var willOverwrite = false;
+    if (currentPreset && newName.toLowerCase() !== String(currentPreset.presetName).toLowerCase()) {
+      willOverwrite = presetManager.presetExists(newName);
+    }
+    if (willOverwrite) {
+      openConfirmModal(
+        "Sobrescrever preset",
+        "Já existe um preset chamado '" + newName + "'. Deseja substituí-lo pelo conteúdo atual do editor?",
+        function () {
+          doSaveAs(newName);
+        }
+      );
+      return;
+    }
+
+    doSaveAs(newName);
+  }
+
+  function doSaveAs(newName) {
     currentPreset.presetName = newName;
     currentPreset.isBuiltIn = false;
     currentPreset = presetManager.savePreset(currentPreset);
@@ -1161,7 +1213,7 @@
       if (window.parent && window.parent !== window && typeof window.parent.onPresetBuilderUpdated === "function") {
         window.parent.onPresetBuilderUpdated(currentPreset.presetName);
       }
-    } catch (eSync2) {}
+    } catch (eSync2) { }
     if (closeAfterSaveAs) {
       closeAfterSaveAs = false;
       closeEditorWindow();
@@ -1179,26 +1231,39 @@
   // Eventos da Barra Superior e Configurações
   presetSelect.addEventListener("change", function () {
     var targetName = presetSelect.value;
-    presetManager.setActivePresetName(targetName);
-    loadSelectedPresetIntoEditor(targetName);
-    setStatus("Preset '" + targetName + "' carregado.", "");
+
+    var applySwitch = function () {
+      presetManager.setActivePresetName(targetName);
+      loadSelectedPresetIntoEditor(targetName);
+      setStatus("Preset '" + targetName + "' carregado.", "");
+    };
+
+    if (isDirty) {
+      // Não descartar edições não salvas em silêncio: o <select> volta a mostrar o
+      // preset real e a troca só acontece se o usuário confirmar.
+      if (currentPreset) presetSelect.value = currentPreset.presetName;
+      openConfirmModal(
+        "Alterações não salvas",
+        "O preset '" + (currentPreset ? currentPreset.presetName : "") +
+        "' tem alterações não salvas. Trocar de preset descarta essas alterações. Continuar?",
+        applySwitch
+      );
+      return;
+    }
+
+    applySwitch();
   });
 
   chkUsePrefixNumbering.addEventListener("change", function () {
     if (!currentPreset) return;
     currentPreset.settings.usePrefixNumbering = chkUsePrefixNumbering.checked;
     renderTree();
-    presetManager.savePreset(currentPreset);
-    presetManager.notifyPresetsUpdated(currentPreset.presetName);
+    // NÃO gravar em disco aqui: o objeto em edição pode ter alterações não salvas
+    // (árvore, regras, labels). Gravar neste ponto empurraria essas alterações para
+    // o disco sem aviso. Marcamos como não salvo e deixamos o Salvar explícito.
+    setDirty(true);
+    setStatus("Numeração atualizada. Use Salvar para gravar no preset.", "");
   });
-
-  if (inpUnusedFolderName) {
-    inpUnusedFolderName.addEventListener("input", function () {
-      if (!currentPreset) return;
-      currentPreset.settings.unusedFolderName = inpUnusedFolderName.value.trim() || "Nunca Usadas";
-      setDirty(true);
-    });
-  }
 
   btnAddTopFolder.addEventListener("click", function () {
     if (!currentPreset) return;
@@ -1231,16 +1296,10 @@
       if (window.parent && window.parent !== window && typeof window.parent.onPresetBuilderUpdated === "function") {
         window.parent.onPresetBuilderUpdated(currentPreset.presetName);
       }
-    } catch (eSync) {}
+    } catch (eSync) { }
     if (typeof onSavedCallback === "function") {
       onSavedCallback();
     }
-  }
-
-  if (btnSavePreset) {
-    btnSavePreset.addEventListener("click", function () {
-      saveCurrentPresetOrPromptNew();
-    });
   }
 
   btnSaveAsPreset.addEventListener("click", function () {
@@ -1280,7 +1339,7 @@
             if (window.parent && window.parent !== window && typeof window.parent.onPresetBuilderUpdated === "function") {
               window.parent.onPresetBuilderUpdated(PresetManager.DEFAULT_PRESET_NAME);
             }
-          } catch (eSync3) {}
+          } catch (eSync3) { }
         } catch (err) {
           setStatus("Erro ao excluir: " + err.message, "error");
         }
@@ -1325,6 +1384,31 @@
     setStatus("Preset exportado com sucesso.", "success");
   });
 
+  // Importa um preset de um JSON, pedindo confirmação antes de sobrescrever um
+  // preset existente (o arquivo importado pode substituir trabalho do usuário).
+  function importPresetJson(raw) {
+    var attempt = function (overwrite) {
+      try {
+        var imported = presetManager.importPresetFromJsonString(raw, { overwrite: overwrite === true });
+        loadSelectedPresetIntoEditor(imported.presetName);
+        setStatus("Preset '" + imported.presetName + "' importado com sucesso!", "success");
+      } catch (e) {
+        if (e && e.code === "PRESET_EXISTS") {
+          openConfirmModal(
+            "Sobrescrever preset",
+            "Já existe um preset chamado '" + e.presetName + "'. Deseja sobrescrevê-lo com o arquivo importado?",
+            function () {
+              attempt(true);
+            }
+          );
+          return;
+        }
+        setStatus("Erro ao importar JSON: " + e.message, "error");
+      }
+    };
+    attempt(false);
+  }
+
   btnImportJson.addEventListener("click", function () {
     if (window.cep && window.cep.fs && typeof window.cep.fs.showOpenDialogEx === "function") {
       var res = window.cep.fs.showOpenDialogEx(
@@ -1338,10 +1422,7 @@
       if (res && res.data && res.data.length > 0) {
         var filePath = res.data[0];
         try {
-          var raw = presetManager.fs.readFileSync(filePath, "utf8");
-          var imported = presetManager.importPresetFromJsonString(raw);
-          loadSelectedPresetIntoEditor(imported.presetName);
-          setStatus("Preset '" + imported.presetName + "' importado com sucesso!", "success");
+          importPresetJson(presetManager.fs.readFileSync(filePath, "utf8"));
         } catch (e) {
           setStatus("Erro ao importar JSON: " + e.message, "error");
         }
@@ -1358,13 +1439,7 @@
     if (!file) return;
     var reader = new FileReader();
     reader.onload = function (e) {
-      try {
-        var imported = presetManager.importPresetFromJsonString(e.target.result);
-        loadSelectedPresetIntoEditor(imported.presetName);
-        setStatus("Preset '" + imported.presetName + "' importado!", "success");
-      } catch (err) {
-        setStatus("Erro ao importar JSON: " + err.message, "error");
-      }
+      importPresetJson(e.target.result);
     };
     reader.readAsText(file);
   });
@@ -1454,7 +1529,7 @@
         });
         return;
       }
-    } catch (e) {}
+    } catch (e) { }
     if (typeof callback === "function") callback();
   }
 
@@ -1488,6 +1563,8 @@
         // Outro painel pode ter salvo/excluído presets: descarta o cache antes de ler
         presetManager.invalidatePresetCache();
         if (currentPreset && currentPreset.presetName === incoming) {
+          // Edições não salvas têm prioridade sobre o estado do disco
+          if (isDirty) return;
           // Mesmo preset: espelha Numeração Sequencial e Pasta de Origem alteradas no Painel Principal
           var stored = presetManager.loadPreset(incoming);
           var changed = false;
@@ -1508,7 +1585,7 @@
             for (var i = 0; i < (nodes || []).length; i++) {
               var f = findNodeAndParentById(currentPreset.tree, nodes[i].id);
               if (f && f.node.rules && nodes[i].rules &&
-                  f.node.rules.groupBySourceFolder !== nodes[i].rules.groupBySourceFolder) {
+                f.node.rules.groupBySourceFolder !== nodes[i].rules.groupBySourceFolder) {
                 f.node.rules.groupBySourceFolder = nodes[i].rules.groupBySourceFolder;
                 changed = true;
               }
@@ -1518,14 +1595,24 @@
           if (changed) renderTree();
           return;
         }
+        if (isDirty) {
+          // Não descartar o trabalho em andamento só porque outro painel trocou o preset
+          setStatus(
+            "Outro painel alterou o preset ativo. Salve ou descarte suas alterações para sincronizar.",
+            "warning"
+          );
+          return;
+        }
         presetManager.setActivePresetNameSilent(incoming);
         loadSelectedPresetIntoEditor(incoming);
-      } catch (eEvt) {}
+      } catch (eEvt) { }
     });
-  } catch (eListen) {}
+  } catch (eListen) { }
 
   window.addEventListener("focus", function () {
     try {
+      // Edições não salvas não podem ser sobrescritas pelo estado do disco
+      if (isDirty) return;
       // Re-sincronização leve: mantém a listagem em cache e relê apenas o preset ativo
       presetManager.invalidatePresetObjectCache();
       var activeName = presetManager.getActivePresetName();
@@ -1545,7 +1632,7 @@
           for (var i = 0; i < (nodes || []).length; i++) {
             var f = findNodeAndParentById(currentPreset.tree, nodes[i].id);
             if (f && f.node.rules && nodes[i].rules &&
-                f.node.rules.groupBySourceFolder !== nodes[i].rules.groupBySourceFolder) {
+              f.node.rules.groupBySourceFolder !== nodes[i].rules.groupBySourceFolder) {
               f.node.rules.groupBySourceFolder = nodes[i].rules.groupBySourceFolder;
               changed = true;
             }
@@ -1554,6 +1641,6 @@
         })(stored.tree);
         if (changed) renderTree();
       }
-    } catch (eFocus) {}
+    } catch (eFocus) { }
   });
 })();
