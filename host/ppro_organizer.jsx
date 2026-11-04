@@ -31,6 +31,13 @@
         _seqTracksCache = {};
     };
 
+    // Hook de diagnostico: defina $.global._pproDebug = function(msg){...} para rastrear decisoes
+    function _dbg(msg) {
+        try {
+            if ($.global._pproDebug) $.global._pproDebug(String(msg));
+        } catch (eDbg) {}
+    }
+
     function trimStr(str) {
         return String(str === undefined || str === null ? "" : str).replace(/^\s+|\s+$/g, "");
     }
@@ -312,6 +319,7 @@
             totalClips: totalClipInstances
         };
         if (cacheKey) _seqTracksCache[cacheKey] = result;
+        _dbg("inspectSequenceTracks " + (cacheKey || "?") + " -> itens=" + referencedProjectItems.length + " clips=" + totalClipInstances);
         return result;
     }
 
@@ -1467,8 +1475,10 @@
                             }
                             if (!visitedMap[refItem.nodeId]) {
                                 visitedMap[refItem.nodeId] = true;
+                                _dbg("nested candidato: " + refItem.name + " protected=" + isInsideProtectedBin(refItem) + " processed=" + !!processedNodeIds[refItem.nodeId]);
                                 if (!isInsideProtectedBin(refItem) && !processedNodeIds[refItem.nodeId]) {
                                     var preMatch = findMatchingNode("PreComps", "", refItem.name);
+                                    _dbg("nested match: " + (preMatch && preMatch.rec ? preMatch.rec.id : "null"));
                                     if (preMatch && preMatch.rec) {
                                         var preNodeBin = ensureNodeBin(preMatch.rec.id);
                                         var destPreBin = preNodeBin;
@@ -1489,6 +1499,7 @@
 
                 for (var ms = 0; ms < targetMainSeqItems.length; ms++) {
                     var mainSeqItem = targetMainSeqItems[ms];
+                    _dbg("main seq: " + mainSeqItem.name + " | no seqMap=" + !!seqMap[mainSeqItem.nodeId] + " | tracks=" + inspectSequenceTracks(seqMap[mainSeqItem.nodeId]).items.length);
                     var mainMatch = findMatchingNode("MainComp", "", mainSeqItem.name);
                     if (mainMatch && mainMatch.rec) {
                         var outBin = ensureNodeBin(mainMatch.rec.id);
@@ -1514,6 +1525,7 @@
 
                 if (isCompoundOrSequenceItem(item)) {
                     if (!isMediaOnly) {
+                        _dbg("loose sequence: " + item.name);
                         var loosePreMatch = findMatchingNode("PreComps", "", item.name);
                         if (loosePreMatch && loosePreMatch.rec) {
                             var looseNodeBin = ensureNodeBin(loosePreMatch.rec.id);
