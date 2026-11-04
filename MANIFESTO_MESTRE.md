@@ -162,7 +162,9 @@ AE_File_Organizer/
 │   ├── _rules.jsx          # Motor de regras compartilhado (classificação por pontuação + cache)
 │   ├── organizer.jsx       # Roteador unificado de Host (detecta AEFT vs PPRO, carrega libs)
 │   ├── aeft_organizer.jsx  # Motor do After Effects (CompItem/FolderItem) + snapshot/rollback
-│   └── ppro_organizer.jsx  # Motor do Premiere Pro 22.x+ (ProjectItem/Bin/Sequence) + snapshot/rollback
+│   ├── ppro_organizer.jsx  # Motor do Premiere Pro 22.x+ (ProjectItem/Bin/Sequence) + snapshot/rollback
+│   └── legacy/
+│       └── aeft_legacy.jsx # Motor AE antigo (pre-presets), carregado sob demanda pelo roteador
 ├── design/
 │   ├── ae_organizer_full_ui.svg      # Mockup consolidado da interface
 │   ├── ae_organizer_ui_tracking.csv  # Rastreio de elementos de UI
@@ -613,6 +615,21 @@ Fecha a decisão de build registrada em **7.8**: em vez de depender do `dist/` d
 | Guardas | falha se algum arquivo crítico faltar; valida que o manifesto aponta para `./client/index.html` e contém `com.tidyflow` |
 
 **Verificação executada:** ZIP com **16 entradas** (91,3 KB comprimido / 431,3 KB descompactado) · manifesto íntegro apontando para `./client/index.html` · extração para pasta temporária e `node --check` nos **9** arquivos JS/JSX empacotados (todos exit 0), provando que o artefato é completo e parseável fora do repositório.
+
+### 7.11 Fase 6 — Consolidação final de helpers, labels e motor legado (04/11/2026)
+
+| Item | Antes | Depois |
+| :--- | :--- | :--- |
+| Helpers puros nos motores | 14 cópias restantes (`arrayContains`, `arrayContainsIgnoreCase`, `stripNumericPrefix`, `getFileExtension`, `isSameFolder`, `trimStr`) | **0 cópias** — todas delegam para `$.global.OrgLib` |
+| `applyLabelSafe` (AE) / `applyPProLabelSafe` | escreviam a cor **sempre** (entrada de undo + chamada IPC por pasta) | comparam antes (`folder.label !== num` / `getColorLabel() !== cor`) |
+| `moveItemSafe` (Premiere) | `moveBin` sem proteção: um item bloqueado abortava a organização inteira | `try/catch` por item + `OrgLib.warn` — o item é pulado e o resto continua |
+| Logging no host | inexistente | `OrgLib.log/warn/error` com hook `$.global.OrgLogHook` (o painel/debugger pode registrar um coletor) |
+| Motor legado do AE | `aeft_organizeAEProject` (~758 linhas) era **avaliado a cada reload** dentro de `aeft_organizer.jsx` | movido para **`host/legacy/aeft_legacy.jsx`** e carregado **sob demanda** (`organizerLoadLegacyAE`), acionado só se um preset sem `tree` chegar |
+
+**Números finais do host:** `aeft_organizer.jsx` **2.582 → 1.823 linhas** (−29%), `ppro_organizer.jsx` 1.851, `_rules.jsx` 197, `_lib.jsx` 99, `organizer.jsx` ~200.
+
+**Validação da Fase 6:** `node --check` em `aeft_organizer.jsx`, `aeft_legacy.jsx` e `organizer.jsx` · **`npm test` → 87 asserções, 0 falhas** — incluindo 3 novas no harness do AE: o arquivo legado existe, **carrega sob demanda** e não afeta o motor atual · `npm run package` agora empacota **17 arquivos** (com `host/legacy/aeft_legacy.jsx`).
+
 
 
 

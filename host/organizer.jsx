@@ -71,6 +71,37 @@
 
     $.global.organizerLoadLib = loadSharedLib;
 
+    // Carrega o motor legado do AE (pre-presets) sob demanda
+    function loadLegacyAE(explicitDirPath) {
+        if (typeof $.global.aeft_organizeAEProject === "function") return true;
+
+        var candidates = [];
+        if (explicitDirPath) {
+            candidates.push(String(explicitDirPath).replace(/\\/g, "/").replace(/\/+$/, "") + "/legacy/aeft_legacy.jsx");
+        }
+        try {
+            if ($.fileName) {
+                var currentScriptFile = new File($.fileName);
+                if (currentScriptFile && currentScriptFile.parent) {
+                    candidates.push(currentScriptFile.parent.fsName + "/legacy/aeft_legacy.jsx");
+                }
+            }
+        } catch (ePath) {}
+
+        for (var i = 0; i < candidates.length; i++) {
+            try {
+                var legacyFile = new File(candidates[i]);
+                if (legacyFile.exists) {
+                    $.evalFile(legacyFile);
+                    if (typeof $.global.aeft_organizeAEProject === "function") return true;
+                }
+            } catch (eLegacy) {}
+        }
+        return false;
+    }
+
+    $.global.organizerLoadLegacyAE = loadLegacyAE;
+
     $.global.organizerLoadEngine = function (explicitHostDirPath) {
         var isPPro = detectIsPremierePro();
         var targetFileName = isPPro ? "ppro_organizer.jsx" : "aeft_organizer.jsx";
@@ -119,7 +150,13 @@
         if (isPPro) {
             return $.global.ppro_organizeWithPreset(mainCompId, configJsonString);
         }
-        return $.global.aeft_organizeAEProject(mainCompId, configJsonString);
+        if (typeof $.global.aeft_organizeAEProject !== "function") {
+            loadLegacyAE();
+        }
+        if (typeof $.global.aeft_organizeAEProject === "function") {
+            return $.global.aeft_organizeAEProject(mainCompId, configJsonString);
+        }
+        return '{"success": false, "error": "Motor legado do After Effects indisponivel."}';
     };
 
     $.global.getProjectComps = function () {

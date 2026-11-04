@@ -198,5 +198,14 @@ check('reexecucao nao duplica pastas', folderCount1 === folderCount2, folderCoun
 check('reexecucao mantem caminhos', pathOf(clipMp4).join('/') === pMp4.join('/'), pathOf(clipMp4).join('/'));
 check('scanCount contido (<= 40)', r1.scanCount <= 40, r1.scanCount);
 
+// Motor legado (host/legacy/aeft_legacy.jsx) deve carregar sob demanda sem quebrar o motor atual
+const legacyPath = path.join(__dirname, '..', '..', 'host', 'legacy', 'aeft_legacy.jsx');
+check('arquivo do motor legado presente', fs.existsSync(legacyPath), legacyPath);
+if (fs.existsSync(legacyPath)) {
+  require(legacyPath);
+  check('motor legado carrega sob demanda', typeof global.aeft_organizeAEProject === 'function');
+  check('motor atual continua disponivel apos carregar o legado', typeof global.aeft_organizeWithPreset === 'function');
+}
+
 console.log('\nRESULTADO ae_engine_test: ' + ok + ' PASS / ' + fail + ' FAIL');
 process.exit(fail === 0 ? 0 : 1);
