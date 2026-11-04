@@ -174,10 +174,11 @@ AE_File_Organizer/
 │   ├── install_symlink.bat         # Instalação do symlink da extensão
 │   ├── rollback_ponto_retorno.bat  # Restaura o código para a tag ponto-de-retorno-ae-v1.0
 │   └── tests/                      # Suíte de testes sem dependências (npm test)
-│       ├── run_all.js              # Runner das 3 suítes
+│       ├── run_all.js              # Runner das 4 suítes
 │       ├── lib_test.js             # Testes unitários de host/_lib.jsx
 │       ├── preset_manager_test.js  # Cache/memoização do PresetManager
-│       └── ae_engine_test.js       # Motor AE com projeto simulado (+ modo scale)
+│       ├── ae_engine_test.js       # Motor AE com projeto simulado (+ modo scale)
+│       └── ppro_engine_test.js     # Motor PPro (bins, moveBin, sequências, rollback)
 └── dist/                   # Build de produção gerado pelo Vite (não versionado)
 ```
 
@@ -533,6 +534,28 @@ Todos os demais elementos — layout, CSS, árvore de pastas, modal de regras, t
 **Validação da Fase 3:** `node --check` nos 4 scripts de host (`_lib.jsx`, `organizer.jsx`, `aeft_organizer.jsx`, `ppro_organizer.jsx`) · **`npm test` → 43 asserções, 0 falhas** (`lib_test` 16/16, `preset_manager_test` 13/13, `ae_engine_test` 14/14) · o harness do AE exercita o **bootstrap real da lib** (o motor carrega `_lib.jsx` sozinho via `$.fileName` + `$.evalFile`), garantindo que a delegação funciona no caminho de produção.
 
 > **Requisito de deploy:** `host/_lib.jsx` precisa acompanhar `organizer.jsx` e os dois motores na mesma pasta — o roteador e os motores resolvem esse caminho relativo.
+
+### 7.7 Harness do Premiere Pro (04/11/2026)
+
+Bancada de teste que executa o **motor PPro real** (`host/ppro_organizer.jsx`) fora do Premiere, contra uma **API dublada** do host. Sem ela, qualquer mudança no motor do Premiere só podia ser validada manualmente.
+
+**O que o dublê implementa** (levantado a partir das chamadas reais do motor):
+
+| Camada | Coberto |
+| :--- | :--- |
+| `app` | `project.rootItem`, `project.sequences` (+`numSequences`), `project.save()`, `project.path`, `project.documentID`, `getCurrentProjectViewSelection()`/`getProjectViewIDs()`/`getProjectViewSelection()`/`getProjectFromViewID()` |
+| Constantes | `ProjectItemType.BIN` / `.ROOT` / `.CLIP` |
+| Bin / item | `nodeId`, `name`, `type`, `children` (coleção com `numItems` + indexador), `createBin()`, `moveBin()`, `deleteBin()`, `getColorLabel()`, `setColorLabel()`, `getMediaPath()`, `getProjectMetadata()`, `isSequence()`, `isOffline()`, `isMulticamClip()`, `isMergedClip()` |
+| Sequência | `videoTracks` / `audioTracks` / `captionTracks` → `numTracks` → `track.clips` → `clip.projectItem` |
+
+Duas regras do host real foram reproduzidas de propósito, porque são onde bugs aparecem: `moveBin()` **rejeita** mover um bin para dentro de si mesmo e **reordena** `children`.
+
+**Asserções (18):** sucesso da execução · `elapsedMs`/`scanCount` · classificação (`MP4`/`PNG`/`WAV`) · bucket de extensão · agrupamento por pasta de origem (e respeitando `false` por pasta) · **item sintético em `Solids`** · numeração `01_`/`02_` só em bins com conteúdo · **Color Label** aplicado (`getColorLabel() >= 0`) · **idempotência** (2ª execução sem movimentos e sem bins duplicados) · **rollback** (`restoredItems`, `removedFolders`, clipes de volta na raiz e bins criados removidos).
+
+**Resultado:** `ppro_engine_test` **18/18** e suíte completa **61 asserções, 0 falhas** (`npm test`).
+
+> **Limite conhecido:** o harness valida lógica, não o host. Mídia offline real, bins bloqueados, variações entre versões do Premiere e a ponte CEP continuam exigindo o smoke test manual — que já foi executado nesta rodada com resultado OK.
+
 
 
 

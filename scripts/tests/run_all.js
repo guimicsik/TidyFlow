@@ -2,7 +2,7 @@
 const { execFileSync } = require('child_process');
 const path = require('path');
 
-const suites = ['lib_test.js', 'preset_manager_test.js', 'ae_engine_test.js'];
+const suites = ['lib_test.js', 'preset_manager_test.js', 'ae_engine_test.js', 'ppro_engine_test.js'];
 let failed = 0;
 
 for (const suite of suites) {
