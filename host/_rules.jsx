@@ -6,41 +6,65 @@
    ({ id, node, parentId, depth }) + OrgLib para utilitários de string.
    ========================================================================== */
 (function () {
-    if ($.global.OrgRules) return;
 
     var Lib = $.global.OrgLib;
-    if (!Lib) {
+    if (!Lib || typeof Lib.getFileNameFromPath !== "function") {
         try {
             var here = $.fileName ? new File($.fileName) : null;
             if (here && here.parent) {
                 var libFile = new File(here.parent.fsName + "/_lib.jsx");
-                if (libFile.exists) $.evalFile(libFile);
+                if (libFile.exists) {
+                    libFile.encoding = "UTF-8";
+                    $.evalFile(libFile);
+                }
             }
-        } catch (eLib) {}
+        } catch (eLib) { }
         Lib = $.global.OrgLib;
     }
     if (!Lib) throw new Error("TidyFlow: host/_lib.jsx precisa ser carregado antes de _rules.jsx");
 
-    function matchesNameFilter(itemName, rules) {
+    function matchesNameFilter(namesOrName, rules) {
         if (!rules || !rules.nameFilter) return false;
         var filterStr = Lib.trimStr(rules.nameFilter);
         if (!filterStr) return false;
-        var targetName = String(itemName === undefined || itemName === null ? "" : itemName);
+
+        var candidates = [];
+        if (namesOrName instanceof Array || (namesOrName && typeof namesOrName === "object" && namesOrName.length !== undefined)) {
+            for (var c = 0; c < namesOrName.length; c++) {
+                var itemVal = namesOrName[c];
+                if (itemVal !== undefined && itemVal !== null && String(itemVal).length > 0) {
+                    candidates.push(String(itemVal));
+                }
+            }
+        } else if (namesOrName !== undefined && namesOrName !== null) {
+            var singleVal = String(namesOrName);
+            if (singleVal.length > 0) candidates.push(singleVal);
+        }
+        if (candidates.length === 0) return false;
 
         if (rules.nameFilterMode === "regex") {
             try {
                 var rx = new RegExp(filterStr, "i");
-                return rx.test(targetName);
+                for (var r = 0; r < candidates.length; r++) {
+                    if (rx.test(candidates[r])) return true;
+                }
+                return false;
             } catch (e) {
-                return targetName.toLowerCase().indexOf(filterStr.toLowerCase()) !== -1;
+                var filterLower = filterStr.toLowerCase();
+                for (var r2 = 0; r2 < candidates.length; r2++) {
+                    if (candidates[r2].toLowerCase().indexOf(filterLower) !== -1) return true;
+                }
+                return false;
             }
         }
 
-        var parts = filterStr.split(",");
-        var nameLower = targetName.toLowerCase();
+        var parts = filterStr.split(/[;,]/);
         for (var p = 0; p < parts.length; p++) {
             var token = Lib.trimStr(parts[p]).toLowerCase();
-            if (token && nameLower.indexOf(token) !== -1) return true;
+            if (!token) continue;
+            for (var k = 0; k < candidates.length; k++) {
+                if (candidates[k].toLowerCase().indexOf(token) !== -1) return true;
+            }
         }
         return false;
     }
@@ -128,11 +152,13 @@
                     var typeOk = hasTypes ? nodeSupportsType(rules, typeToTest) : false;
                     var extOk = (hasExts && extLower) ? Lib.arrayContainsIgnoreCase(rules.extensions, extLower) : false;
 
-                    // 1. Filtro por nomenclatura tem prioridade maxima
+                    // 1. Filtro por nomenclatura tem prioridade maxima (MANIFESTO 2.3, item 3):
+                    //    se o nome casou, o item e roteado direto para esta pasta. As listas de
+                    //    tipos/extensoes do no sao derivadas dos tiles do Preset Builder e ficam
+                    //    defasadas com facilidade (preset antigo, edicao parcial), portanto nao
+                    //    podem vetar o filtro por nome.
                     if (hasNameRule) {
                         if (!matchesNameFilter(itemName, rules)) continue;
-                        if (hasTypes && !typeOk) continue;
-                        if (hasExts && !extOk) continue;
                         var nameScore = 1000 + rec.depth * 10;
                         if (nameScore > bestScore) {
                             bestScore = nameScore;
@@ -187,6 +213,25 @@
                         continue;
                     }
 
+                    // 5b. Tipo casou, mas a extensao do item nao esta declarada no no
+                    //     (e o no nao e coringa). As listas de extensoes sao derivadas
+                    //     dos tiles do Preset Builder e ficam defasadas com facilidade
+                    //     (preset antigo, edicao parcial), entao recusar o no aqui
+                    //     significava NAO MOVER o item - silenciosamente, sem contador
+                    //     e sem erro no painel. O item reconhecido por tipo passa a
+                    //     ter destino, com score abaixo de qualquer match explicito de
+                    //     extensao (700/850) e acima de OTHERS (200).
+                    //     Nos com catchOthers ficam de fora: eles continuam roteando o
+                    //     excedente para OTHERS (passo 6), como ja era.
+                    if (hasExts && !extOk && !rules.catchOthers) {
+                        var typeOnlyScore = 380 + rec.depth * 10 - Math.min(rules.extensions.length, 80);
+                        if (typeOnlyScore > bestScore) {
+                            bestScore = typeOnlyScore;
+                            bestCandidate = { rec: rec, matchedViaCatchOthers: false };
+                        }
+                        continue;
+                    }
+
                     // 6. Pasta coringa (OTHERS)
                     if (rules.catchOthers) {
                         var fallbackScore = 200 + rec.depth * 10 + (hasExts ? 0 : 25);
@@ -223,4 +268,3 @@
         createMatcher: createMatcher
     };
 })();
-

@@ -10,13 +10,15 @@
             var here = $.fileName ? new File($.fileName) : null;
             if (!here || !here.parent) return;
             var baseDir = here.parent.fsName;
-            if (!$.global.OrgLib) {
-                var libFile = new File(baseDir + "/_lib.jsx");
-                if (libFile.exists) $.evalFile(libFile);
+            var libFile = new File(baseDir + "/_lib.jsx");
+            if (libFile.exists) {
+                libFile.encoding = "UTF-8";
+                $.evalFile(libFile);
             }
-            if (!$.global.OrgRules) {
-                var rulesFile = new File(baseDir + "/_rules.jsx");
-                if (rulesFile.exists) $.evalFile(rulesFile);
+            var rulesFile = new File(baseDir + "/_rules.jsx");
+            if (rulesFile.exists) {
+                rulesFile.encoding = "UTF-8";
+                $.evalFile(rulesFile);
             }
         } catch (eLibLoad) { }
     })();
@@ -67,10 +69,34 @@
         _seqTracksCache = {};
     };
 
-    // Hook de diagnostico: defina $.global._pproDebug = function(msg){...} para rastrear decisoes
+    // Hook de diagnostico: defina $.global._pproDebug = function(msg){...} para rastrear decisoes.
+    // O buffer em memoria guarda as ultimas decisoes e vai no JSON de resposta
+    // (debugTrace), para explicar uma organizacao que "nao fez nada".
+    var _pproDebugBuffer = [];
+    var _PPRO_DEBUG_MAX = 120;
+
+    function ppro_debugReset() {
+        _pproDebugBuffer = [];
+    }
+
+    function ppro_debugTrace() {
+        return _pproDebugBuffer.join(" | ");
+    }
+
+    $.global.ppro_getDebugTrace = function () {
+        return ppro_debugTrace();
+    };
+
     function _dbg(msg) {
+        var text = String(msg);
         try {
-            if ($.global._pproDebug) $.global._pproDebug(String(msg));
+            if (_pproDebugBuffer.length >= _PPRO_DEBUG_MAX) {
+                _pproDebugBuffer.shift();
+            }
+            _pproDebugBuffer.push(text);
+        } catch (eBuf) { }
+        try {
+            if ($.global.pproDebugEnabled && $.global._pproDebug) $.global._pproDebug(text);
         } catch (eDbg) { }
     }
 
@@ -81,6 +107,8 @@
     var arrayContains = $.global.OrgLib.arrayContains;
 
     var arrayContainsIgnoreCase = $.global.OrgLib.arrayContainsIgnoreCase;
+
+    var Lib = $.global.OrgLib;
 
     // Mapeamento bijetor 1:1 dos 16 slots do Preset Builder (1..16) para os 16 Color Labels do Premiere Pro (0..15)
     // Slot 0 = Nenhum / Manter cor padrão do Premiere Pro
@@ -252,6 +280,13 @@
         return folderName;
     }
 
+    function getFileNameFromPath(filePath) {
+        if (!filePath) return "";
+        var clean = String(filePath).replace(/\\/g, "/");
+        var lastSlash = clean.lastIndexOf("/");
+        return lastSlash === -1 ? clean : clean.substring(lastSlash + 1);
+    }
+
     function getItemExtension(item) {
         var mediaPath = getMediaPathSafe(item);
         var ext = extractExtensionFromPath(mediaPath);
@@ -344,6 +379,403 @@
         if (cacheKey) _seqTracksCache[cacheKey] = result;
         _dbg("inspectSequenceTracks " + (cacheKey || "?") + " -> itens=" + referencedProjectItems.length + " clips=" + totalClipInstances);
         return result;
+    }
+
+    // --- Dicionarios e Helpers de Classificacao de Audio (ES3 estrito: barra escapada em [...]) ---
+    var AUDIO_SEP_RX = /[\-_.:\/\\+,;()\[\]]/g;
+    var RX_AUDIO_DIALOGUE = /\b(dialogue|dialogo|di[\u00e1a]logo|dialog|voz|voice|voiceover|fala|dx|entrevista|interview|locucao|locu[\u00e7c][\u00e3a]o|narracao|narra[\u00e7c][\u00e3a]o|narration|narrator|depoimento|lapela|lavalier|lav|boom[-_ ]?mic|mic|podcast|speech|vo)\b/i;
+    var RX_AUDIO_MUSIC = /\b(music|musica|m[\u00fau]sica|bgm|soundtrack|trilha|song|beat|instrumental|no[-_ ]?(?:lead[-_ ]?)?vocals?|backing[-_ ]?(?:track|vocals?)|stems?|remix|theme|ost|score|jingle|mx)\b/i;
+    var RX_AUDIO_AMBIENCE_EXPLICIT = /\b(ambience|ambient|ambiente|amb|room[-_ ]?tone|atmos|atmosphere|atmosfera|city[-_ ]?ambience|night[-_ ]?ambience)\b/i;
+    var RX_AUDIO_SFX = /\b(sfx|fx|sound[-_ ]?effects?|efeitos?|foley|whoosh|woosh|swoosh|swooshes|swish|snaps?|flaps?|hits?|hit|impacts?|impact|impacto|riser|downer|braam|sub[-_ ]?boom|boom|transicao|transi[\u00e7c][\u00e3a]o|pop|click|clicks|beep|ui|infographics?|explosion|explos[\u00e3a]o|punch|brawl|fight|weapons?|sword|glitch|steps?|footsteps?|passos|walking|sneakers?|heels?|shoe|shoes|cloth|clothing|leather|jacket|pants|undressed|rubbing|fabric|movements?|pillow|fluffing|door|slam|knock|paper|carbon|buzz)\b/i;
+    var RX_AUDIO_AMBIENCE_ENV = /\b(vento|wind|rain|chuva|thunder|trov[\u00e3a]o|nature|natureza|forest|floresta|ocean|sea|waves|birds|passaros|p[\u00e1a]ssaros|traffic|crowd|multid[\u00e3a]o|background[-_ ]?noise)\b/i;
+    var RX_AUDIO_MUSIC_GENRE = /\b(pop|rock|indie|electronic|electro|edm|house|techno|hip[-_ ]?hop|rap|trap|rnb|soul|funk|jazz|blues|classical|orchestral|cinematic|acoustic|folk|country|lofi|lo[-_ ]?fi|reggae|latin|bossa|samba|sertanejo|forr[\u00f3o]|mpb|metal|punk|disco|synthwave|chillout|chill|downtempo|corporate|uplifting|inspirational)\b/i;
+
+    function cleanAudioTokens(rawStr) {
+        if (!rawStr) return "";
+        return " " + String(rawStr).replace(AUDIO_SEP_RX, " ") + " ";
+    }
+
+    function matchAudioRoleKeywords(rawStr) {
+        if (!rawStr) return "";
+        var cleaned = cleanAudioTokens(rawStr);
+        if (RX_AUDIO_DIALOGUE.test(cleaned)) return "Dialogue";
+        if (RX_AUDIO_MUSIC.test(cleaned)) return "Music";
+        if (RX_AUDIO_AMBIENCE_EXPLICIT.test(cleaned)) return "Ambience";
+        if (RX_AUDIO_SFX.test(cleaned)) return "SFX";
+        if (RX_AUDIO_AMBIENCE_ENV.test(cleaned)) return "Ambience";
+        return "";
+    }
+
+    function matchExplicitEssentialSoundTag(rawStr) {
+        if (!rawStr) return "";
+        var s = String(rawStr);
+        if (/(?:audioRole|audioCategory|soundType|audioType|audio_type|sound_type|essentialSound|dvaessential|presetType|"role"|"tag"|"type"|"category")[^A-Za-z0-9]{1,24}(?:Dialogue|Dialog|Speech|Voice)/i.test(s)) {
+            return "Dialogue";
+        }
+        if (/(?:audioRole|audioCategory|soundType|audioType|audio_type|sound_type|essentialSound|dvaessential|presetType|"role"|"tag"|"type"|"category")[^A-Za-z0-9]{1,24}(?:Music|Song|Score)/i.test(s)) {
+            return "Music";
+        }
+        if (/(?:audioRole|audioCategory|soundType|audioType|audio_type|sound_type|essentialSound|dvaessential|presetType|"role"|"tag"|"type"|"category")[^A-Za-z0-9]{1,24}(?:SFX|Sound[-_ ]?Effects?)/i.test(s)) {
+            return "SFX";
+        }
+        if (/(?:audioRole|audioCategory|soundType|audioType|audio_type|sound_type|essentialSound|dvaessential|presetType|"role"|"tag"|"type"|"category")[^A-Za-z0-9]{1,24}(?:Ambience|Ambient|Atmosphere)/i.test(s)) {
+            return "Ambience";
+        }
+        return "";
+    }
+
+    function extractXmpFieldValues(xmlStr, fieldNameRx) {
+        if (!xmlStr) return "";
+        var values = [];
+        var elRx = /<([A-Za-z0-9_.:-]+)(?:\s[^>]*)?>([^<\r\n]+)<\/[A-Za-z0-9_.:-]+>/g;
+        var m;
+        while ((m = elRx.exec(xmlStr)) !== null) {
+            var tName = m[1] || "";
+            var tVal = String(m[2] || "").replace(/^\s+|\s+$/g, "");
+            if (tVal && fieldNameRx.test(tName)) {
+                values.push(tVal);
+            }
+        }
+        var attrRx = /\b([A-Za-z0-9_.:-]+)="([^"\r\n]+)"/g;
+        var ma;
+        while ((ma = attrRx.exec(xmlStr)) !== null) {
+            var aName = ma[1] || "";
+            var aVal = String(ma[2] || "").replace(/^\s+|\s+$/g, "");
+            if (aVal && fieldNameRx.test(aName)) {
+                values.push(aVal);
+            }
+        }
+        return values.join(" ; ");
+    }
+
+    function extractXmpDcBagText(xmpStr) {
+        if (!xmpStr) return "";
+        var values = [];
+        var blockRx = /<dc:(description|subject|title)\b[\s\S]*?<\/dc:\1>/gi;
+        var bm;
+        while ((bm = blockRx.exec(xmpStr)) !== null) {
+            var block = bm[0] || "";
+            var liRx = /<rdf:li(?:\s[^>]*)?>([^<]+)<\/rdf:li>/gi;
+            var lm;
+            while ((lm = liRx.exec(block)) !== null) {
+                var liVal = String(lm[1] || "").replace(/^\s+|\s+$/g, "");
+                if (liVal) values.push(liVal);
+            }
+        }
+        return values.join(" ; ");
+    }
+
+    function getAncestorFolderNamesFromPath(pathStr, maxLevels) {
+        if (!pathStr) return [];
+        var normalized = String(pathStr).replace(/\\/g, "/").replace(/\/+$/, "");
+        var lastSlash = normalized.lastIndexOf("/");
+        if (lastSlash <= 0) return [];
+        var dirPart = normalized.substring(0, lastSlash);
+        var parts = dirPart.split("/");
+        var result = [];
+        var limit = maxLevels || 3;
+        var genericRx = /^(\d+[_\-\s]*)?(audios?|wav|bwf|mp3|aif|aiff|flac|ogg|m4a|assets?|media|m[\u00edi]dias?|files?|footages?|imports?|downloads?|desktop|documents?|users)$/i;
+        for (var i = parts.length - 1; i >= 0 && result.length < limit; i--) {
+            var seg = String(parts[i] || "").replace(/^\s+|\s+$/g, "");
+            if (!seg || /^[A-Za-z]:$/.test(seg)) continue;
+            if (/^users$/i.test(seg)) break;
+            if (genericRx.test(seg)) continue;
+            result.push(seg);
+        }
+        return result;
+    }
+
+    function matchComponentAudioRole(comp) {
+        if (!comp) return "";
+        var mName = comp.matchName ? String(comp.matchName) : "";
+        var dName = comp.displayName ? String(comp.displayName) : "";
+        var compSig = (mName + " " + dName).toLowerCase();
+
+        if (/(speechenhancer|enhance speech|vocal enhancer|speech|de-?noise|denoise|de-?hum|dehum|de-?reverb|dereverb|reduce reverb|de-?ess|deess|clarity|dialogue)/i.test(compSig)) {
+            return "Dialogue";
+        }
+        if (/(ducking|auto-?duck|remix|music|stretch|duration)/i.test(compSig)) {
+            return "Music";
+        }
+        if (/(ambience|roomtone|room tone|stereo width|wind removal|environment|atmos)/i.test(compSig)) {
+            return "Ambience";
+        }
+        if (/(soundeffect|sfx|reverb|studioreverb|creative|distortion|delay|flanger|chorus)/i.test(compSig)) {
+            return "SFX";
+        }
+
+        // Ignorar componentes intrinsecos padrao de todo clipe (Volume, Channel Volume, Panner, Balance)
+        if (/^(adbe\s+)?(volume|channel volume|panner|balance)(\s+.*)?$/i.test(mName) || /^(volume|channel volume|panner|balance)$/i.test(dName)) {
+            return "";
+        }
+
+        // Inspecionar propriedades/parametros de componentes extras (ex.: Essential Sound / Sweetening)
+        try {
+            if (comp.properties && comp.properties.numItems) {
+                for (var p = 0; p < comp.properties.numItems; p++) {
+                    var prop = comp.properties[p];
+                    if (!prop) continue;
+                    var pName = prop.displayName ? String(prop.displayName) : "";
+                    var pValStr = "";
+                    try {
+                        if (typeof prop.getValue === "function") {
+                            var rawVal = prop.getValue();
+                            if (typeof rawVal === "string" && rawVal.length > 0 && rawVal.length < 8000) {
+                                pValStr = rawVal;
+                            }
+                        }
+                    } catch (ePropVal) { }
+
+                    if (pValStr) {
+                        var explicitFromProp = matchExplicitEssentialSoundTag(pValStr);
+                        if (explicitFromProp) return explicitFromProp;
+                        var cleanVal = pValStr.replace(/^\s+|\s+$/g, "");
+                        if (/^(dialogue|dialog)$/i.test(cleanVal)) return "Dialogue";
+                        if (/^music$/i.test(cleanVal)) return "Music";
+                        if (/^(sfx|sound\s*effects?)$/i.test(cleanVal)) return "SFX";
+                        if (/^(ambience|ambient)$/i.test(cleanVal)) return "Ambience";
+                    }
+                    if (pName) {
+                        if (/(enhance speech|vocal enhancer|reduce noise|reduce reverb|dehum|deess|clarity)/i.test(pName)) return "Dialogue";
+                        if (/(ducking|duck against|remix)/i.test(pName)) return "Music";
+                        if (/(stereo width|wind removal)/i.test(pName)) return "Ambience";
+                    }
+                }
+            }
+        } catch (eProps) { }
+
+        return "";
+    }
+
+    function buildTimelineAudioMap() {
+        var map = {};
+        var prioMap = {};
+        function assignMapKey(key, role, prio) {
+            if (!key || !role) return;
+            if (!prioMap[key] || prio >= prioMap[key]) {
+                map[key] = role;
+                prioMap[key] = prio;
+            }
+        }
+
+        try {
+            if (!app.project || !app.project.sequences) {
+                return map;
+            }
+            var numSeqs = app.project.sequences.numSequences || 0;
+            var seqList = [];
+            var seenSeqIds = {};
+
+            function registerSeq(seq) {
+                if (!seq) return;
+                var sKey = "";
+                try {
+                    if (seq.projectItem && seq.projectItem.nodeId) {
+                        sKey = seq.projectItem.nodeId;
+                    } else if (seq.id !== undefined && seq.id !== null) {
+                        sKey = "ID_" + seq.id;
+                    } else if (seq.name) {
+                        sKey = "NAME_" + seq.name;
+                    }
+                } catch (eKey) { }
+                if (!sKey) sKey = "SEQ_" + seqList.length;
+
+                if (!seenSeqIds[sKey]) {
+                    seenSeqIds[sKey] = true;
+                    seqList.push(seq);
+                }
+            }
+
+            var activeSeq = null;
+            try { activeSeq = app.project.activeSequence; } catch (eAct) { }
+            if (activeSeq) {
+                registerSeq(activeSeq);
+            }
+
+            for (var s = 0; s < numSeqs; s++) {
+                try {
+                    var sCand = app.project.sequences[s];
+                    if (sCand) {
+                        registerSeq(sCand);
+                    }
+                } catch (eCand) { }
+            }
+
+            for (var si = 0; si < seqList.length; si++) {
+                var currentSeq = seqList[si];
+                if (!currentSeq || !currentSeq.audioTracks) continue;
+                var trackCount = currentSeq.audioTracks.numTracks || 0;
+
+                for (var t = 0; t < trackCount; t++) {
+                    var track = currentSeq.audioTracks[t];
+                    if (!track) continue;
+
+                    var trackCategory = "";
+                    if (track.name) {
+                        var tClean = cleanAudioTokens(track.name);
+                        if (/\b(dialogue|dialog|voz|voice|fala|dx|entrevista|interview|locucao|locu[\u00e7c][\u00e3a]o|speech|vo)\b/i.test(tClean)) {
+                            trackCategory = "Dialogue";
+                        } else if (/\b(music|musica|m[\u00fau]sica|trilha|mx|bgm|soundtrack|song|beat|score)\b/i.test(tClean)) {
+                            trackCategory = "Music";
+                        } else if (/\b(sfx|fx|sound[-_ ]?effects?|efeitos?|foley)\b/i.test(tClean)) {
+                            trackCategory = "SFX";
+                        } else if (/\b(ambience|ambient|ambiente|amb|atmos|room[-_ ]?tone|atmosfera)\b/i.test(tClean)) {
+                            trackCategory = "Ambience";
+                        }
+                    }
+
+                    if (!track.clips || !track.clips.numItems) continue;
+
+                    for (var c = 0; c < track.clips.numItems; c++) {
+                        var clip = track.clips[c];
+                        if (!clip) continue;
+
+                        var pItem = null;
+                        try { pItem = clip.projectItem; } catch (ePI) { }
+
+                        var clipCategory = "";
+                        try {
+                            if (clip.components && clip.components.numItems) {
+                                for (var cp = 0; cp < clip.components.numItems; cp++) {
+                                    clipCategory = matchComponentAudioRole(clip.components[cp]);
+                                    if (clipCategory) break;
+                                }
+                            }
+                        } catch (eComp) { }
+
+                        var finalCategory = clipCategory || trackCategory;
+                        var prio = clipCategory ? 2 : 1;
+                        if (finalCategory) {
+                            if (pItem) {
+                                if (pItem.nodeId) {
+                                    assignMapKey(pItem.nodeId, finalCategory, prio);
+                                }
+                                var pMediaPath = getMediaPathSafe(pItem);
+                                if (pMediaPath) {
+                                    assignMapKey(pMediaPath, finalCategory, prio);
+                                }
+                                if (pItem.name) {
+                                    assignMapKey("NAME:" + pItem.name, finalCategory, prio);
+                                }
+                            }
+                            if (clip.name) {
+                                assignMapKey("NAME:" + clip.name, finalCategory, prio);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (eTimeline) { }
+
+        return map;
+    }
+
+    function classifyAudioRole(item, timelineAudioMap, nameCandidates) {
+        if (!item) return "";
+
+        var mPath = getMediaPathSafe(item);
+
+        // 1. Prioridade Maxima: Timeline & Essential Sound
+        if (timelineAudioMap) {
+            if (item.nodeId && timelineAudioMap[item.nodeId]) {
+                return timelineAudioMap[item.nodeId];
+            }
+            if (mPath && timelineAudioMap[mPath]) {
+                return timelineAudioMap[mPath];
+            }
+            if (item.name && timelineAudioMap["NAME:" + item.name]) {
+                return timelineAudioMap["NAME:" + item.name];
+            }
+        }
+
+        // 2. Tags explicitas de Essential Sound / AudioRole em XMP e notas do usuario no Projeto
+        var xmpCached = "";
+        try {
+            if (typeof item.getXMPMetadata === "function") {
+                xmpCached = item.getXMPMetadata() || "";
+                if (xmpCached) {
+                    var explicitXmpRole = matchExplicitEssentialSoundTag(xmpCached);
+                    if (explicitXmpRole) return explicitXmpRole;
+                }
+            }
+        } catch (eXMP) { }
+
+        try {
+            if (typeof item.getProjectMetadata === "function") {
+                var metaXml = item.getProjectMetadata();
+                if (metaXml) {
+                    var explicitProjRole = matchExplicitEssentialSoundTag(metaXml);
+                    if (explicitProjRole) return explicitProjRole;
+                    // Extrair APENAS valores preenchidos em colunas de notas/categoria (nunca tags XML vazias como Column.PropertyText.Dialog!)
+                    var userMetaValues = extractXmpFieldValues(
+                        metaXml,
+                        /(?:^|[.:])(?:LogNote|Description|Comment|SoundRoll|EssentialSound|AudioRole|AudioType|SoundType|AudioCategory|Category|Genre)$/i
+                    );
+                    if (userMetaValues) {
+                        var roleFromProjMeta = matchAudioRoleKeywords(userMetaValues);
+                        if (roleFromProjMeta) return roleFromProjMeta;
+                    }
+                }
+            }
+        } catch (eMeta) { }
+
+        // 3. Nome proprio do clipe e nome do arquivo em disco (antes de pasta generica)
+        if (item.name) {
+            var roleByItemName = matchAudioRoleKeywords(item.name);
+            if (roleByItemName) return roleByItemName;
+        }
+        var diskFileName = mPath ? getFileNameFromPath(mPath) : "";
+        if (diskFileName && diskFileName !== item.name) {
+            var roleByDiskFile = matchAudioRoleKeywords(diskFileName);
+            if (roleByDiskFile) return roleByDiskFile;
+        }
+
+        // 4. Metadados XMP descritivos embutidos no arquivo (BWF, ID3, RIFF, Artlist, Soundly: genre, description, BPM/tempo)
+        if (xmpCached) {
+            try {
+                var dcBagText = extractXmpDcBagText(xmpCached);
+                var xmpDescText = extractXmpFieldValues(
+                    xmpCached,
+                    /(?:^|:)(?:genre|album|logComment|instrument|description|comment|subject|IGNR|ICMT|ISBJ)$/i
+                );
+                var combinedXmpDesc = (dcBagText ? dcBagText + " ; " : "") + xmpDescText;
+                if (combinedXmpDesc) {
+                    var roleFromXmpDesc = matchAudioRoleKeywords(combinedXmpDesc);
+                    if (roleFromXmpDesc) return roleFromXmpDesc;
+                }
+                var xmpGenreOnly = extractXmpFieldValues(xmpCached, /(?:^|:)(?:genre|IGNR)$/i);
+                if (xmpGenreOnly && RX_AUDIO_MUSIC_GENRE.test(cleanAudioTokens(xmpGenreOnly))) {
+                    return "Music";
+                }
+                var xmpTempo = extractXmpFieldValues(xmpCached, /(?:^|:)(?:tempo|bpm|beatsPerMinute)$/i);
+                if (xmpTempo) {
+                    var bpmNum = parseFloat(xmpTempo);
+                    if (!isNaN(bpmNum) && bpmNum >= 30 && bpmNum <= 300) {
+                        return "Music";
+                    }
+                }
+            } catch (eXmpDesc) { }
+        }
+
+        // 5. Pastas em disco (pasta imediata + ate 3 niveis ancestrais) e candidatos restantes (bin original, treePath)
+        var folderAndBinCandidates = [];
+        if (mPath) {
+            var ancestors = getAncestorFolderNamesFromPath(mPath, 3);
+            for (var a = 0; a < ancestors.length; a++) {
+                folderAndBinCandidates.push(ancestors[a]);
+            }
+        }
+        if (nameCandidates && nameCandidates.length) {
+            for (var nc = 0; nc < nameCandidates.length; nc++) {
+                if (nameCandidates[nc]) folderAndBinCandidates.push(String(nameCandidates[nc]));
+            }
+        }
+        for (var i = 0; i < folderAndBinCandidates.length; i++) {
+            var roleByContext = matchAudioRoleKeywords(folderAndBinCandidates[i]);
+            if (roleByContext) return roleByContext;
+        }
+
+        return "Others";
     }
 
     // Coleta itens selecionados no painel Project mesmo quando o foco acabou de ir para o painel CEP
@@ -780,6 +1212,8 @@
         var reduceProject = (settings.reduceProject === true);
         var groupBySourceFolderGlobal = (settings.groupBySourceFolder !== false);
         var unusedFolderName = settings.unusedFolderName || "Nunca Usadas";
+        var separateAudioCategories = (settings.separateAudioCategories !== false);
+        var numberAudioCategories = (settings.numberAudioCategories !== false);
 
         // --- Perfil de execucao (Fase 2): tempo total + varreduras de bins ---
         var _profT0 = new Date().getTime();
@@ -801,6 +1235,7 @@
             var allBins = snap.allBins;
             var allNonBinItems = snap.allNonBinItems;
             var seqMap = buildSequenceMap();
+            var timelineAudioMap = separateAudioCategories ? buildTimelineAudioMap() : {};
 
             function isCompoundOrSequenceItem(item) {
                 if (!item || isBin(item) || isRoot(item)) return false;
@@ -863,21 +1298,37 @@
                 return false;
             }
 
+            var AUDIO_ROLE_ORDER = ["Dialogue", "Music", "SFX", "Ambience", "Others"];
+            function isCanonicalAudioRoleName(candidateName) {
+                if (!candidateName) return false;
+                var cleanLower = stripNumericPrefix(String(candidateName)).toLowerCase();
+                for (var ari = 0; ari < AUDIO_ROLE_ORDER.length; ari++) {
+                    if (AUDIO_ROLE_ORDER[ari].toLowerCase() === cleanLower) return true;
+                }
+                return false;
+            }
+
             function getOrCreateSubBin(parentBin, pathArray, inheritLabel) {
                 var currentParent = parentBin || rootItem;
                 for (var i = 0; i < pathArray.length; i++) {
                     var binName = pathArray[i];
+                    var matchRoleIgnorePrefix = (i === 0 && isCanonicalAudioRoleName(binName));
+                    var cleanRoleTarget = matchRoleIgnorePrefix ? stripNumericPrefix(binName).toLowerCase() : "";
                     var foundBin = null;
                     if (currentParent.children) {
                         for (var j = 0; j < currentParent.children.numItems; j++) {
                             _scanCount++;
                             var child = currentParent.children[j];
-                            if (isBin(child) && child.name === binName) {
-                                foundBin = child;
-                                if (foundBin.nodeId && !parentByNodeId[foundBin.nodeId]) {
-                                    parentByNodeId[foundBin.nodeId] = currentParent;
+                            if (isBin(child)) {
+                                var sameExact = (child.name === binName);
+                                var sameRole = (matchRoleIgnorePrefix && stripNumericPrefix(child.name).toLowerCase() === cleanRoleTarget);
+                                if (sameExact || sameRole) {
+                                    foundBin = child;
+                                    if (foundBin.nodeId && !parentByNodeId[foundBin.nodeId]) {
+                                        parentByNodeId[foundBin.nodeId] = currentParent;
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
                     }
@@ -982,7 +1433,7 @@
                 var mediaTypeMeta = getIntrinsicMediaType(item);
 
                 // 1. Áudio puro ou extensão de áudio
-                if (mediaTypeMeta && /^(audio|[aá]udio|ton|son)$/i.test(mediaTypeMeta)) {
+                if (mediaTypeMeta && /^(audio|[\u00e1a]udio|ton|son)$/i.test(mediaTypeMeta)) {
                     return "Audios";
                 }
                 if (
@@ -1009,11 +1460,11 @@
 
                 // 4. Sequência de imagens vs Imagem Estática via metadado intrínseco do Premiere
                 if (mediaTypeMeta) {
-                    if (/still|est[aá]tica|fija|fixe|standbild/i.test(mediaTypeMeta)) {
+                    if (/still|est[\u00e1a]tica|fija|fixe|standbild/i.test(mediaTypeMeta)) {
                         return "StillImages";
                     }
                     if (
-                        /video|v[ií]deo|movie|filme/i.test(mediaTypeMeta) &&
+                        /video|v[\u00edi]deo|movie|filme/i.test(mediaTypeMeta) &&
                         extLower !== "psd" &&
                         extLower !== "psb" &&
                         extLower !== "ai"
@@ -1066,6 +1517,76 @@
             var movedFootages = 0;
             var cleanedFolders = 0;
             var reducedCount = 0;
+
+            // --- Diagnostico visivel (Fase 2) ---
+            // Sem estes contadores, uma triagem que nao roda (ESP desligado) ou que
+            // nao encontra destino para o item devolve success:true e o painel exibe
+            // "Projeto organizado!" sem nenhum indicio do que ficou de fora.
+            ppro_debugReset();
+            var audioTotal = 0;
+            var audioNoMatch = 0;
+            var audioSkipped = 0;
+            var audioRoles = { Dialogue: 0, Music: 0, SFX: 0, Ambience: 0, Others: 0 };
+            var audioTargets = {};
+            var audioSamples = [];
+            var emptyLeftovers = [];
+
+            function registerAudioDecision(item, role, targetNode, subPathArr, movedOk) {
+                if (role) {
+                    if (!audioRoles[role]) audioRoles[role] = 0;
+                    audioRoles[role]++;
+                } else {
+                    audioSkipped++;
+                }
+                var targetName = String(targetNode && targetNode.name ? targetNode.name : "?");
+                audioTargets[targetName] = (audioTargets[targetName] || 0) + 1;
+                if (audioSamples.length < 8) {
+                    audioSamples.push({
+                        _nodeId: targetNode && targetNode.id ? String(targetNode.id) : "",
+                        name: String(item && item.name ? item.name : ""),
+                        role: role || "(ESP desligado)",
+                        node: targetName,
+                        path: (subPathArr || []).join("/"),
+                        moved: Boolean(movedOk)
+                    });
+                }
+                _dbg("AUDIO " + (movedOk ? "movido" : "mantido") + ": " +
+                    (item && item.name) + " role=" + (role || "-") +
+                    " no=" + targetName + " sub=" + (subPathArr || []).join("/"));
+            }
+
+            function jsonCountMap(countMap) {
+                var parts = [];
+                for (var key in countMap) {
+                    if (countMap.hasOwnProperty(key)) {
+                        parts.push('"' + escapeJsonString(key) + '":' + (parseInt(countMap[key], 10) || 0));
+                    }
+                }
+                return "{" + parts.join(",") + "}";
+            }
+
+            function jsonStringList(list) {
+                var parts = [];
+                for (var li = 0; li < (list || []).length; li++) {
+                    parts.push('"' + escapeJsonString(list[li]) + '"');
+                }
+                return "[" + parts.join(",") + "]";
+            }
+
+            function jsonAudioSamples() {
+                var parts = [];
+                for (var si = 0; si < audioSamples.length; si++) {
+                    var smp = audioSamples[si];
+                    parts.push(
+                        '{"name":"' + escapeJsonString(smp.name) +
+                        '","role":"' + escapeJsonString(smp.role) +
+                        '","node":"' + escapeJsonString(smp.node) +
+                        '","path":"' + escapeJsonString(smp.path) +
+                        '","moved":' + (smp.moved ? "true" : "false") + "}"
+                    );
+                }
+                return "[" + parts.join(",") + "]";
+            }
 
             if (typeof $.global.ppro_ensurePreOrganizeSnapshot === "function") {
                 $.global.ppro_ensurePreOrganizeSnapshot();
@@ -1216,7 +1737,7 @@
                         isInsideProtectedBin(binCandidate) ||
                         isTreeRootOrCategoryBin(binCandidate) ||
                         /^(psd|ai|psb)$/i.test(binCandidate.name) ||
-                        /^(\d+[_-\s]*)?(pre[-_]?comps?|sequences?|sequ[eê]ncias?)$/i.test(binCandidate.name)
+                        /^(\d+[_-\s]*)?(pre[-_]?comps?|sequences?|sequ[\u00eae]ncias?)$/i.test(binCandidate.name)
                     ) {
                         continue;
                     }
@@ -1235,7 +1756,7 @@
                         if (isCompoundOrSequenceItem(child)) {
                             internalSeqs.push(child);
                         } else if (isBin(child)) {
-                            if (!/^(\d+[_-\s]*)?(pre[-_]?comps?|sequences?|sequ[eê]ncias?)$/i.test(child.name)) {
+                            if (!/^(\d+[_-\s]*)?(pre[-_]?comps?|sequences?|sequ[\u00eae]ncias?)$/i.test(child.name)) {
                                 hasNonPsdAiItems = true;
                             }
                         } else {
@@ -1259,7 +1780,7 @@
                             var localPreCompBin = null;
                             for (var c2 = 0; c2 < binCandidate.children.numItems; c2++) {
                                 var ch = binCandidate.children[c2];
-                                if (isBin(ch) && /^(\d+[_-\s]*)?(pre[-_]?comps?|sequences?|sequ[eê]ncias?)$/i.test(ch.name)) {
+                                if (isBin(ch) && /^(\d+[_-\s]*)?(pre[-_]?comps?|sequences?|sequ[\u00eae]ncias?)$/i.test(ch.name)) {
                                     localPreCompBin = ch;
                                     break;
                                 }
@@ -1337,7 +1858,12 @@
                                 visitedMap[refItem.nodeId] = true;
                                 _dbg("nested candidato: " + refItem.name + " protected=" + isInsideProtectedBin(refItem) + " processed=" + !!processedNodeIds[refItem.nodeId]);
                                 if (!isInsideProtectedBin(refItem) && !processedNodeIds[refItem.nodeId]) {
-                                    var preMatch = findMatchingNode("PreComps", "", refItem.name);
+                                    var preCandidates = [refItem.name];
+                                    var origPreBin = (parentByNodeId && refItem.nodeId) ? parentByNodeId[refItem.nodeId] : null;
+                                    if (origPreBin && !isSameBin(origPreBin, rootItem) && origPreBin.name) {
+                                        preCandidates.push(origPreBin.name);
+                                    }
+                                    var preMatch = findMatchingNode("PreComps", "", preCandidates);
                                     _dbg("nested match: " + (preMatch && preMatch.rec ? preMatch.rec.id : "null"));
                                     if (preMatch && preMatch.rec) {
                                         var preNodeBin = ensureNodeBin(preMatch.rec.id);
@@ -1360,7 +1886,12 @@
                 for (var ms = 0; ms < targetMainSeqItems.length; ms++) {
                     var mainSeqItem = targetMainSeqItems[ms];
                     _dbg("main seq: " + mainSeqItem.name + " | no seqMap=" + !!seqMap[mainSeqItem.nodeId] + " | tracks=" + inspectSequenceTracks(seqMap[mainSeqItem.nodeId]).items.length);
-                    var mainMatch = findMatchingNode("MainComp", "", mainSeqItem.name);
+                    var mainCandidates = [mainSeqItem.name];
+                    var origMainBin = (parentByNodeId && mainSeqItem.nodeId) ? parentByNodeId[mainSeqItem.nodeId] : null;
+                    if (origMainBin && !isSameBin(origMainBin, rootItem) && origMainBin.name) {
+                        mainCandidates.push(origMainBin.name);
+                    }
+                    var mainMatch = findMatchingNode("MainComp", "", mainCandidates);
                     if (mainMatch && mainMatch.rec) {
                         var outBin = ensureNodeBin(mainMatch.rec.id);
                         if (moveItemSafe(mainSeqItem, outBin)) {
@@ -1375,6 +1906,30 @@
                 }
             }
 
+            // Pre-classificar stems irmaos de musica (ex.: "Artist - Track.wav" + "Artist - Track - No Lead Vocals.wav")
+            var musicStemBases = {};
+            function stripAudioExtAndStem(rawName) {
+                if (!rawName) return "";
+                var base = String(rawName).replace(/\.[A-Za-z0-9]{2,5}$/, "").toLowerCase();
+                base = base.replace(/\s*[-_(]+\s*(?:no\s+lead\s+vocals?|no\s+vocals?|instrumental|backing\s+track|backing\s+vocals?|stems?)(?:\s*[)_\-].*)?$/i, "");
+                return base.replace(/^\s+|\s+$/g, "");
+            }
+            if (separateAudioCategories) {
+                for (var psm = 0; psm < allNonBinItems.length; psm++) {
+                    var candItem = allNonBinItems[psm];
+                    if (!candItem || !candItem.nodeId || isCompoundOrSequenceItem(candItem)) continue;
+                    var cExt = getItemExtension(candItem);
+                    if (classifyPProItem(candItem, cExt) !== "Audios") continue;
+                    var quickRole = classifyAudioRole(candItem, timelineAudioMap, [candItem.name]);
+                    if (quickRole === "Music") {
+                        var stemBase = stripAudioExtAndStem(candItem.name);
+                        if (stemBase && stemBase.length >= 4) {
+                            musicStemBases[stemBase] = true;
+                        }
+                    }
+                }
+            }
+
             // 3. Processar os demais itens do projeto
             for (var r = 0; r < allNonBinItems.length; r++) {
                 var item = allNonBinItems[r];
@@ -1386,7 +1941,12 @@
                 if (isCompoundOrSequenceItem(item)) {
                     if (!isMediaOnly) {
                         _dbg("loose sequence: " + item.name);
-                        var loosePreMatch = findMatchingNode("PreComps", "", item.name);
+                        var looseCandidates = [item.name];
+                        var origLooseBin = (parentByNodeId && item.nodeId) ? parentByNodeId[item.nodeId] : null;
+                        if (origLooseBin && !isSameBin(origLooseBin, rootItem) && origLooseBin.name) {
+                            looseCandidates.push(origLooseBin.name);
+                        }
+                        var loosePreMatch = findMatchingNode("PreComps", "", looseCandidates);
                         if (loosePreMatch && loosePreMatch.rec) {
                             var looseNodeBin = ensureNodeBin(loosePreMatch.rec.id);
                             var targetLooseBin = looseNodeBin;
@@ -1403,8 +1963,49 @@
                     var fileExt = getItemExtension(item);
                     var fType = classifyPProItem(item, fileExt);
 
+                    var mediaPath = getMediaPathSafe(item);
+                    var diskFileName = mediaPath ? getFileNameFromPath(mediaPath) : "";
+                    var diskFolderName = mediaPath ? getParentFolderNameFromPath(mediaPath) : "";
+                    var origParentBin = (parentByNodeId && item.nodeId) ? parentByNodeId[item.nodeId] : null;
+                    var origBinName = (origParentBin && !isSameBin(origParentBin, rootItem) && origParentBin.name) ? origParentBin.name : "";
+
+                    var nameCandidates = [item.name];
+                    if (diskFileName && diskFileName !== item.name) {
+                        nameCandidates.push(diskFileName);
+                    }
+                    if (diskFolderName) {
+                        nameCandidates.push(diskFolderName);
+                    }
+                    if (origBinName && origBinName !== diskFolderName && origBinName !== item.name) {
+                        nameCandidates.push(origBinName);
+                    }
+                    if (item.treePath) {
+                        nameCandidates.push(item.treePath);
+                    }
+
+                    // Triagem de papel de audio (ESP). O papel detectado NAO entra em
+                    // nameCandidates: ele e derivado do proprio item e, como o filtro por
+                    // nomenclatura tem prioridade absoluta em _rules.jsx, injeta-lo fazia
+                    // qualquer no com nameFilter "sfx"/"fx"/"music"/"voz" capturar o
+                    // audio, inclusive nos que nao sao de audio. O destino por papel e
+                    // resolvido depois, na subpasta (01_Dialogue .. 05_Others).
+                    var isAudioItem = (fType === "Audios");
+                    var detectedAudioRole = "";
+                    if (isAudioItem) {
+                        audioTotal++;
+                        if (separateAudioCategories) {
+                            detectedAudioRole = classifyAudioRole(item, timelineAudioMap, nameCandidates);
+                            if (detectedAudioRole === "Others" && item.name) {
+                                var itemBaseKey = stripAudioExtAndStem(item.name);
+                                if (itemBaseKey && musicStemBases[itemBaseKey]) {
+                                    detectedAudioRole = "Music";
+                                }
+                            }
+                        }
+                    }
+
                     if (fType === "Solids") {
-                        var solidMatch = findMatchingNode("Solids", "", item.name);
+                        var solidMatch = findMatchingNode("Solids", "", nameCandidates);
                         if (solidMatch && solidMatch.rec) {
                             var solidBin = ensureNodeBin(solidMatch.rec.id);
                             if (moveItemSafe(item, solidBin)) {
@@ -1413,7 +2014,12 @@
                             processedNodeIds[item.nodeId] = true;
                         }
                     } else {
-                        var mediaMatch = findMatchingNode(fType, fileExt, item.name);
+                        var mediaMatch = findMatchingNode(fType, fileExt, nameCandidates);
+                        if ((!mediaMatch || !mediaMatch.rec) && isAudioItem) {
+                            audioNoMatch++;
+                            _dbg("AUDIO SEM NO: " + item.name + " (ext=" + fileExt +
+                                ", role=" + (detectedAudioRole || "-") + ")");
+                        }
                         if (mediaMatch && mediaMatch.rec) {
                             var targetNode = mediaMatch.rec.node;
                             var nodeBin = ensureNodeBin(mediaMatch.rec.id);
@@ -1423,15 +2029,24 @@
                                 ? Boolean(targetNode.rules.groupBySourceFolder)
                                 : groupBySourceFolderGlobal;
 
-                            var sourceFolderName = "";
-                            if (shouldGroupBySource) {
-                                var mediaPath = getMediaPathSafe(item);
-                                if (mediaPath) {
-                                    sourceFolderName = getParentFolderNameFromPath(mediaPath);
+                            var sourceFolderName = shouldGroupBySource ? diskFolderName : "";
+
+                            var subPath = [];
+
+                            // Subpasta de Categoria de Áudio (Dialogue, Music, SFX, Ambience, Others)
+                            if (fType === "Audios" && separateAudioCategories && detectedAudioRole) {
+                                var cleanTargetLower = stripNumericPrefix(targetNode.name || "").toLowerCase();
+                                var isAlreadyRoleNode = (
+                                    cleanTargetLower === "dialogue" || cleanTargetLower === "dialogo" ||
+                                    cleanTargetLower === "music" || cleanTargetLower === "musica" ||
+                                    cleanTargetLower === "sfx" ||
+                                    cleanTargetLower === "ambience" || cleanTargetLower === "ambiente"
+                                );
+                                if (!isAlreadyRoleNode && isCanonicalAudioRoleName(detectedAudioRole)) {
+                                    subPath.push(detectedAudioRole);
                                 }
                             }
 
-                            var subPath = [];
                             if (targetNode.rules && targetNode.rules.groupSubfoldersByExt) {
                                 var subBinName = (mediaMatch.matchedViaCatchOthers || !fileExt)
                                     ? "OTHERS"
@@ -1462,8 +2077,12 @@
                                 finalMediaBin = getOrCreateSubBin(nodeBin, subPath, targetNode.label);
                             }
 
-                            if (moveItemSafe(item, finalMediaBin)) {
+                            var mediaMoved = moveItemSafe(item, finalMediaBin);
+                            if (mediaMoved) {
                                 movedFootages++;
+                            }
+                            if (isAudioItem) {
+                                registerAudioDecision(item, detectedAudioRole, targetNode, subPath, mediaMoved);
                             }
                             processedNodeIds[item.nodeId] = true;
                         }
@@ -1494,7 +2113,86 @@
                 cleanedFolders = cleanEmptyBinsBottomUp(rootItem);
             }
 
-            // 5. Aplicar numeração sequencial (01_, 02_...) e Color Labels apenas nas Bins com itens
+            // 4b. Bins vazias remanescentes (quando deleteEmptyFolders esta desligado).
+            // Sem isso o usuario ve, por exemplo, 04_Audios/WAV vazio - sobra de uma
+            // execucao antiga - e conclui que a triagem por papel nao funcionou.
+            function collectEmptyBins(container, depth, pathPrefix) {
+                if (!container || !container.children || depth > 12) return;
+                for (var eb = 0; eb < container.children.numItems; eb++) {
+                    var chEb = container.children[eb];
+                    if (!chEb || !isBin(chEb) || isInsideProtectedBin(chEb)) continue;
+                    var childPath = pathPrefix ? (pathPrefix + "/" + chEb.name) : String(chEb.name || "");
+                    var numKids = (chEb.children && chEb.children.numItems) ? chEb.children.numItems : 0;
+                    if (numKids === 0) {
+                        if (emptyLeftovers.length < 40) emptyLeftovers.push(childPath);
+                    } else {
+                        collectEmptyBins(chEb, depth + 1, childPath);
+                    }
+                }
+            }
+            collectEmptyBins(rootItem, 0, "");
+
+            function applyAudioRoleSubfolderNumbering(parentAudioBin, ownerNode) {
+                if (!parentAudioBin || !parentAudioBin.children) return;
+                var childNodes = (ownerNode && ownerNode.children) ? ownerNode.children : [];
+                var shouldNumberRoles = Boolean(usePrefixNumbering && numberAudioCategories);
+                var roleSeq = 0;
+                var finalRoleFolderByBase = {};
+
+                for (var r = 0; r < AUDIO_ROLE_ORDER.length; r++) {
+                    var roleBase = AUDIO_ROLE_ORDER[r];
+                    var roleLower = roleBase.toLowerCase();
+
+                    // Nao interferir caso o usuario tenha criado um no filho manual com esse nome na arvore
+                    var isManualChildNode = false;
+                    for (var cn = 0; cn < childNodes.length; cn++) {
+                        if (childNodes[cn] && stripNumericPrefix(childNodes[cn].name || "").toLowerCase() === roleLower) {
+                            isManualChildNode = true;
+                            break;
+                        }
+                    }
+                    if (isManualChildNode) continue;
+
+                    var matchedRoleBin = null;
+                    for (var c = 0; c < parentAudioBin.children.numItems; c++) {
+                        _scanCount++;
+                        var sub = parentAudioBin.children[c];
+                        if (!sub || !isBin(sub)) continue;
+                        if (!sub.children || sub.children.numItems === 0) continue;
+                        if (stripNumericPrefix(sub.name).toLowerCase() === roleLower) {
+                            matchedRoleBin = sub;
+                            break;
+                        }
+                    }
+
+                    if (matchedRoleBin) {
+                        var finalRoleName = roleBase;
+                        if (shouldNumberRoles) {
+                            roleSeq++;
+                            var rPrefix = (roleSeq < 10 ? "0" + roleSeq : String(roleSeq)) + "_";
+                            finalRoleName = rPrefix + roleBase;
+                        }
+                        renameBinSafe(matchedRoleBin, finalRoleName);
+                        finalRoleFolderByBase[roleBase] = finalRoleName;
+                    }
+                }
+
+                var ownerId = ownerNode && ownerNode.id ? String(ownerNode.id) : "";
+                if (ownerId) {
+                    for (var si = 0; si < audioSamples.length; si++) {
+                        var smp = audioSamples[si];
+                        if (smp && smp._nodeId === ownerId && smp.role && finalRoleFolderByBase[smp.role]) {
+                            var sParts = smp.path ? smp.path.split("/") : [];
+                            if (sParts.length > 0 && stripNumericPrefix(sParts[0]).toLowerCase() === smp.role.toLowerCase()) {
+                                sParts[0] = finalRoleFolderByBase[smp.role];
+                                smp.path = sParts.join("/");
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 5. Aplicar numeração sequencial contínua (01_, 02_...) e Color Labels apenas nas Bins com itens
             function applyTreeNumberingAndLabels(nodesList, parentBin) {
                 if (!nodesList || !nodesList.length || !parentBin || !parentBin.children) return;
 
@@ -1546,6 +2244,10 @@
                     renameBinSafe(entry.bin, finalName);
                     applyPProLabelSafe(entry.bin, entry.node.label);
 
+                    if (separateAudioCategories) {
+                        applyAudioRoleSubfolderNumbering(entry.bin, entry.node);
+                    }
+
                     if (entry.node.children && entry.node.children.length > 0) {
                         applyTreeNumberingAndLabels(entry.node.children, entry.bin);
                     }
@@ -1573,6 +2275,25 @@
                 (new Date().getTime() - _profT0) +
                 ', "scanCount": ' +
                 _scanCount +
+                ', "audioSeparate": ' +
+                (separateAudioCategories ? "true" : "false") +
+                ', "audioTotal": ' +
+                audioTotal +
+                ', "audioNoMatch": ' +
+                audioNoMatch +
+                ', "audioSkipped": ' +
+                audioSkipped +
+                ', "audioRoles": ' +
+                jsonCountMap(audioRoles) +
+                ', "audioTargets": ' +
+                jsonCountMap(audioTargets) +
+                ', "audioSamples": ' +
+                jsonAudioSamples() +
+                ', "emptyLeftovers": ' +
+                jsonStringList(emptyLeftovers) +
+                ', "debugTrace": "' +
+                escapeJsonString(ppro_debugTrace()) +
+                '"' +
                 "}"
             );
         } catch (err) {

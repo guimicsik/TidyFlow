@@ -70,16 +70,23 @@ test("main.js só usa IDs presentes em index.html", function () {
   checkPair("Painel", "client/main.js", "client/index.html", panelHtmlIds);
 });
 
-test("modal de regras oferece campo livre + chips de extensões (MANIFESTO §2.1)", function () {
+test("modal de regras V2 unifica Seção 1 com caixa inline de tags específicas (MANIFESTO §2.1)", function () {
   var html = read("client/tree_editor.html");
-  assert.includes(html, 'id="inpNewExtension"', "input de extensão avulsa ausente");
-  assert.includes(html, 'id="btnAddExtension"', "botão [+] Adicionar de extensões ausente");
-  assert.includes(html, 'id="extTagsContainer"', "container de chips de extensões ausente");
+  var js = read("client/tree_editor.js");
+  assert.includes(html, 'class="modal-card modal-card-rules"', "card compacto V2 do modal de regras ausente");
+  assert.includes(html, 'id="inpNewExtension"', "input inline de formato específico ausente");
+  assert.includes(html, 'id="extTagsContainer"', "container inline de formatos específicos ausente");
+  assert.includes(html, 'id="extChipsList"', "lista inline de chips de formatos ausente");
+  assert.notIncludes(html, 'class="rule-pack-chk"', "pacotes de extensão redundantes (antiga Seção 3) devem ser removidos");
+  assert.notIncludes(html, 'class="info-icon"', "ícones (i) devem ser substituídos por tooltip direto no hover do botão");
+  assert.includes(js, 'ev.code === "Space"', "apertar Espaço deve salvar a tag de formato específico");
 });
 
-test("chips de extensão reutilizam o estilo dos chips de nomenclatura", function () {
+test("chips de formato e nomenclatura compartilham estilo e grid V2 mantém 3 colunas / centralização", function () {
   var css = read("client/tree_editor.css");
-  assert.includes(css, ".ext-tags-box", "estilo do container de chips ausente no CSS");
+  assert.includes(css, ".inline-ext-tags-box", "estilo da caixa inline de formatos específicos ausente no CSS");
+  assert.includes(css, ".behavior-grid-v2", "grid de 2 linhas da Seção 2 ausente no CSS");
+  assert.includes(css, ".ext-tags-box", "estilo do container de chips de nomenclatura ausente no CSS");
   assert.includes(css, ".ext-tag", "estilo do chip ausente no CSS");
 });
 
@@ -88,6 +95,13 @@ test("tree_editor.js não referencia controles removidos da UI", function () {
   assert.notIncludes(js, 'getElementById("btnSavePreset")', "btnSavePreset não existe mais na UI");
   assert.notIncludes(js, 'getElementById("inpUnusedFolderName")', "campo de nome da pasta de não usadas foi removido da UI");
   assert.notIncludes(js, "chkDeleteEmptyFolders", "toggle de excluir vazias vive apenas no painel principal");
+});
+
+test("editor de presets possui os toggles de Categorias de Áudio (ESP) e Numerar ESP ao lado de Numeração Sequencial", function () {
+  var html = read("client/tree_editor.html");
+  assert.includes(html, 'id="chkSeparateAudioCategories"', "chkSeparateAudioCategories deve existir no HTML");
+  assert.includes(html, 'id="chkNumberAudioCategories"', "chkNumberAudioCategories deve existir no HTML");
+  assert.includes(html, 'id="chkUsePrefixNumbering"', "chkUsePrefixNumbering deve existir no HTML");
 });
 
 test("painel principal mantém os controles documentados no manifesto", function () {
@@ -107,6 +121,18 @@ test("painel principal mantém os controles documentados no manifesto", function
   for (var i = 0; i < required.length; i++) {
     assert.ok(panelHtmlIds[required[i]], "index.html deve conter #" + required[i]);
   }
+});
+
+test("modal de confirmação de redução de projeto está presente e configurado", function () {
+  var html = read("client/index.html");
+  var js = read("client/main.js");
+  assert.includes(html, 'id="reduceModalBackdrop"', "reduceModalBackdrop ausente no index.html");
+  assert.includes(html, 'id="reduceModalTitle"', "reduceModalTitle ausente no index.html");
+  assert.includes(html, 'id="reduceModalSubtext"', "reduceModalSubtext ausente no index.html");
+  assert.includes(html, 'id="btnReduceSaveAndContinue"', "btnReduceSaveAndContinue ausente no index.html");
+  assert.includes(html, 'id="btnReduceContinueWithoutSave"', "btnReduceContinueWithoutSave ausente no index.html");
+  assert.includes(html, 'id="btnReduceCancel"', "btnReduceCancel ausente no index.html");
+  assert.includes(js, "openReduceModal()", "btnOrganize deve abrir o modal de redução quando chkReduceProject estiver ativo");
 });
 
 test("P8: fluxos destrutivos de preset pedem confirmação antes de sobrescrever", function () {

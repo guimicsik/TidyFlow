@@ -12,4 +12,10 @@
       <Host Name="PPRO" Port="8092" />
     </HostList>
   </Extension>
+  <Extension Id="com.tidyflow.collect">
+    <HostList>
+      <Host Name="AEFT" Port="8093" />
+      <Host Name="PPRO" Port="8094" />
+    </HostList>
+  </Extension>
 </ExtensionList>

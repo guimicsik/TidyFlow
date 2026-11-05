@@ -9,7 +9,9 @@
     "saveProjectBefore": true,
     "reduceProject": false,
     "groupBySourceFolder": true,
-    "unusedFolderName": "Nunca Usadas"
+    "unusedFolderName": "Nunca Usadas",
+    "separateAudioCategories": true,
+    "numberAudioCategories": true
   },
   "tree": [
     {

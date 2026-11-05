@@ -13,7 +13,7 @@ O sistema resolve a desorganização em projetos de qualquer complexidade:
 - Possui um motor dinâmico baseado em **Presets JSON** com um **Editor Visual Flutuante (*Preset Builder*)**.
 - Suporta rótulos de cores nativos (*Color Labels*), prefixação ordinal inteligente e criação de árvore de pastas limpa (*scaffolding*).
 - Oferece **Snapshot & Rollback**: qualquer organização pode ser revertida ao estado exato anterior (pastas recriadas, itens devolvidos ao pai original, labels restaurados).
-- Interface desktop redesenhada no **Figma** com design system dedicado (`index.css` / `tree_editor.css`), painel compacto de 360×440 px e janela modeless para o editor de presets.
+- Interface desktop redesenhada no **Figma** com design system em camadas — tokens e componentes de botão em `theme.css` (compartilhado) e estilos de cada janela em `index.css` / `tree_editor.css` —, painel compacto de 360×440 px e janela modeless para o editor de presets.
 - Identidade unificada sob a marca **TidyFlow** (`com.tidyflow` / `com.tidyflow.editor`), com compartilhamento total de UI e presets entre After Effects e Premiere Pro.
 
 ---
@@ -27,18 +27,20 @@ O sistema resolve a desorganização em projetos de qualquer complexidade:
   - **Árvore visual arrastável (drag & drop):** o handle de cada pasta move o nó com zonas de drop de *25% superior = antes*, *50% central = dentro da pasta* e *25% inferior = depois*, com bloqueio de mover uma pasta para dentro de si mesma (`isDescendantOf`).
   - Criar pastas no nível raiz (`+ Add Top Folder`) e subpastas aninhadas em qualquer profundidade; renomear, excluir (modal de confirmação) e colapsar/expandir nós.
   - **Popover de Color Labels:** o swatch abre um popover ancorado com os **17 slots (0 a 16)**, traduzidos por host (`AE_LABELS` vs `PPRO_LABELS_BY_SLOT`).
-  - **Modal de Regras e Filtros em 4 seções:**
-    1. **Tipos Permitidos:** `MainComp`, `PreComps`, `StillImages`, `Videos`, `ImageSequences`, `Audios`, `Solids`, `DataFiles` (rótulos e tooltips trocados automaticamente para *Sequências* no Premiere).
-    2. **Subpastas e Comportamento:** `groupSubfoldersByExt` (*Subpastas por Extensão*), `groupBySourceFolder` (*Pasta de Origem*), `groupByMainComp` (*Agrupar por Comp/Seq Principal*), `handlePsdBundles` (*Isolar PSD/AI*) e `catchOthers` (*Pasta OTHERS – Fallback*).
-    3. **Pacotes de Extensão:** botões de pacote (Imagens, Vídeos, Áudios, Dados/3D) que marcam vários formatos de uma vez, mais campo livre `[+] Adicionar` e chips removíveis com `×`.
-    4. **Filtro por Nomenclatura:** tags de palavras separadas por `,` ou `;`, gravadas em `rules.nameFilter` (modo `contains`, case-insensitive). Qualquer item cujo nome contenha uma das palavras é enviado direto para aquela pasta.
+  - **Modal de Regras e Filtros V2 compacto (`492px`, coluna única em 3 seções, tooltips no hover dos botões):**
+    1. **1. Formatos (grid 3×3 unificando Tipos + Formatos Específicos):** 7 botões de `148×42 px` (`MainComp`, `PreComps`, `StillImages`, `Videos` — que unifica vídeos e `ImageSequences` —, `Audios`, `DataFiles`, `Solids`, com rótulos e tooltips adaptados automaticamente para *Sequências* / *Itens Sintéticos* no Premiere) + **caixa inline de formatos específicos** (`302×42 px`, ocupando 2 colunas ao lado de `Sólidos`) onde apertar **`Espaço`** (ou `Enter` / `,`) salva imediatamente o formato digitado como chip removível (`.exr ×`), mantendo os pacotes padrão de categoria ocultos nos bastidores (`rules.customExtensions` + `rules.extensions`).
+    2. **2. Subpastas e Comportamento (grid 2 linhas: 3 em cima + 2 centralizados embaixo, todos `148×42 px`):** `groupSubfoldersByExt` (*Subpastas por Extensão*), `groupBySourceFolder` (*Pasta de Origem*), `groupByMainComp` (*Agrupar por Comp/Seq Principal*), `handlePsdBundles` (*Isolar PSD/AI*) e `catchOthers` (*Pasta OTHERS – Fallback*), com espaço na 2ª linha para expansão futura.
+    3. **3. Filtro por Nomenclatura:** tags de palavras separadas por `,` ou `;`, gravadas em `rules.nameFilter` (modo `contains`, case-insensitive). O motor avalia o conjunto de candidatos do item (`item.name`, nome do arquivo em disco, pasta de origem em disco e bin/pasta original) com prioridade máxima (score 1000+) sobre regras genéricas de tipo e extensão. Se qualquer candidato contiver uma das palavras, o item é roteado diretamente para aquela pasta — **as listas `rules.types` / `rules.extensions` do próprio nó não vetam o filtro por nome** (elas são derivadas dos tiles do Builder e ficam defasadas com facilidade, ex.: preset antigo ou edição parcial).
+    - **Visual:** os 12 tiles acima e os botões do rodapé (`Cancelar` / `Aplicar Regras na Pasta`) e da linha de ações (`[+] Adicionar` / `Limpar`) **consomem o design system do painel principal** (`theme.css`): tiles usam `.tf-toggle` + `.tf-toggle__face` (cinza desligado / verde ligado, 42 px de altura no modal) e os botões usam `.tf-btn--primary`, `.tf-btn--ghost` e `.tf-btn--destructive` (`.tf-btn--mini`), sem cores locais duplicadas.
   - **Barra superior de ações:** `Salvar`, `Salvar Novo` (modal de nome que clona o preset atual), `Reset Default`, `Importar Preset` / `Exportar Preset` (via `cep.fs.showOpenDialogEx` / `showSaveDialogEx`, com fallback por `FileReader` e download), `Abrir Pasta Local` (abre a pasta de presets no Explorer/Finder) e `Excluir` (indisponível em presets de fábrica).
+  - **Visual dos botões da janela:** a barra superior, o rodapé (`Salvar` / `Fechar`), o botão `+ Add pasta` e os rodapés dos modais (Salvar Como, Confirmação e Alterações Não Salvos) usam o **mesmo componente de botão do painel principal** — `.tf-btn--primary` (azul), `.tf-btn--danger` → `.tf-btn--destructive` (vermelho), `.tf-btn--success` (verde), `.tf-btn--warning` (laranja) e `.tf-btn--ghost` (cinza), com relevo de 3 px e raio de 7 px, em escalas `.tf-btn--xs` (28 px) / `--sm` (32 px) / `--mini` (22 px). O julgamento de cores é preservado: azul continua azul, vermelho continua vermelho e cinza continua cinza.
   - **Badges de estado:** `Padrão de Fábrica` e `Não salvo*` (dirty flag recalculada a cada edição).
   - **Rodapé:** `Salvar` (`btnFooterSave`, mesmo fluxo do `Salvar` superior) e `Fechar`. Se houver alterações não salvas (`isDirty`), `Fechar` abre o modal *Alterações Não Salvas* com `Salvar e Fechar`, `Fechar sem Salvar` e `Cancelar` (no preset de fábrica, `Salvar e Fechar` passa pelo modal *Salvar Como* e fecha após criar o novo preset).
   - **Pasta de Não Usados:** o campo de edição foi removido da UI; `settings.unusedFolderName` continua no preset (padrão `Nunca Usadas`).
 - **Persistência Híbrida:** grava via Node.js `fs` em `%APPDATA%/TidyFlow/presets`, com **migração única** de `%APPDATA%/AE_Organizer/presets` (flag `ae_organizer_presets_migrated`) e fallback resiliente via `localStorage` quando `fs`/`path` não estão disponíveis. A exclusão limpa o arquivo nas **duas** pastas (nova e legada), evitando que presets removidos ressuscitem na migração.
   - **Falha de escrita não cria preset fantasma:** se `writeFileSync` falhar, `savePreset()` **não** espelha o objeto em `localStorage`, **não** troca o preset ativo e devolve o preset normalizado com `lastSaveError` preenchido (o editor mostra o erro e mantém `Não salvo*`). Espelhar nesse momento criaria uma entrada que `listPresets()` (fonte = disco) nunca lista e que `_loadPresetFromDiskOrMemory()` não recarrega.
   - **Overrides do `Default Clean`:** a árvore do preset de fábrica é protegida, mas `savePreset()` persiste em `localStorage["ae_organizer_default_settings"]` os toggles globais (`usePrefixNumbering`, `deleteEmptyFolders`, `saveProjectBefore`, `reduceProject`, `groupBySourceFolder`, `unusedFolderName`) **e** a regra por pasta `nodeGroupBySourceFolder` (mapa `id → bool`). `getDefaultPreset()` reaplica ambos, então alternar "Pasta de Origem" em uma pasta sobrevive a reload do painel.
+  - **Descarte de árvore no Default nunca é silencioso:** como o Default grava apenas os itens acima, qualquer **outra** mudança de estrutura enviada a `savePreset()` seria perdida sem aviso. O manager compara uma assinatura estável da árvore (`buildTreeSignature`, memoizada por `_getDefaultTreeSignature()`, ignorando `id` e `rules.groupBySourceFolder`, que são persistidos) com a do bundle de fábrica e, se divergir, preenche `lastSaveWarning` + `OrgLog.warn` — o editor e o painel consomem via `consumeSaveWarning()` e mostram o aviso em `warning`, mantendo o badge `Não salvo*`. O caminho correto continua sendo `Salvar Novo`.
   - **Cache em memória (Fase 1):** `getPresetsFolderPath()` é memoizado e `listPresets()`/`loadPreset()` mantêm cache invalidado por `invalidatePresetCache()` em salvar/excluir/importar e no evento `com.tidyflow.presetsUpdated` — antes, cada evento `focus` disparava `readdirSync` + leitura de todos os JSONs.
 - **Sincronização com o Painel Principal:** `notifyPresetsUpdated()` avisa via `window.opener`/`window.parent` (`onPresetBuilderUpdated`) **e** dispara o CSEvent `com.tidyflow.presetsUpdated`; o painel escuta o evento, o `focus` da janela e re-sincroniza preset ativo + toggles.
 
@@ -48,19 +50,24 @@ O sistema resolve a desorganização em projetos de qualquer complexidade:
 3. **Media Only (`btnMediaOnly`):** chama `$.global.organizeWithPreset("media_only", preset)` — move exclusivamente footage, áudio, imagens e sólidos, mantendo composições/sequências onde o usuário as posicionou. Ainda aplica classificação por regras, *Pasta de Origem*, *OTHERS* e Color Labels.
 4. **Verificar Comps / Limpeza (`btnCheckComps`):** chama `$.global.checkUnusedComps(preset)` — identifica e isola em pasta dedicada (`Nunca Usadas`, nome configurável) itens vazios e comps/sequências que não estão vinculadas nem ativas no fluxo de entrega.
 5. **Rollback (`btnRollback`):** abre o modal de confirmação e chama `$.global.rollbackProject(saveBefore, snapshotJson)` — devolve o projeto ao estado anterior à última organização (detalhado em **2.4**).
+6. **Collect Files — em teste (`btnOpenCollect`):** botão temporário no fim do painel que abre a janela `com.tidyflow.collect` (ver **2.5**).
 
-Todas as chamadas retornam um JSON padronizado (`success`, `movedComps`, `movedFootages`, `cleanedFolders`, `reducedCount`, `projectSaved`, `error`), usado pelo painel para montar a mensagem de status e, em caso de sucesso, para sincronizar o snapshot de rollback.
+Todas as chamadas retornam um JSON padronizado (`success`, `movedComps`, `movedFootages`, `cleanedFolders`, `reducedCount`, `projectSaved`, `error`), usado pelo painel para montar a mensagem de status e, em caso de sucesso, para sincronizar o snapshot de rollback. No Premiere Pro, `organizeWithPreset` inclui ainda os campos de diagnóstico da triagem (`audioSeparate`, `audioTotal`, `audioNoMatch`, `audioSkipped`, `audioRoles`, `audioTargets`, `audioSamples`), as bins vazias remanescentes (`emptyLeftovers`) e o rastro de decisões (`debugTrace`) — ver **7.17**.
 
 ### 2.3 Opções Rápidas (Toggles de Pipeline)
-- `usePrefixNumbering`: prefixa pastas com `01_`, `02_`, `03_...` **apenas nas pastas que realmente contiverem itens** (categorias vazias são puladas). Cada nó pode sair da numeração com `useNumbering: false`. O prefixo antigo é removido antes de renumerar (`stripNumericPrefix`), evitando acúmulo de `01_01_` em reexecuções.
+- `usePrefixNumbering`: prefixa pastas com `01_`, `02_`, `03_...` usando o **número da posição do nó na árvore do preset** — a mesma regra de `createPresetFolderStructure` e do badge do Preset Builder. Categorias vazias continuam **não sendo criadas**, mas também **não deslocam a numeração das demais** (`03_Footages` continua `03_Footages` mesmo com as posições 1 e 2 vazias; lacunas como `01_`, `03_` são esperadas). Cada nó pode sair da numeração com `useNumbering: false`. O prefixo antigo é removido antes de renumerar (`stripNumericPrefix`), evitando acúmulo de `01_01_` em reexecuções.
 - `deleteEmptyFolders`: remove recursivamente pastas/bins que restarem vazios ao fim da triagem (`cleanEmptyFolders` no AE, `cleanEmptyBinsBottomUp` no Premiere), ignorando pastas protegidas do sistema.
 - `saveProjectBefore`: salva o projeto antes de iniciar qualquer modificação (é forçado quando `reduceProject` está ativo).
 - `reduceProject`: reduz o projeto às dependências da comp/sequência selecionada antes da triagem (no Premiere usa um bin temporário `__ORGANIZER_REDUCE_TMP__` como lixeira); exibe banner de aviso no painel enquanto estiver ligado.
+  - Ao clicar em **Organizar Projeto** (`btnOrganize`) com essa opção ativa, abre o modal de confirmação `#reduceModalBackdrop` (seguindo o mesmo design system do modal de Rollback), perguntando se o usuário deseja salvar o projeto antes de prosseguir (**Salvar e Continuar**, **Continuar sem Salvar** ou **Cancelar**).
 - `groupBySourceFolder`: cria uma subpasta com o nome da pasta em que o arquivo reside em disco (ex: `02_Assets > 03_Footages > MP4 > Teste > Teste.mp4`). Ativo por padrão **por pasta** (`rules.groupBySourceFolder`, com fallback global em `settings.groupBySourceFolder`) e sincronizado entre After Effects e Premiere Pro.
   - O toggle do painel grava `settings.groupBySourceFolder` **e propaga o valor para todos os nós** da árvore.
   - Se apenas algumas pastas desativarem a opção, o tile entra em estado **parcial** (classe `.partial` + `#groupSourceNote`) listando as pastas divergentes.
+- `separateAudioCategories`: *(Exclusivo Premiere Pro)* Ativa a triagem inteligente de áudio em subpastas de `Dialogue`, `Music`, `SFX` e `Ambience` (com `Others` para não identificados). O motor inspeciona a timeline ativa (componentes/ajustes do painel Essential Sound e nomes de trilha `Dialogue`, `DX`, `Music`, `MX`, `SFX`, `Ambience`, etc.) com fallback em cascata para metadados de projeto (Log Note/Description) e palavras-chave nos nomes dos arquivos/pastas em disco. Preserva a organização por formato (`WAV`, `MP3`...) internamente em cada categoria quando `groupSubfoldersByExt` estiver ativo. Configurado no Preset Builder via toggle **Categorias de Áudio (ESP)** ao lado de *Numeração Sequencial*.
+  - **Precedência da triagem (`_rules.jsx`):** o papel detectado escolhe apenas a subpasta (`01_Dialogue` … `05_Others`) e **não** é injetado em `nameCandidates` — como o filtro por nomenclatura tem prioridade absoluta, injetá-lo fazia qualquer nó com `nameFilter` `sfx`/`fx`/`music`/`voz` capturar o áudio. Além disso, um nó cujo **tipo** casou tem prioridade menor que um match explícito de extensão, mas **maior que `OTHERS`**: listas de extensões derivadas dos tiles do Preset Builder ficam defasadas e, sem esse fallback, o áudio simplesmente não era movido (ver **7.16** e **7.17**).
+  - **Diagnóstico:** `organizeWithPreset` devolve contadores por papel/destino, bins vazias remanescentes e `debugTrace`; `buildAudioSummary()` no painel transforma isso em status (âmbar quando há áudio sem destino, ESP desligado num preset que tem nó de áudio, ou sobras vazias).
 - **Persistência dos toggles:** gravados no preset ativo via `presetManager.savePreset()` (que já dispara `com.tidyflow.presetsUpdated` — não há segundo dispatch) e espelhados em `localStorage` (`ae_organizer_save_project`, `ae_organizer_reduce_project`, `ae_organizer_delete_empty`), garantindo que o painel reabra no último estado usado.
-  - **Invariante `reduceProject ⇒ saveProjectBefore`:** as três chaves são independentes, então o par inválido pode reaparecer. `enforceReduceRequiresSave()` roda em `syncPresetsAndToggles()`, no handler de `#chkReduceProject`, em `runOrganizer()` (`saveProjectBefore || reduceProject`) e no handler de `#chkSaveProject` (desmarcar "Salvar" com "Reduzir" ligado é bloqueado com aviso) — reduzir o projeto remove itens e exige ponto de retorno salvo.
+  - **Invariante `reduceProject ⇒ saveProjectBefore` e Modal de Confirmação:** as três chaves são independentes, então o par inválido pode reaparecer. `enforceReduceRequiresSave()` roda em `syncPresetsAndToggles()`, no handler de `#chkReduceProject`, em `runOrganizer()` (`saveProjectBefore || reduceProject`) e no handler de `#chkSaveProject` (desmarcar "Salvar" com "Reduzir" ligado é bloqueado com aviso). Ao acionar "Organizar Projeto" com a redução ativa, o modal `#reduceModalBackdrop` oferece explicitamente as opções de salvar e continuar, continuar sem salvar (override pontual para a execução) ou cancelar a ação com segurança.
 
 ### 2.4 Snapshot & Rollback (Desfazer Organização)
 Sistema que devolve o projeto ao estado exato anterior à organização, em ambos os hosts.
@@ -80,6 +87,16 @@ Sistema que devolve o projeto ao estado exato anterior à organização, em ambo
 2. Clicar em **Rollback** abre `#rollbackModalBackdrop` com **Salvar e Continuar**, **Continuar sem Salvar** e **Cancelar** (Esc e clique no backdrop fecham).
 3. Ao concluir, o painel exibe `Itens restaurados`, `Pastas recriadas`, `Pastas removidas` e `Projeto salvo`, e limpa o snapshot do `localStorage`.
 4. O roteador expõe `$.global.rollbackProject` e `$.global.getRollbackSnapshotJson` (também em `organizerRouter`), mantendo o frontend 100% agnóstico de host.
+
+### 2.5 Collect Files (em construção — especificação em `COLLECT_FILES_SPEC.md`)
+Coleta o projeto numa pasta autossuficiente: cópia do `.aep`, arquivos em `(Footage)/` espelhando o painel Project e relink completo. A arquitetura de relink foi validada na Fase 0 (troca de caminhos no `.aepx`; `item.replace()` está **proibido** por achatar camadas de PSD/AI). Estado atual:
+
+- **Janela própria `com.tidyflow.collect`** (`client/collect.html` / `collect.css` / `collect.js`, *Modeless* 390×460), espelhando o diálogo nativo do AE: origem (`Tudo`, `Para todas as comps`, `Para as comps selecionadas`, `Para as comps na fila` — desabilitado —, `Nenhum (apenas projeto)`), `Gerar apenas relatório`, `Obedecer configurações de proxy`, `Reduzir projeto`, opções de render farm (desabilitadas), `Mostrar no Explorer`, `Comentários...`.
+- **Regras de habilitação:** `Tudo` e `Nenhum` desabilitam *Proxy* e *Reduzir*; os modos por comp habilitam; `Gerar apenas relatório` desabilita *Reduzir*.
+- **Rodapé em tempo real:** `X arquivo(s) (Y GB) serão coletados. Z efeito(s) usado(s).` — recalculado ao trocar o modo, ao alternar *Proxy*/*Relatório* e no `focus` da janela (a seleção pode ter mudado). Avisa projeto não salvo, nenhuma comp selecionada, itens offline e arquivos ausentes no disco.
+- **Host:** `$.global.collectScan(optionsJson)` (roteado para `aeft_collectScan` em `host/aeft_collect.jsx`, somente leitura) devolve `success`, `mode`, `projectName`, `projectPath`, `projectSaved`, `selectedCompCount`, `queuedCount`, `effectCount`, `effects[]` e `items[]` (`id`, `name`, `path`, `isSequence`, `missing`, `folders[]`, `proxyPath`, `proxyIsSequence`, `useProxy`). No Premiere devolve `unsupported: true`.
+- **Cliente:** `client/CollectEngine.js` (puro, testável em Node) — regras de nome do disco, frames de sequência, `planSources` (deduplicação e *Obedecer proxy*) e estimativa assíncrona de tamanho com cache.
+- **Ainda não implementado:** o botão `Coletar...` não executa a cópia/relink (Fases 4–5 da spec).
 
 ---
 
@@ -153,12 +170,17 @@ AE_File_Organizer/
 │   ├── CSInterface.js      # Biblioteca ponte de comunicação CEP <-> Host
 │   ├── OrgLog.js           # Logger leve (níveis, ring buffer, dump) usado pelo painel e pelo editor
 │   ├── index.html          # Interface do Painel Principal (estrutura semântica)
-│   ├── index.css           # Design system do painel (Figma: dark UI, tiles, toggles, modais)
+│   ├── theme.css           # Design system compartilhado: tokens (--tf-*) e botões/toggles (Painel + Builder)
+│   ├── index.css           # Design system do painel (Figma: dark UI, layout de tiles, modais)
 │   ├── main.js             # Controladores do painel: modos, toggles, presets e rollback
 │   ├── tree_editor.html    # Interface do Preset Builder (Janela Modeless)
 │   ├── tree_editor.css     # Design system do Preset Builder (árvore, modais, popovers)
 │   ├── tree_editor.js      # Árvore drag & drop, regras, import/export e persistência
 │   ├── PresetManager.js    # Leitura/escrita de presets, schema, labels e extensões por host
+│   ├── collect.html        # Janela Collect Files (com.tidyflow.collect)
+│   ├── collect.css         # Layout da janela Collect (botões vêm de theme.css)
+│   ├── collect.js          # Opções do Collect e cálculo prévio do rodapé
+│   ├── CollectEngine.js    # Lógica pura do Collect (nomes no disco, sequências, estimativa)
 │   └── presets/
 │       └── default_preset.json # Preset padrão de fábrica (After Effects)
 ├── host/
@@ -167,6 +189,7 @@ AE_File_Organizer/
 │   ├── organizer.jsx       # Roteador unificado de Host (detecta AEFT vs PPRO, carrega libs)
 │   ├── aeft_organizer.jsx  # Motor do After Effects (CompItem/FolderItem) + snapshot/rollback
 │   ├── ppro_organizer.jsx  # Motor do Premiere Pro 22.x+ (ProjectItem/Bin/Sequence) + snapshot/rollback
+│   ├── aeft_collect.jsx    # Collect Files: scan somente leitura do projeto AE (carregado pelo roteador)
 │   └── legacy/
 │       └── aeft_legacy.jsx # Motor AE antigo (pre-presets), carregado sob demanda pelo roteador
 ├── design/
@@ -175,12 +198,14 @@ AE_File_Organizer/
 │   └── figma_exports/                # Exportações do Figma
 │       ├── main_panel.svg            # Painel principal (layout atual)
 │       ├── main_panel_old.svg        # Painel principal (layout anterior)
-│       ├── modal_rules.svg           # Modal de Regras e Filtros
+│       ├── modal_rules.svg           # Modal de Regras e Filtros (V1)
+│       ├── modal_rules_V2.svg        # Modal de Regras e Filtros (V2 compacto em 3 seções)
 │       └── preset_builder.svg        # Preset Builder / árvore de pastas
 ├── scripts/
 │   ├── setup_dev.ps1               # Setup do ambiente de desenvolvimento (symlink CEP)
 │   ├── install_symlink.bat         # Instalação do symlink da extensão
 │   └── rollback_ponto_retorno.bat  # Restaura o código para a tag ponto-de-retorno-ae-v1.0
+├── backups/                # Cópias manuais de theme.css (ponto de retorno local, não entra na extensão)
 └── dist/                   # Build de produção gerado pelo Vite (não versionado)
 ```
 
@@ -199,7 +224,9 @@ AE_File_Organizer/
     "saveProjectBefore": true,
     "reduceProject": false,
     "groupBySourceFolder": true,
-    "unusedFolderName": "Nunca Usadas"
+    "unusedFolderName": "Nunca Usadas",
+    "separateAudioCategories": true,
+    "numberAudioCategories": true
   },
   "tree": [
     {
@@ -333,7 +360,7 @@ AE_File_Organizer/
 | `presetName` | raiz | Nome único do perfil; usado como nome de arquivo (`sanitizeFileName`) e chave em `localStorage` |
 | `isBuiltIn` | raiz | `true` apenas no preset de fábrica — bloqueia exclusão e é restaurado por **Reset Default** |
 | `version` / `$schema` | raiz | Controle de versão e referência de schema (draft-07) |
-| `settings.usePrefixNumbering` | settings | Liga a numeração ordinal `01_`, `02_`... (só em pastas com itens) |
+| `settings.usePrefixNumbering` | settings | Liga a numeração ordinal `01_`, `02_`... (número = posição do nó na árvore; pastas vazias não são criadas e não deslocam as demais) |
 | `settings.deleteEmptyFolders` | settings | Remove pastas/bins vazios ao final |
 | `settings.saveProjectBefore` | settings | Salva o projeto antes de modificar |
 | `settings.reduceProject` | settings | Executa redução de projeto antes da triagem |
@@ -345,7 +372,8 @@ AE_File_Organizer/
 | `tree[].useNumbering` | nó | `false` exclui esta pasta da numeração sequencial (padrão `true`) |
 | `tree[].children` | nó | Subpastas aninhadas (recursivo, profundidade livre) |
 | `rules.types` | nó | Categorias aceitas: `MainComp`, `PreComps`, `StillImages`, `Videos`, `ImageSequences`, `Audios`, `Solids`, `DataFiles` |
-| `rules.extensions` | nó | Lista de extensões (sem ponto, minúsculas) aceitas pelo nó |
+| `rules.extensions` | nó | Lista efetiva de extensões (sem ponto, minúsculas) aceitas pelo nó (pacotes padrão das categorias marcadas + tags específicas) |
+| `rules.customExtensions` | nó | *(Opcional)* Lista apenas das tags de formato específico/avulso digitadas pelo usuário na caixa inline da Seção 1 |
 | `rules.groupSubfoldersByExt` | nó | Cria subpasta em MAIÚSCULAS por extensão (`MP4/`, `PNG/`...) |
 | `rules.groupBySourceFolder` | nó | Cria subpasta com o nome da pasta de origem no disco; ausente ⇒ herda `settings` |
 | `rules.groupByMainComp` | nó | Agrupa pré-comps/sequências aninhadas pelo nome da comp/seq principal |
@@ -372,12 +400,13 @@ O CEP suporta múltiplos hosts sob a mesma extensão. O Premiere Pro 22.x+ (`PPR
 ```
 
 ### 6.2 Frontend 100% Compartilhado (Client-Side)
-- O HTML, o design system (`index.css` / `tree_editor.css`), `tree_editor.html`, `PresetManager.js` e a lógica de eventos são idênticos e compartilham a mesma pasta de presets em disco (`%APPDATA%/TidyFlow/presets`), com migração única de `%APPDATA%/AE_Organizer/presets`.
+- O HTML, o design system (`theme.css` + `index.css` / `tree_editor.css`), `tree_editor.html`, `PresetManager.js` e a lógica de eventos são idênticos e compartilham a mesma pasta de presets em disco (`%APPDATA%/TidyFlow/presets`), com migração única de `%APPDATA%/AE_Organizer/presets`.
+- **Design system em camadas:** `theme.css` é a fonte única dos tokens e dos componentes de botão — `.tf-btn` (base), tiles `.tf-btn--hero` / `--tile` / `--tile-danger`, botões de barra `.tf-btn--primary` / `--destructive` / `--success` / `--warning` / `--ghost` e modificadores de tamanho `.tf-btn--sm` / `--xs` / `--mini` — e do toggle em tile (`.tf-toggle` + `.tf-toggle__face`, cinza desligado / verde ligado / âmbar parcial, dirigido por `:checked` ou pela classe `.active`). O `:root` é dividido em **A. Preenchimento/texto**, **B. Forma** e **C. Bordas & Relevo**: no bloco C cada estado expõe um par `*-border` (contorno, topo e laterais) e `*-relevo` (borda inferior mais escura, o "degrau"), mais as espessuras `--tf-border-w` / `--tf-relevo-w` / `--tf-relevo-tile-w` — ajustar o volume 3D de qualquer botão ou toggle é mudar **uma linha** do bloco C. O arquivo é carregado **antes** de `index.css` (Painel Principal) e de `tree_editor.css` (Preset Builder), então qualquer botão novo das duas janelas deve reutilizar essas classes em vez de recriar cores, raios e relevos. Os arquivos de janela mantêm apenas utilitários de dimensionamento (`.modal-btn`, `.btn-footer-action`).
 - O painel consulta o ID do host via `csInterface.getHostEnvironment().appId`:
   - Se for `"AEFT"`, exibe termos como *"Composições"* e os 16 labels do After Effects.
   - Se for `"PPRO"`, exibe termos como *"Sequências"* e mapeia de forma bijetora (1:1) os 16 color labels do Premiere Pro (`0..15`).
 - A sincronização entre o Preset Builder e o painel usa três caminhos redundantes: `window.opener.onPresetBuilderUpdated`, `window.parent.onPresetBuilderUpdated` e o CSEvent `com.tidyflow.presetsUpdated`; o painel ainda re-sincroniza no evento `focus`.
-- O painel Principal é registrado como `com.tidyflow` e o editor como `com.tidyflow.editor` (janela separada), ambos sob o bundle `com.tidyflow`.
+- O painel Principal é registrado como `com.tidyflow`, o editor como `com.tidyflow.editor` (janela separada) e a janela de Collect como `com.tidyflow.collect` (*Modeless*, portas de debug 8093/8094), todos sob o bundle `com.tidyflow`.
 
 ### 6.3 Camada de Abstração ExtendScript (`host/organizer.jsx`)
 O frontend sempre chama as mesmas funções globais (`$.global.organizeWithPreset`, `$.global.createPresetFolderStructure`, `$.global.checkUnusedComps`), e o roteador em `host/organizer.jsx` direciona automaticamente para `aeft_organizer.jsx` ou `ppro_organizer.jsx`.
@@ -448,10 +477,11 @@ Todos os demais elementos — layout, CSS, árvore de pastas, modal de regras, t
 | :--- | :--- |
 | **Rebranding** | Extensão renomeada para **TidyFlow**: `ExtensionBundleId="com.tidyflow"`, extensões `com.tidyflow` e `com.tidyflow.editor`, menus "TidyFlow" / "TidyFlow - Preset Builder", `.debug` e `package.json` atualizados. **Um único bundle atende AEFT + PPRO** |
 | **UI / Figma** | Painel e Preset Builder redesenhados: `index.css` e `tree_editor.css` criados, HTML enxugado, exports em `design/figma_exports/`, painel fixo 360×440 e grade de tiles (hero + 3 ações + 5 toggles) |
+| **Design System compartilhado** | Botões e toggles centralizados em `theme.css` (`.tf-btn*` / `.tf-toggle*`) e reutilizados por **todas** as janelas: painel de Regras e Filtros, barra superior / rodapé / modais do Preset Builder e modal de Rollback — que deixaram de recriar cores e raios próprios (`#084083`, `#1473e6`, `.btn`, `.btn-gear`, `.modal-btn-*`) |
 | **Rollback** | Snapshot/restore completo nos dois hosts, espelho em `localStorage`, modal de confirmação e novo tile `Rollback` no painel |
 | **Pasta de Origem** | `groupBySourceFolder` granular por pasta, propagação pelo toggle global e aviso de estado "parcial" |
 | **Preset Builder** | Drag & drop com zonas, popover de labels, modal de regras em 4 seções, filtro por nomenclatura, importar/exportar JSON, abrir pasta local, badges e "Salvar e Organizar Agora" |
-| **Numeração** | Prefixos aplicados só em pastas com conteúdo, com remoção de prefixo antigo antes de renumerar |
+| **Numeração** | Prefixo = posição do nó na árvore (igual em *Organizar* e *Criar estrutura*), pastas vazias não são criadas nem deslocam as demais, com remoção de prefixo antigo antes de renumerar |
 | **Premiere Pro** | Opções específicas do host no mesmo plugin: `DEFAULT_EXTENSIONS_PPRO`, mapa de labels `PPRO_LABELS_BY_SLOT` e snapshot/rollback próprios |
 | **Presets** | Um único conjunto de presets para os dois hosts, em `%APPDATA%/TidyFlow/presets`, com migração única e limpeza nas duas pastas ao excluir |
 | **Infra** | `scripts/rollback_ponto_retorno.bat` (tag `ponto-de-retorno-ae-v1.0`), `scripts/setup_dev.ps1`, `scripts/install_symlink.bat` |
@@ -629,6 +659,7 @@ O empacotador (`scripts/package.js` + `npm run package`) chegou a ser criado e f
 | P0-3 | **AE:** `cleanEmptyFolders` invalidava `_folderIndex`, mas não `nodeFolderMap`/`boundFolderIds`; `applyTreeNumberingAndLabels` acessava `numItems` de `FolderItem` removida → `"Object is invalid"` **depois** de mutar o projeto, devolvendo `success:false` e pulando `aeft_markPostOrganizeState()` (rollback inconsistente) | limpeza agora zera `_folderIndex`, `nodeFolderMap` e `boundFolderIds`, e a checagem de conteúdo passa por `isAliveFolderWithContent()` (try/catch por pasta) |
 | P0-4 | `getDefaultPreset()` ignorava `groupBySourceFolder`, `unusedFolderName` e as regras por pasta do `Default Clean` | overrides persistidos por `savePreset()` e reaplicados por `applyNodeGroupBySourceFolder()` (ver **2.1**) |
 | P0-5 | Falha de `writeFileSync` seguia adiante: espelhava em `localStorage` e trocava o preset ativo, criando preset **fantasma** | `savePreset()` retorna antes do espelho/ativação quando a escrita falha, mantendo `lastSaveError` (ver **2.1**) |
+| P0-6 | Editar a árvore do `Default Clean` e salvar descartava a estrutura em silêncio (o editor voltava à árvore de fábrica e a UI dizia "salvo") | `savePreset()` compara a assinatura da árvore com a do bundle e expõe `lastSaveWarning` + `OrgLog.warn`; editor e painel mostram o aviso em `warning` e mantêm `Não salvo*` via `consumeSaveWarning()` (ver **2.1**) |
 | P1-1 | `reduceProject` podia ficar ativo com `saveProjectBefore` desligado (chaves independentes de `localStorage`) | invariante `reduceProject ⇒ saveProjectBefore` em `enforceReduceRequiresSave()` (ver **2.3**) |
 | P1-2 | `aeft_checkUnusedComps` abria `app.beginUndoGroup` **antes** de checar `app.project` | checagem movida para antes do grupo de desfazer |
 | P1-3 | **PPRO:** 6.6 prometia `beginUndoGroup/endUndoGroup` nos dois hosts, mas o motor PPRO não tinha nenhum — desfazer desfazia item a item | `ppro_beginUndoGroup()`/`ppro_endUndoGroup()` (com detecção de `app.beginUndoGroup`) + `finally` em `ppro_checkUnusedComps`, `ppro_organizeWithPreset`, `ppro_createPresetFolderStructure` e `ppro_rollbackProject` |
@@ -642,7 +673,7 @@ O empacotador (`scripts/package.js` + `npm run package`) chegou a ser criado e f
 
 | Arquivo | Cobertura |
 | :--- | :--- |
-| `preset_manager_test.js` | disco × `localStorage`, preset fantasma (P0-5), overrides do Default + por pasta (P0-4), `resetDefaultPreset`, exclusão, dicionário PPro (P1-4). Roda o `client/PresetManager.js` real com `localStorage`/`fs` simulados |
+| `preset_manager_test.js` | disco × `localStorage`, preset fantasma (P0-5), overrides do Default + por pasta (P0-4), aviso de árvore descartada no Default (P0-6), `resetDefaultPreset`, exclusão, dicionário PPro (P1-4). Roda o `client/PresetManager.js` real com `localStorage`/`fs` simulados |
 | `ae_engine_test.js` | `host/aeft_organizer.jsx` real sobre um **simulador da API do AE** (`lib/ae_mock.js`): organização, idempotência (`01_01_`), Regra A3, `useNumbering:false`, label aplicado, limpeza de vazias, pasta protegida, modo seleção, pré-comps por comp principal, profiling e **P0-3** (pasta vinculada removida não aborta) |
 | `client_refs_test.js` | todo `getElementById`/`querySelector` de `main.js`/`tree_editor.js` existe no HTML correspondente; presença dos chips de extensão (P0-2); ausência de controles mortos (P2); IDs do painel citados em 2.3 |
 | `host_static_test.js` | **ES3 estrito** em `host/*.jsx` (sem `let`/`const`/arrow/template literal/`forEach`/`map`/`filter`/`Object.keys`, ignorando comentários), contratos de snapshot dos dois motores, fronteiras de desfazer do PPRO (P1-3) e ordem `beginUndoGroup` × projeto aberto no AE (P1-2) |
@@ -670,6 +701,100 @@ O empacotador (`scripts/package.js` + `npm run package`) chegou a ser criado e f
 | Preset de fábrica na importação | `Default Clean` é renomeado para `Default Clean (Importado)` antes da checagem, então nunca sobrescreve o padrão |
 
 **Validação da Fase 8:** `npm test` → **38 testes, 0 falhas** (novo `preset_import_test.js` com 6 casos + 2 casos estáticos de guarda em `client_refs_test.js`) · `node --check` nos arquivos de cliente alterados · `vite build` OK.
+
+### 7.14 Fase 9 — Modal de Confirmação para Redução de Projeto (05/11/2026)
+
+| # | Melhoria | Implementação |
+| :--- | :--- | :--- |
+| P9-1 | **Confirmação ao Reduzir Projeto**: acionar "Organizar Projeto" com `reduceProject` ativo podia executar operação destrutiva sem confirmação | Adicionado modal `#reduceModalBackdrop` (seguindo exatamente a identidade visual e botões do Rollback) perguntando "Deseja salvar o projeto antes de continuar?", com opções **Salvar e Continuar**, **Continuar sem Salvar** e **Cancelar** |
+
+**Validação da Fase 9:** `npm test` → **45 testes, 0 falhas** · validação estática de DOM e refs OK.
+
+### 7.15 Collect Files — Fase 0 e janela de opções (05/11/2026)
+
+| Item | Entrega |
+| :--- | :--- |
+| Fase 0 (AE 26.5) | `scripts/tests/phase0/`: `collect_relink_probe.jsx` mostrou que `item.replace()` achata camadas de PSD/PSB/AI e perde alpha (1/24 idêntico); `collect_aepx_probe.jsx` validou o relink pela troca de caminhos no `.aepx` (**25/25 idênticos**, Render Queue intacto, portabilidade confirmada em outro HD). Detalhes em `COLLECT_FILES_SPEC.md` §8 e §12 |
+| Janela `com.tidyflow.collect` | Registrada em `manifest.xml` / `manifest.dev.xml` / `.debug`; opções espelhando o diálogo nativo e rodapé com contagem/tamanho em tempo real (ver **2.5**) |
+| Scan no host | `host/aeft_collect.jsx` + `$.global.collectScan` no roteador (`organizerRouter.collectScan`); carregado junto com o motor do AE |
+| `CollectEngine.js` | Regras de nome (§5 da spec), frames de sequência, `planSources`, estimativa assíncrona não-bloqueante com cache e suporte a `cancel()`, `rewriteAepxXml`, `buildCollectPlan` e `buildReportText` |
+| Execução do Collect | Diálogo nativo de Salvar pasta (`showSaveDialogEx` / fallback `collectSaveDialog`) com nome padrão `[Projeto]_Collect` editável pelo usuário, modo *Apenas Relatório*, cópia física assíncrona para `(Footage)/...` com barra de progresso, porcentagem e tempo estimado restante (ETA), cancelamento imediato operacional via botão Cancelar / Esc com limpeza automática de arquivos parciais, ciclo de reescrita `.aepx`, finalização `.aep` no AE, `Report.txt` e reveal nativo direto via Node/Explorer (sem alertas de segurança do host) |
+| Painel | Botão temporário `#btnOpenCollect` ("Collect Files (teste)") no fim do painel |
+
+**Validação:** `npm test` → **69 testes, 0 falhas** — suíte `collect_test.js` (24 casos: regras de nome, sequências, estimativa com formatação de tempo restante, cancelamento de cópia e estimativa, reescrita de XML do `.aepx`, plano de cópias com sufixo `_1`, relatório `Report.txt`, *Obedecer proxy*, scan `Tudo`/`Todas as comps`/`Selecionadas`/`Nenhum` sobre o simulador do AE, manifest, IDs de DOM e roteador).
+
+### 7.16 Categorização Inteligente de Áudios por Papel/ESP no Premiere Pro (05/11/2026)
+
+Implementação da triagem especializada para arquivos de áudio no Adobe Premiere Pro, separando clipes nas subpastas `01_Dialogue`, `02_Music`, `03_SFX`, `04_Ambience` (com fallback em `05_Others`), mantendo internamente a organização por formato (`WAV`, `MP3`...) e pasta de origem em disco (`Sound Effects`).
+
+| Componente | Alteração Realizada |
+| :--- | :--- |
+| `schema_preset.json` & `default_preset.json` | Adicionado `"separateAudioCategories": true` em `settings`. |
+| `client/PresetManager.js` | Adicionada a chave `separateAudioCategories` aos `DEFAULT_OVERRIDE_SETTING_KEYS`, fallback em `normalizePreset(p)` (default `true`) e preservação nos métodos de persistência e clonagem de presets. |
+| `client/tree_editor.html` & `tree_editor.js` | Adicionado toggle `#chkSeparateAudioCategories` ("Categorias de Áudio (ESP)") na barra `.settings-toggles` ao lado de *Numeração Sequencial*, com sincronização de foco, evento de `change`, flag `dirty` e persistência no preset. |
+| `host/ppro_organizer.jsx` | Implementada a infraestrutura de classificação em cascata:<br>1. `buildTimelineAudioMap()`: Mapeia sequências via `projectItem.nodeId`, `seq.id` e `seq.name` (evitando `.sequenceID` inexistente no Premiere DOM). Inspeciona clipes na timeline por efeitos/filtros do Essential Sound (`Enhance Speech`, `De-noise`, `Studio Reverb`, `Reverb`, `Ducking`, etc.) e nomes de trilha (`DX`, `MX`, `SFX`, `Ambience`). Mapeia por `nodeId`, `mediaPath` e `name`.<br>2. `classifyAudioRole(item, timelineAudioMap, nameCandidates)`: Executa cascata: Timeline/ESP → Metadados XMP (`getXMPMetadata`) → Metadados de Projeto (`getProjectMetadata`) → Heurística de nomenclatura/palavras-chave em nomes de arquivo, pasta de origem em disco e bin original (`steps`, `walking`, `foley`, `sfx`, `bgm`, etc.) → Fallback `"Others"`.<br>3. `ppro_organizeWithPreset`: Declarado `var timelineAudioMap = separateAudioCategories ? buildTimelineAudioMap() : {};` no escopo principal. Ao criar pastas de áudio (`fType === "Audios"`), injeta o papel detectado (`01_Dialogue` a `05_Others`, ou sem numeração se `usePrefixNumbering` for falso) no `subPath` antes do formato (`WAV`) e da pasta de origem (`Sound Effects`). |
+| `scripts/tests/ppro_audio_classifier_test.js` | Suíte de testes unitários dedicada (7 testes) validando Dialogue (Enhance Speech), Music (Auto-Ducking), SFX (Reverb/Creative), nomes de trilha, nomes de arquivo/candidatos e tags XMP. |
+
+**Validação:** `npm test` → **77 testes, 0 falhas** — incluindo suíte `ppro_audio_classifier_test.js` e verificações estáticas de ES3 no host.
+
+#### Causa Raiz e Correção (05/11/2026)
+- **Sintoma**: com o preset `Custom Clean`, áudios (ex.: `Steps Asphalt - High Heels, Walking.wav`) eram organizados direto em `04_Audios/WAV/...`, sem a subpasta de papel (`03_SFX/`), e **nenhum aviso aparecia no painel** (`success: true`, sem contadores).
+- **Causa raiz** (reproduzida em `scripts/tests/ppro_organize_audio_test.js`):
+  1. `findMatchingNode` só aceitava um nó quando a extensão do item estava **declarada** em `rules.extensions`. Essas listas derivam dos tiles do Preset Builder e ficam defasadas (preset antigo, edição parcial); com o `.wav` fora da lista, **nenhum nó casava**, o item não era movido e, por não ser um erro, nada era contado.
+  2. O papel detectado (SFX/Music/...) era injetado em `nameCandidates`, e o filtro por nomenclatura tem **prioridade absoluta** em `_rules.jsx`. Qualquer nó com `nameFilter` contendo `sfx`, `fx`, `music` ou `voz` passava a capturar o áudio — inclusive nós que não são de áudio.
+- **Correção**:
+  1. `_rules.jsx` (passo 5b): nó cujo **tipo** casou e cuja lista de extensões está defasada passa a ser aceito com score `380 + depth*10` — abaixo de qualquer match explícito de extensão (700/850) e acima de `OTHERS` (200). Nós com `catchOthers` continuam roteando o excedente para `OTHERS` (sem regressão).
+  2. `ppro_organizer.jsx`: o papel do áudio **não entra mais** em `nameCandidates`; ele decide apenas a subpasta (`01_Dialogue` … `05_Others`).
+- **Verificação**: a suíte `ppro_organize_audio_test.js` reproduz o cenário do preset `Custom Clean` — no motor anterior o item ficava na raiz do projeto com `movedFootages: 0`, no atual ele chega a `01_Audios/03_SFX/WAV`.
+
+### 7.17 Diagnóstico Visível da Triagem (Premiere Pro) — 05/11/2026
+Regra: **triagem que não roda não pode parecer triagem que funcionou**. Todo item reconhecido e não movido passa a ser contado, e o painel transforma a contagem em status.
+
+| Camada | Alteração |
+| :--- | :--- |
+| `host/ppro_organizer.jsx` | `ppro_organizeWithPreset` passa a devolver `audioSeparate`, `audioTotal`, `audioNoMatch`, `audioSkipped`, `audioRoles` (por papel), `audioTargets` (por bin), `audioSamples` (até 8 decisões: nome, papel, nó, subcaminho, movido), `emptyLeftovers` (bins vazias remanescentes com `deleteEmptyFolders` desligado) e `debugTrace` (últimas 120 decisões). `_dbg` mantém buffer em memória e só espelha em `$.global._pproDebug` quando `$.global.pproDebugEnabled` estiver ligado. |
+| `host/_rules.jsx` | Fallback 5b (tipo casou, extensão defasada) — ver **7.16**; `catchOthers` intacto. |
+| `client/main.js` | `buildAudioSummary(response)` + `presetHasAudioNode(preset)` montam o resumo do status: "Áudios: N (Dialogue x, SFX y…)", aviso quando o ESP está desligado num preset que tem nó de áudio, contagem de áudios sem pasta correspondente e bins vazias remanescentes. Nesses casos o status passa a usar `warning` (âmbar) e as amostras/trace vão para `OrgLog` (`panel.audio`, `panel.audio.samples`, `panel.audio.trace`). |
+| `scripts/tests/lib/ppro_mock.js` | Simulador mínimo do Premiere (bins, `createBin`, `moveBin`, `children` 1-based, `getMediaPath`) para testes de ponta a ponta do motor. |
+| `scripts/tests/ppro_organize_audio_test.js` | 6 testes: SFX com extensão não declarada, ESP desligado, preset sem nó de áudio, `nameFilter` de outro nó não captura o papel, bin antiga vazia reportada e JSON/trace sempre parseáveis. |
+| `scripts/tests/rules_matcher_test.js` | 7 testes de precedência do motor compartilhado (nome > extensão explícita > tipo > fallback por tipo > `OTHERS`). |
+
+**Contrato de resposta (Premiere Pro):** os campos acima são **aditivos**; `success`, `movedComps`, `movedFootages`, `cleanedFolders`, `reducedCount`, `projectSaved`, `elapsedMs` e `scanCount` permanecem inalterados.
+
+**Validação:** `npm test` → **92 testes, 0 falhas** (inclui o guarda de sintaxe dos `.jsx` do host).
+
+### 7.18 Correção Definitiva de Parse ES3 no ExtendScript e Precisão ESP/XMP — 05/11/2026
+- **Causa Raiz Real do Falha no Premiere Pro**:
+  1. **SyntaxError Lexical ES3 em RegExp (`/[.../...]/`)**: Em `host/ppro_organizer.jsx` (`buildTimelineAudioMap` e `classifyAudioRole`), a expressão `/[\-_./\\+,]/g` continha `/` sem escape dentro de `[...]`. No V8/Node (ES5+), `/` dentro de classe de caracteres é permitido (por isso `new Function(code)` passava nos testes), mas no **parser ECMAScript 3 do ExtendScript da Adobe** (ECMA-262 3ª Ed. §7.8.5) `/` sem escape encerra prematuramente o literal RegExp e dispara `SyntaxError` em tempo de compilação.
+  2. **Por que ignorava o código novo antes de reiniciar e quebrou após reiniciar**: Antes de reiniciar o Premiere, `organizer.jsx` engolia silenciosamente o `SyntaxError` no `catch (e) {}` e mantinha na memória a função antiga `$.global.ppro_organizeWithPreset` carregada horas antes (sem suporte a categorias de áudio). Após reiniciar o Premiere, `$.global.ppro_organizeWithPreset` permanecia `undefined`, gerando `TypeError` → `"EvalScript error."` → `"Erro ao executar script no Premiere Pro."`.
+  3. **Falso-positivo em `getProjectMetadata()`**: Testar `/\bdialog\b/i` no XML bruto casava com a tag vazia de esquema `<premierePrivateProjectMetaData:Column.PropertyText.Dialog></...>`, o que classificaria qualquer áudio como `Dialogue`.
+- **Correções Aplicadas**:
+  - `host/ppro_organizer.jsx`: Escapada explicitamente `\/` em `AUDIO_SEP_RX` (`/[\-_.:\/\\+,;()\[\]]/g`) e convertidos todos os caracteres não-ASCII em literais RegExp para escapes `\uXXXX`.
+  - `host/organizer.jsx`, `host/ppro_organizer.jsx`, `host/aeft_organizer.jsx`, `host/_rules.jsx`: Forçado `fileObj.encoding = "UTF-8"` antes de todo `$.evalFile(...)`; `organizer.jsx` agora registra `$.global._organizerLastLoadError` (arquivo + linha) e devolve JSON estruturado de erro caso um motor falhe ao carregar, eliminando `EvalScript error.` opaco.
+  - `client/main.js`: `runOrganizer`, `btnCreateStructure` e `btnCheckComps` agora recarregam os scripts de host via `loadOrReloadHostScripts(...)` antes de executar (igual ao Rollback), aplicando atualizações imediatamente sem exigir reinício do Premiere Pro.
+  - `host/ppro_organizer.jsx` (`classifyAudioRole` & `buildTimelineAudioMap`):
+    - Inspeção de parâmetros/propriedades JSON de componentes extras na timeline (`ADBE Sweetening` / `Essential Sound`), capturando o papel mesmo quando todos os efeitos (`Loudness`, `Creative > Reverb`, `Pan`) estão desligados.
+    - Extração estrita apenas de valores preenchidos em `getProjectMetadata()` e `getXMPMetadata()` (atributos RDF e tags `dc:description`, `dc:subject`, `xmpDM:genre`, `xmpDM:tempo`/`BPM`), eliminando falsos-positivos de tags XML vazias.
+    - Prioridade de nome próprio do arquivo antes de pastas genéricas (ex.: `Wet City - Night Ambience.wav` dentro de `Sound Effects` vai para `04_Ambience/WAV`), leitura de até 3 pastas ancestrais em `mediaPath`, vocabulário expandido de Foley/SFX e propagação de stems irmãos (`- No Lead Vocals` / `- Instrumental` → faixa principal herda `Music`).
+  - `scripts/tests/host_static_test.js` & `scripts/tests/ppro_organize_audio_test.js`: Adicionado scanner lexical ES3 de RegExp (bloqueia `/` não escapado em `[...]`, flags pós-ES3, caracteres não-ASCII em RegExp e trailing commas) e novos testes ponta a ponta (**95 testes, 0 falhas**).
+
+### 7.19 Numeração Sequencial Contínua sem Lacunas e Toggle Provisório "Numerar ESP" — 05/11/2026
+- **Contexto**: Quando categorias intermediárias ficavam vazias (ex.: sem `PreComps`/`Images` na árvore do preset ou sem `Dialogue` nos áudios), a numeração pulava números (`03_Footages`, `04_Audios` e `02_Music`, `03_SFX`, `04_Ambience`, `05_Others`). Além disso, solicitou-se uma opção rápida para desativar a numeração apenas nas subpastas de áudio do ESP.
+- **Alterações Realizadas**:
+  1. **Numeração Contínua (`01_`, `02_`...) nas Pastas do Preset (`host/aeft_organizer.jsx` e `host/ppro_organizer.jsx`)**:
+     - `applyTreeNumberingAndLabels` voltou a numerar sequencialmente via `currentSeq++` sobre `activeEntries` (apenas pastas que efetivamente possuem itens), conforme a regra arquitetural da Seção 3 (*"categorias vazias não entram na contagem"*), eliminando saltos (`01_Footages`, `02_Audios`).
+  2. **Numeração Contínua Dinâmica + Opção Sem Numeração nas Subpastas ESP (`host/ppro_organizer.jsx`)**:
+     - Adicionada `AUDIO_ROLE_ORDER = ["Dialogue", "Music", "SFX", "Ambience", "Others"]`, `isCanonicalAudioRoleName` e `applyAudioRoleSubfolderNumbering(parentAudioBin, ownerNode)` no Passo 5 (pós-limpeza de bins vazias).
+     - `getOrCreateSubBin` reutiliza in-place pastas canônicas de papel de áudio ignorando prefixos numéricos anteriores (`02_Music` / `01_Music` / `Music`), evitando duplicação ao re-organizar.
+     - Quando `usePrefixNumbering && numberAudioCategories` está ativo, numera apenas os papéis presentes a partir de `01_` na ordem canônica (`01_Music`, `02_SFX`, `03_Ambience`, `04_Others`); quando `numberAudioCategories === false` (ou `usePrefixNumbering === false`), mantém os nomes limpos (`Dialogue`, `Music`, `SFX`, `Ambience`, `Others`).
+  3. **Toggle Provisório `Numerar ESP` no Preset Builder (`client/tree_editor.html`, `client/tree_editor.css`, `client/tree_editor.js`, `client/PresetManager.js`, `client/presets/default_preset.json`)**:
+     - Nova flag `settings.numberAudioCategories` (padrão `true`) persistida no preset e espelhada em `DEFAULT_OVERRIDE_SETTING_KEYS`.
+     - Adicionado toggle `#chkNumberAudioCategories` (`Numerar ESP`) ao lado de `#chkSeparateAudioCategories` (`Categorias de Áudio (ESP)`), que esmaece automaticamente (`.is-disabled`) quando o ESP está desligado.
+  4. **Testes Automatizados (`scripts/tests/ppro_organize_audio_test.js`, `scripts/tests/ae_engine_test.js`, `scripts/tests/client_refs_test.js`)**:
+     - Adicionado cenário ponta a ponta validando numeração contínua nos dois níveis e alternância `numberAudioCategories: true → false` in-place (**96 testes, 0 falhas**).
+
+
+
 
 
 

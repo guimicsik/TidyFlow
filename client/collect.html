@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>TidyFlow — Collect Files</title>
+  <!-- Design system compartilhado (botões) — deve vir antes de collect.css -->
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="collect.css">
+</head>
+
+<body>
+  <div class="collect-dialog">
+
+    <!-- Origem dos arquivos -->
+    <div class="collect-row collect-source">
+      <label for="selCollectMode" class="collect-source-label">Coletar arquivos de origem:</label>
+      <select id="selCollectMode">
+        <option value="all">Tudo</option>
+        <option value="allComps" id="optAllComps">Para todas as comps</option>
+        <option value="selected" id="optSelected">Para as comps selecionadas</option>
+        <option value="queued" id="optQueued" disabled>Para as comps na fila</option>
+        <option value="none">Nenhum (apenas projeto)</option>
+      </select>
+    </div>
+
+    <!-- Opções -->
+    <div class="collect-options">
+      <label class="collect-check">
+        <input type="checkbox" id="chkReportOnly">
+        <span>Gerar apenas relatório</span>
+      </label>
+
+      <label class="collect-check" id="rowObeyProxy">
+        <input type="checkbox" id="chkObeyProxy">
+        <span>Obedecer configurações de proxy</span>
+      </label>
+
+      <label class="collect-check" id="rowReduceProject">
+        <input type="checkbox" id="chkReduceProject">
+        <span>Reduzir projeto</span>
+      </label>
+
+      <div class="collect-check collect-check--inline is-disabled" title="Recurso de render farm (fora do escopo)">
+        <input type="checkbox" id="chkRenderOutput" disabled>
+        <span>Alterar saída de render para</span>
+        <input type="text" id="inpRenderOutput" class="collect-text" disabled>
+        <span>pasta</span>
+      </div>
+
+      <label class="collect-check is-disabled" title="Recurso de render farm (fora do escopo)">
+        <input type="checkbox" id="chkWatchFolder" disabled>
+        <span>Habilitar render em 'Watch Folder'</span>
+      </label>
+
+      <label class="collect-check">
+        <input type="checkbox" id="chkReveal" checked>
+        <span>Mostrar o projeto coletado no Explorer ao terminar</span>
+      </label>
+
+      <div class="collect-farm-info is-disabled">
+        <div>Número máximo de máquinas: 5</div>
+        <div id="queuedInfo">0 itens de render na fila.</div>
+      </div>
+    </div>
+
+    <!-- Resumo e Progresso de Cópia -->
+    <div class="collect-summary">
+      <div id="collectProgressBox" class="collect-progress-box is-hidden">
+        <div class="collect-progress-header">
+          <span id="collectEta">Tempo restante estimado: calculando...</span>
+          <span id="collectPercent" class="collect-progress-percent">0%</span>
+        </div>
+        <div class="collect-progress-track">
+          <div id="collectProgressBar" class="collect-progress-bar" style="width: 0%"></div>
+        </div>
+      </div>
+      <div id="summaryFiles">Calculando...</div>
+      <div id="summaryEffects">&nbsp;</div>
+      <div id="statusLine" class="collect-status"></div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="collect-footer">
+      <button type="button" id="btnComments" class="tf-btn tf-btn--ghost tf-btn--xs collect-btn-comments">
+        Comentários...
+      </button>
+      <div class="collect-footer-actions">
+        <button type="button" id="btnCollect" class="tf-btn tf-btn--primary tf-btn--xs collect-btn">Coletar...</button>
+        <button type="button" id="btnCancel" class="tf-btn tf-btn--ghost tf-btn--xs collect-btn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Comentários (entram no Report.txt) -->
+  <div id="commentsBackdrop" class="collect-modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="commentsTitle">
+    <div class="collect-modal-card">
+      <div id="commentsTitle" class="collect-modal-title">Comentários</div>
+      <p class="collect-modal-text">Os comentários são gravados no Report.txt do Collect.</p>
+      <textarea id="txtComments" rows="6"></textarea>
+      <div class="collect-modal-footer">
+        <button type="button" id="btnCommentsOk" class="tf-btn tf-btn--primary tf-btn--xs collect-btn">OK</button>
+        <button type="button" id="btnCommentsCancel" class="tf-btn tf-btn--ghost tf-btn--xs collect-btn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="CSInterface.js"></script>
+  <script src="OrgLog.js"></script>
+  <script src="CollectEngine.js"></script>
+  <script src="collect.js"></script>
+</body>
+
+</html>

@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <title>TidyFlow — Preset Builder</title>
+  <!-- Design system compartilhado (botões/toggles) — deve vir antes de tree_editor.css -->
+  <link rel="stylesheet" href="theme.css">
   <link rel="stylesheet" href="tree_editor.css">
 </head>
 
@@ -14,22 +16,26 @@
     <div class="preset-selector-group">
       <span class="preset-label">Preset:</span>
       <select id="presetSelect" class="select-input"></select>
-      <button type="button" id="btnDeletePreset" class="btn btn-danger"
-        title="Excluir este preset de usuário">Excluir</button>
       <span id="badgeBuiltIn" class="badge-builtin">Padrão</span>
+      <button type="button" id="btnDeletePreset" class="tf-btn tf-btn--destructive tf-btn--xs"
+        title="Excluir este preset de usuário">Excluir</button>
       <span id="badgeUnsaved" class="badge-unsaved">Não salvo*</span>
     </div>
 
     <div class="preset-actions">
-      <button type="button" id="btnSaveAsPreset" class="btn" title="Salvar estrutura como um novo Preset">Salvar
+      <button type="button" id="btnSaveAsPreset" class="tf-btn tf-btn--ghost tf-btn--xs"
+        title="Salvar estrutura como um novo Preset">Salvar
         Novo</button>
-      <button type="button" id="btnResetDefault" class="btn" title="Restaurar o preset padrão de fábrica">Reset
+      <button type="button" id="btnResetDefault" class="tf-btn tf-btn--ghost tf-btn--xs"
+        title="Restaurar o preset padrão de fábrica">Reset
         Default</button>
-      <button type="button" id="btnImportJson" class="btn" title="Importar arquivo .json de preset">Importar
+      <button type="button" id="btnImportJson" class="tf-btn tf-btn--ghost tf-btn--xs"
+        title="Importar arquivo .json de preset">Importar
         Preset</button>
-      <button type="button" id="btnExportJson" class="btn" title="Exportar preset atual para .json">Exportar
+      <button type="button" id="btnExportJson" class="tf-btn tf-btn--ghost tf-btn--xs"
+        title="Exportar preset atual para .json">Exportar
         Preset</button>
-      <button type="button" id="btnOpenPresetsFolder" class="btn"
+      <button type="button" id="btnOpenPresetsFolder" class="tf-btn tf-btn--ghost tf-btn--xs"
         title="Abrir pasta de Presets no Explorer/Finder">Abrir Pasta Local</button>
       <input type="file" id="hiddenFileInput" accept=".json,application/json" style="display: none;">
     </div>
@@ -40,7 +46,7 @@
     <div class="tree-toolbar">
       <span id="treeToolbarTitle" class="tree-toolbar-title">Estrutura da Árvore de Pastas • Clique nas regras para
         filtrar</span>
-      <button type="button" id="btnAddTopFolder" class="btn btn-primary">+ Add pasta</button>
+      <button type="button" id="btnAddTopFolder" class="tf-btn tf-btn--primary tf-btn--xs">+ Add pasta</button>
     </div>
 
     <div id="treeScrollArea" class="tree-scroll-area">
@@ -53,6 +59,18 @@
             <span class="toggle-slider"></span>
             <span>Numeração Sequencial</span>
           </label>
+          <label class="toggle-container"
+            title="No Premiere Pro, separa automaticamente os áudios em subpastas de Dialogue, Music, SFX e Ambience via Essential Sound e inteligência de nomes.">
+            <input type="checkbox" id="chkSeparateAudioCategories" checked>
+            <span class="toggle-slider"></span>
+            <span>Categorias de Áudio (ESP)</span>
+          </label>
+          <label id="lblNumberAudioCategories" class="toggle-container"
+            title="Adiciona numeração sequencial (01_, 02_...) nas subpastas de áudio criadas pelo ESP. Desative para manter apenas Dialogue, Music, SFX, Ambience e Others sem número.">
+            <input type="checkbox" id="chkNumberAudioCategories" checked>
+            <span class="toggle-slider"></span>
+            <span>Numerar ESP</span>
+          </label>
         </div>
       </div>
 
@@ -64,9 +82,9 @@
   <div class="footer-bar">
     <div id="editorStatus">Configure as pastas e regras do preset.</div>
     <div class="footer-actions">
-      <button type="button" id="btnFooterSave" class="btn btn-primary btn-footer-action"
+      <button type="button" id="btnFooterSave" class="tf-btn tf-btn--primary btn-footer-action"
         title="Salvar alterações no preset atual">Salvar</button>
-      <button type="button" id="btnCloseModal" class="btn btn-footer-action">Fechar</button>
+      <button type="button" id="btnCloseModal" class="tf-btn tf-btn--ghost btn-footer-action">Fechar</button>
     </div>
   </div>
 
@@ -76,204 +94,131 @@
   <!-- Tooltip Flutuante de Informação das Regras -->
   <div id="ruleInfoTooltip" class="rule-info-tooltip"></div>
 
-  <!-- Modal: Configuração de Regras e Filtros da Pasta -->
+  <!-- Modal: Configuração de Regras e Filtros da Pasta (V2 Compacto) -->
   <div id="rulesModalBackdrop" class="modal-backdrop">
-    <div class="modal-card">
+    <div class="modal-card modal-card-rules">
       <div class="modal-header">
         <div class="modal-title">
           <span id="rulesModalSwatch" class="label-option-dot"></span>
           <span id="rulesModalTitleText">Regras e Filtros da Pasta</span>
         </div>
-        <button type="button" id="btnCloseRulesModalX" class="btn btn-icon">✕</button>
+        <button type="button" id="btnCloseRulesModalX" class="tf-btn tf-btn--ghost tf-btn--mini">✕</button>
       </div>
 
       <div class="modal-body">
-        <div class="rules-two-columns">
-          <!-- Coluna Esquerda: Seção 1 e Seção 3 -->
-          <div class="rules-col">
-            <!-- 1. Tipos Nativos do Host -->
-            <div class="rule-section">
-              <div class="rule-section-header">
-                <div class="rule-section-title">
-                  <span id="ruleSectionHostTitle">1. Tipos</span>
-                  <span class="info-icon"
-                    data-tooltip="Escolha quais categorias de arquivos ou composições do projeto devem ser movidas para esta pasta.">i</span>
-                </div>
-              </div>
-              <div class="types-grid-2col">
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-type-chk" value="MainComp">
-                  <span id="lblTypeMainComp" class="btn-tile-label">Composição Principal</span>
-                  <span id="infoTypeMainComp" class="info-icon"
-                    data-tooltip="Composições finais de entrega que não estão inseridas dentro de nenhuma outra composição.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-type-chk" value="PreComps">
-                  <span id="lblTypePreComps" class="btn-tile-label">Pré-Composições</span>
-                  <span id="infoTypePreComps" class="info-icon"
-                    data-tooltip="Composições secundárias utilizadas como camadas dentro de outras composições.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-type-chk" value="StillImages">
-                  <span class="btn-tile-label">Imagens</span>
-                  <span class="info-icon"
-                    data-tooltip="Fotos, artes, ilustrações e logotipos parados sem duração de vídeo.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-type-chk" value="Videos">
-                  <span class="btn-tile-label">Vídeos</span>
-                  <span class="info-icon"
-                    data-tooltip="Gravações de câmera, clipes renderizados e arquivos de vídeo em movimento.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-type-chk" value="ImageSequences">
-                  <span class="btn-tile-label">Sequências de Imagem</span>
-                  <span class="info-icon"
-                    data-tooltip="Quadros numerados importados juntos como um único vídeo contínuo.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-type-chk" value="Audios">
-                  <span class="btn-tile-label">Áudios</span>
-                  <span class="info-icon"
-                    data-tooltip="Músicas, locuções e efeitos sonoros que não possuem vídeo.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-type-chk" value="Solids">
-                  <span id="lblTypeSolids" class="btn-tile-label">Sólidos</span>
-                  <span id="infoTypeSolids" class="info-icon"
-                    data-tooltip="Camadas de cor sólida e ajustes criadas diretamente dentro do programa.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-type-chk" value="DataFiles">
-                  <span id="lblTypeDataFiles" class="btn-tile-label">Dados e 3D</span>
-                  <span id="infoTypeDataFiles" class="info-icon"
-                    data-tooltip="Modelos 3D, arquivos de dados, tabelas de texto e projetos externos importados.">i</span>
-                </label>
-              </div>
+        <!-- 1. Formatos (Tipos + Caixa Inline de Formatos Específicos) -->
+        <div class="rule-section">
+          <div class="rule-section-header">
+            <div class="rule-section-title">
+              <span id="ruleSectionHostTitle">1. Formatos</span>
             </div>
-
-            <!-- 3. Filtro por Extensões (Grid 3x2: 5 pacotes + slot de adicionar avulsa) -->
-            <div class="rule-section">
-              <div class="rule-section-header">
-                <div class="rule-section-title">
-                  <span>3. Filtro de Extensões</span>
-                  <span class="info-icon"
-                    data-tooltip="Selecione os pacotes de extensões que deseja filtrar para esta pasta. Você pode ativar vários pacotes simultaneamente.">i</span>
-                </div>
-                <button type="button" id="btnClearAllExts" class="btn ext-preset-btn btn-danger"
-                  style="display: none;">Limpar</button>
-              </div>
-
-              <div class="packs-grid-3x2">
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-pack-chk" value="Images">
-                  <span class="btn-tile-label">Imagens</span>
-                  <span class="info-icon" data-tooltip="Exemplos: .png, .jpg, .psd, .ai, .svg, .exr...">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-pack-chk" value="Videos">
-                  <span class="btn-tile-label">Vídeos</span>
-                  <span class="info-icon" data-tooltip="Exemplos: .mp4, .mov, .prores, .mxf, .avi, .braw...">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-pack-chk" value="ImageSequences">
-                  <span class="btn-tile-label">Seq. Imagem</span>
-                  <span class="info-icon" data-tooltip="Exemplos: .exr, .png, .tga, .dpx, .tif, .cin...">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-pack-chk" value="Audios">
-                  <span class="btn-tile-label">Áudios</span>
-                  <span class="info-icon" data-tooltip="Exemplos: .wav, .mp3, .aac, .aif, .flac, .m4a...">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" class="rule-pack-chk" value="DataFiles">
-                  <span class="btn-tile-label">Dados / 3D</span>
-                  <span class="info-icon" data-tooltip="Exemplos: .json, .c4d, .obj, .fbx, .csv, .prproj...">i</span>
-                </label>
-              </div>
-
-              <div class="ext-add-row">
-                <input type="text" id="inpNewExtension" class="text-input"
-                  placeholder="Extensão avulsa (ex.: .dng) e Enter">
-                <button type="button" id="btnAddExtension" class="btn btn-primary">[+] Adicionar</button>
-              </div>
-
-              <div id="extTagsContainer" class="ext-tags-box"></div>
+            <button type="button" id="btnClearAllExts" class="tf-btn tf-btn--destructive tf-btn--mini"
+              style="display: none;">Limpar tags</button>
+          </div>
+          <div class="formats-grid-3col">
+            <label id="tileTypeMainComp" class="rule-toggle-btn tf-toggle"
+              data-tooltip="Composições finais de entrega que não estão inseridas dentro de nenhuma outra composição.">
+              <input type="checkbox" class="rule-type-chk" value="MainComp">
+              <span id="lblTypeMainComp" class="btn-tile-label tf-toggle__face">Composição Principal</span>
+            </label>
+            <label id="tileTypePreComps" class="rule-toggle-btn tf-toggle"
+              data-tooltip="Composições secundárias utilizadas como camadas dentro de outras composições.">
+              <input type="checkbox" class="rule-type-chk" value="PreComps">
+              <span id="lblTypePreComps" class="btn-tile-label tf-toggle__face">Pré-Composições</span>
+            </label>
+            <label id="tileTypeStillImages" class="rule-toggle-btn tf-toggle"
+              data-tooltip="Fotos, artes, ilustrações e logotipos estáticos (.png, .jpg, .psd, .ai, .svg, .exr...).">
+              <input type="checkbox" class="rule-type-chk" value="StillImages">
+              <span class="btn-tile-label tf-toggle__face">Imagens Estáticas</span>
+            </label>
+            <label id="tileTypeVideos" class="rule-toggle-btn tf-toggle"
+              data-tooltip="Gravações de câmera, clipes renderizados e sequências de imagem (.mp4, .mov, .prores, .mxf, .braw, .exr...).">
+              <input type="checkbox" class="rule-type-chk" value="Videos">
+              <span class="btn-tile-label tf-toggle__face">Vídeos / Footages</span>
+            </label>
+            <label id="tileTypeAudios" class="rule-toggle-btn tf-toggle"
+              data-tooltip="Músicas, locuções e efeitos sonoros sem vídeo (.wav, .mp3, .aac, .aif, .flac, .m4a...).">
+              <input type="checkbox" class="rule-type-chk" value="Audios">
+              <span class="btn-tile-label tf-toggle__face">Áudios</span>
+            </label>
+            <label id="tileTypeDataFiles" class="rule-toggle-btn tf-toggle"
+              data-tooltip="Modelos 3D, arquivos de dados, tabelas e projetos importados (.json, .c4d, .obj, .fbx, .csv, .aep...).">
+              <input type="checkbox" class="rule-type-chk" value="DataFiles">
+              <span id="lblTypeDataFiles" class="btn-tile-label tf-toggle__face">Dados e 3D</span>
+            </label>
+            <label id="tileTypeSolids" class="rule-toggle-btn tf-toggle"
+              data-tooltip="Camadas de cor sólida e ajustes criadas diretamente dentro do programa.">
+              <input type="checkbox" class="rule-type-chk" value="Solids">
+              <span id="lblTypeSolids" class="btn-tile-label tf-toggle__face">Sólidos</span>
+            </label>
+            <div id="extTagsContainer" class="inline-ext-tags-box"
+              title="Digite formatos específicos e aperte Espaço para criar a tag">
+              <div id="extChipsList" class="inline-ext-chips"></div>
+              <input type="text" id="inpNewExtension" class="inline-ext-input" placeholder="Avulsa: exr, webp...">
             </div>
           </div>
+        </div>
 
-          <!-- Coluna Direita: Seção 2 e Seção 4 -->
-          <div class="rules-col">
-            <!-- 2. Subpastas Automáticas e Comportamento -->
-            <div class="rule-section">
-              <div class="rule-section-header">
-                <div class="rule-section-title">
-                  <span>2. Subpastas e Comportamento</span>
-                  <span class="info-icon"
-                    data-tooltip="Define como os itens serão divididos e organizados em subpastas automáticas dentro desta pasta.">i</span>
-                </div>
-              </div>
-              <div class="behavior-grid-2col">
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" id="chkRuleGroupExt">
-                  <span class="btn-tile-label">Subpastas por Extensão</span>
-                  <span class="info-icon"
-                    data-tooltip="Cria automaticamente uma subpasta separada para cada formato de arquivo encontrado.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" id="chkRuleGroupBySourceFolder">
-                  <span class="btn-tile-label">Pasta de Origem</span>
-                  <span class="info-icon"
-                    data-tooltip="Agrupa os arquivos em uma subpasta com o mesmo nome da pasta onde estão salvos no seu computador.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" id="chkRuleGroupByMainComp">
-                  <span id="lblRuleGroupByMainComp" class="btn-tile-label">Agrupar por Comp Principal</span>
-                  <span id="infoRuleGroupByMainComp" class="info-icon"
-                    data-tooltip="Separa as pré-composições em subpastas com o nome da composição principal onde cada uma é usada.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" id="chkRulePsdBundles">
-                  <span id="lblRulePsdBundles" class="btn-tile-label">Isolar PSD / AI</span>
-                  <span id="infoRulePsdBundles" class="info-icon"
-                    data-tooltip="Mantém intacta a pasta original de camadas importadas do Photoshop ou Illustrator sem espalhar seus itens.">i</span>
-                </label>
-                <label class="rule-toggle-btn">
-                  <input type="checkbox" id="chkRuleCatchOthers">
-                  <span class="btn-tile-label">Pasta OTHERS (Fallback)</span>
-                  <span class="info-icon"
-                    data-tooltip="Guarda em uma subpasta chamada OTHERS os arquivos da categoria escolhida que não tiverem extensão específica definida.">i</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- 4. Filtro por Nomenclatura (Tags) -->
-            <div class="rule-section">
-              <div class="rule-section-header">
-                <div class="rule-section-title">
-                  <span>4. Filtro por Nomenclatura</span>
-                  <span class="info-icon"
-                    data-tooltip="Qualquer item do projeto que tiver uma das palavras abaixo no nome será movido diretamente para esta pasta.">i</span>
-                </div>
-                <button type="button" id="btnClearAllNameTags" class="btn ext-preset-btn btn-danger"
-                  style="display: none;">Limpar</button>
-              </div>
-
-              <div class="ext-add-row">
-                <input type="text" id="inpNewNameTag" class="text-input"
-                  placeholder="Digite uma palavra do nome e aperte Enter">
-                <button type="button" id="btnAddNameTag" class="btn btn-primary">[+] Adicionar</button>
-              </div>
-
-              <div id="nameTagsContainer" class="ext-tags-box"></div>
+        <!-- 2. Subpastas Automáticas e Comportamento (Grid 3 em cima + 2 centralizados embaixo) -->
+        <div class="rule-section">
+          <div class="rule-section-header">
+            <div class="rule-section-title">
+              <span>2. Subpastas e Comportamento</span>
             </div>
           </div>
+          <div class="behavior-grid-v2">
+            <label class="rule-toggle-btn tf-toggle"
+              data-tooltip="Cria automaticamente uma subpasta separada para cada formato de arquivo encontrado.">
+              <input type="checkbox" id="chkRuleGroupExt">
+              <span class="btn-tile-label tf-toggle__face">Subpastas por Extensão</span>
+            </label>
+            <label class="rule-toggle-btn tf-toggle"
+              data-tooltip="Agrupa os arquivos em uma subpasta com o mesmo nome da pasta onde estão salvos no seu computador.">
+              <input type="checkbox" id="chkRuleGroupBySourceFolder">
+              <span class="btn-tile-label tf-toggle__face">Pasta de Origem</span>
+            </label>
+            <label id="tileRuleGroupByMainComp" class="rule-toggle-btn tf-toggle"
+              data-tooltip="Separa as pré-composições em subpastas com o nome da composição principal onde cada uma é usada.">
+              <input type="checkbox" id="chkRuleGroupByMainComp">
+              <span id="lblRuleGroupByMainComp" class="btn-tile-label tf-toggle__face">Agrupar por Comp Principal</span>
+            </label>
+            <label class="rule-toggle-btn tf-toggle"
+              data-tooltip="Mantém intacta a pasta original de camadas importadas do Photoshop ou Illustrator sem espalhar seus itens.">
+              <input type="checkbox" id="chkRulePsdBundles">
+              <span id="lblRulePsdBundles" class="btn-tile-label tf-toggle__face">Isolar PSD / AI</span>
+            </label>
+            <label class="rule-toggle-btn tf-toggle"
+              data-tooltip="Guarda em uma subpasta chamada OTHERS os arquivos da categoria escolhida que não tiverem extensão específica definida.">
+              <input type="checkbox" id="chkRuleCatchOthers">
+              <span class="btn-tile-label tf-toggle__face">Pasta OTHERS (Fallback)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 3. Filtro por Nomenclatura (Tags) -->
+        <div class="rule-section">
+          <div class="rule-section-header">
+            <div class="rule-section-title">
+              <span>3. Filtro por Nomenclatura</span>
+            </div>
+            <button type="button" id="btnClearAllNameTags" class="tf-btn tf-btn--destructive tf-btn--mini"
+              style="display: none;">Limpar</button>
+          </div>
+
+          <div class="ext-add-row">
+            <input type="text" id="inpNewNameTag" class="text-input"
+              placeholder="Digite uma palavra do nome e aperte Enter">
+            <button type="button" id="btnAddNameTag" class="tf-btn tf-btn--primary tf-btn--sm">[+] Adicionar</button>
+          </div>
+
+          <div id="nameTagsContainer" class="ext-tags-box"></div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button type="button" id="btnApplyRulesModal" class="btn btn-primary">Aplicar</button>
-        <button type="button" id="btnCancelRulesModal" class="btn">Cancelar</button>
+        <button type="button" id="btnCancelRulesModal" class="tf-btn tf-btn--ghost tf-btn--sm">Cancelar</button>
+        <button type="button" id="btnApplyRulesModal" class="tf-btn tf-btn--primary tf-btn--sm">Aplicar Regras na
+          Pasta</button>
       </div>
     </div>
   </div>
@@ -290,8 +235,8 @@
         <input type="text" id="inpSaveAsName" class="text-input" placeholder="Meu Preset Customizado">
       </div>
       <div class="modal-footer">
-        <button type="button" id="btnConfirmSaveAs" class="btn btn-primary">Salvar</button>
-        <button type="button" id="btnCancelSaveAs" class="btn">Cancelar</button>
+        <button type="button" id="btnConfirmSaveAs" class="tf-btn tf-btn--primary tf-btn--sm">Salvar</button>
+        <button type="button" id="btnCancelSaveAs" class="tf-btn tf-btn--ghost tf-btn--sm">Cancelar</button>
       </div>
     </div>
   </div>
@@ -306,8 +251,8 @@
         <p id="confirmModalMessage" style="font-size: 12px; color: #d4d4d4; line-height: 1.45;"></p>
       </div>
       <div class="modal-footer">
-        <button type="button" id="btnCancelConfirm" class="btn">Cancelar</button>
-        <button type="button" id="btnAcceptConfirm" class="btn btn-danger">Confirmar</button>
+        <button type="button" id="btnCancelConfirm" class="tf-btn tf-btn--ghost tf-btn--sm">Cancelar</button>
+        <button type="button" id="btnAcceptConfirm" class="tf-btn tf-btn--destructive tf-btn--sm">Confirmar</button>
       </div>
     </div>
   </div>
@@ -323,13 +268,13 @@
         <p class="modal-subtext">O preset possui alterações que ainda não foram salvas e serão perdidas.</p>
       </div>
       <div class="modal-footer modal-footer-vertical">
-        <button type="button" id="btnUnsavedSaveClose" class="btn modal-btn modal-btn-save">
+        <button type="button" id="btnUnsavedSaveClose" class="tf-btn tf-btn--success modal-btn">
           Salvar e Fechar
         </button>
-        <button type="button" id="btnUnsavedDiscard" class="btn modal-btn modal-btn-nosave">
+        <button type="button" id="btnUnsavedDiscard" class="tf-btn tf-btn--warning modal-btn">
           Fechar sem Salvar
         </button>
-        <button type="button" id="btnUnsavedCancel" class="btn modal-btn modal-btn-cancel">
+        <button type="button" id="btnUnsavedCancel" class="tf-btn tf-btn--ghost modal-btn">
           Cancelar
         </button>
       </div>

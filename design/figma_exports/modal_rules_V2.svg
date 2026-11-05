@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 680 620">
+  <!-- Generator: Adobe Illustrator 30.8.2, SVG Export Plug-In . SVG Version: 2.1.4 Build 7)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #2a2a2a;
+      }
+
+      .st0, .st1, .st2 {
+        stroke: #383838;
+      }
+
+      .st3 {
+        fill: #fff;
+      }
+
+      .st3, .st4 {
+        font-family: Roboto-Medium, Roboto;
+        font-weight: 500;
+      }
+
+      .st3, .st4, .st5, .st6, .st7, .st8, .st9, .st10 {
+        isolation: isolate;
+      }
+
+      .st3, .st4, .st6, .st7, .st8, .st9 {
+        font-size: 11px;
+      }
+
+      .st1 {
+        fill: #1e1e1e;
+      }
+
+      .st4 {
+        fill: #d4d4d4;
+      }
+
+      .st11, .st12 {
+        fill: #1473e6;
+      }
+
+      .st12 {
+        stroke: #3894ff;
+        stroke-width: 1.5px;
+      }
+
+      .st13 {
+        fill: red;
+      }
+
+      .st14 {
+        fill: #2b2b2b;
+        stroke: #444;
+      }
+
+      .st5 {
+        fill: #e0e0e0;
+        font-size: 12px;
+      }
+
+      .st5, .st7 {
+        font-family: SegoeUI-Semibold, 'Segoe UI';
+        font-weight: 600;
+      }
+
+      .st2 {
+        fill: #252525;
+      }
+
+      .st15 {
+        stroke: #222;
+      }
+
+      .st15, .st16 {
+        fill: #141414;
+      }
+
+      .st16 {
+        stroke: #2d2d2d;
+      }
+
+      .st6 {
+        font-family: SegoeUI-Italic, 'Segoe UI';
+        font-style: italic;
+      }
+
+      .st6, .st9, .st10 {
+        fill: #9a9a9a;
+      }
+
+      .st17 {
+        stroke: #282828;
+      }
+
+      .st17, .st18 {
+        fill: none;
+      }
+
+      .st19 {
+        display: none;
+      }
+
+      .st18 {
+        stroke: #2a2a2a;
+      }
+
+      .st7 {
+        fill: #8a8a8a;
+        letter-spacing: .05em;
+      }
+
+      .st8 {
+        fill: #888;
+        font-family: MyriadPro-Regular, 'Myriad Pro';
+      }
+
+      .st9, .st10 {
+        font-family: SegoeUI, 'Segoe UI';
+      }
+
+      .st10 {
+        font-size: 11.1px;
+      }
+
+      .st20 {
+        fill: #0d5cb6;
+        stroke: #1473e6;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1">
+    <rect class="st1" width="492.28" height="620" rx="6" ry="6"/>
+    <rect class="st14" x="18" y="18" width="14" height="14" rx="2" ry="2"/>
+    <text class="st5" transform="translate(42 30)"><tspan x="0" y="0">Regras e Filtros — Pasta: Solids</tspan></text>
+    <g id="btn-modal-close">
+      <rect class="st0" x="448.6" y="16" width="26" height="24" rx="3" ry="3"/>
+      <text class="st8" transform="translate(459.16 32)"><tspan x="0" y="0">✕</tspan></text>
+    </g>
+    <line class="st18" x1="18" y1="46" x2="474.44" y2="46"/>
+    <text class="st7" transform="translate(18 68)"><tspan x="0" y="0">1. FORMATOS</tspan></text>
+    <g id="btn-type-main-comp">
+      <rect class="st20" x="18" y="78" width="148" height="42" rx="4" ry="4"/>
+      <text class="st3" transform="translate(38.08 103)"><tspan x="0" y="0">Composição Principal</tspan></text>
+    </g>
+    <g id="btn-type-pre-comps">
+      <rect class="st20" x="172" y="78" width="148" height="42" rx="4" ry="4"/>
+      <text class="st3" transform="translate(202.07 103)"><tspan x="0" y="0">Pré-Composições</tspan></text>
+    </g>
+    <g id="btn-type-images">
+      <rect class="st20" x="326" y="78" width="148" height="42" rx="4" ry="4"/>
+      <text class="st3" transform="translate(354.73 103)"><tspan x="0" y="0">Imagens Estáticas</tspan></text>
+    </g>
+    <g id="btn-type-footages">
+      <rect class="st20" x="18" y="127.09" width="148" height="42" rx="4" ry="4"/>
+      <text class="st3" transform="translate(47.23 152.09)"><tspan x="0" y="0">Vídeos / Footages</tspan></text>
+    </g>
+    <g id="btn-type-audios">
+      <rect class="st20" x="172" y="127.09" width="148" height="42" rx="4" ry="4"/>
+      <text class="st3" transform="translate(228.87 152.09)"><tspan x="0" y="0">Áudios</tspan></text>
+    </g>
+    <g id="btn-type-solids">
+      <rect class="st12" x="18" y="174.73" width="148" height="42" rx="4" ry="4"/>
+      <text class="st3" transform="translate(73.7 199.73)"><tspan x="0" y="0">Sólidos</tspan></text>
+    </g>
+    <g id="btn-type-data">
+      <rect class="st20" x="326" y="126.36" width="148" height="42" rx="4" ry="4"/>
+      <text class="st3" transform="translate(372 151.36)"><tspan x="0" y="0">Dados e 3D</tspan></text>
+    </g>
+    <g>
+      <text class="st7" transform="translate(18.44 273.03)"><tspan x="0" y="0">2. SUBPASTAS E COMPORTAMENTO</tspan></text>
+      <g id="btn-comp-subext">
+        <rect class="st20" x="18.44" y="283.03" width="148" height="42" rx="4" ry="4"/>
+        <text class="st3" transform="translate(32.93 308.03)"><tspan x="0" y="0">Subpastas por Extensão</tspan></text>
+      </g>
+      <g id="btn-comp-pasta-origem">
+        <rect class="st12" x="172.44" y="283.03" width="148" height="42" rx="4" ry="4"/>
+        <text class="st3" transform="translate(205.6 308.03)"><tspan x="0" y="0">Pasta de Origem</tspan></text>
+      </g>
+      <g id="btn-comp-group-main">
+        <rect class="st20" x="326.44" y="283.03" width="148" height="42" rx="4" ry="4"/>
+        <text class="st3" transform="translate(355.19 301.03)"><tspan x="0" y="0">Agrupar por Comp</tspan></text>
+        <text class="st3" transform="translate(378.79 315.03)"><tspan x="0" y="0">Principal</tspan></text>
+      </g>
+      <g id="btn-comp-isolar-psd">
+        <rect class="st20" x="95.44" y="331.03" width="148" height="42" rx="4" ry="4"/>
+        <text class="st3" transform="translate(133.74 356.03)"><tspan x="0" y="0">Isolar PSD / AI</tspan></text>
+      </g>
+      <g id="btn-comp-fallback">
+        <rect class="st20" x="249" y="331.03" width="148.44" height="42" rx="4" ry="4"/>
+        <text class="st3" transform="translate(261.49 356.03)"><tspan x="0" y="0">Pasta OTHERS (Fallback)</tspan></text>
+      </g>
+    </g>
+    <rect class="st16" x="172" y="174.54" width="302" height="42.38" rx="4" ry="4"/>
+    <text class="st10" transform="translate(184.11 199.76)"><tspan x="0" y="0">Avulsa: exr, webp...</tspan></text>
+    <text class="st7" transform="translate(18.07 433.49)"><tspan x="0" y="0">3. FILTRO POR NOMENCLATURA</tspan></text>
+    <rect class="st16" x="18.07" y="443.49" width="334.52" height="34" rx="4" ry="4"/>
+    <text class="st9" transform="translate(28.07 464.49)"><tspan x="0" y="0">Digite uma palavra do nome e aper</tspan></text>
+    <g>
+      <rect class="st11" x="360.71" y="443.49" width="114" height="34" rx="4" ry="4"/>
+      <text class="st3" transform="translate(386.79 464.49)"><tspan x="0" y="0">[+] Adicionar</tspan></text>
+    </g>
+    <g id="word-tags-box">
+      <rect class="st15" x="18.07" y="485.49" width="456.43" height="54" rx="4" ry="4"/>
+      <text class="st6" transform="translate(30.07 509.49)"><tspan x="0" y="0">Nenhuma palavra filtrada.</tspan></text>
+    </g>
+    <line class="st17" x1="18" y1="560" x2="474.44" y2="560"/>
+    <g id="btn-cancel">
+      <rect class="st2" x="220.28" y="570" width="84" height="32" rx="4" ry="4"/>
+      <text class="st4" transform="translate(240.54 590)"><tspan x="0" y="0">Cancelar</tspan></text>
+    </g>
+    <g id="btn-apply-rules">
+      <rect class="st11" x="312.28" y="570" width="162" height="32" rx="4" ry="4"/>
+      <text class="st3" transform="translate(334.64 590)"><tspan x="0" y="0">Aplicar Regras na Pasta</tspan></text>
+    </g>
+  </g>
+  <g id="Layer_2" class="st19">
+    <rect class="st13" x="474.28" y="577" width="18" height="18"/>
+    <rect class="st13" x="353.2" y="457.42" width="7.51" height="7.51"/>
+  </g>
+</svg>

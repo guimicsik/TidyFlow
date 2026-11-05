@@ -10,7 +10,11 @@ var suites = [
   "./preset_import_test.js",
   "./ae_engine_test.js",
   "./client_refs_test.js",
-  "./host_static_test.js"
+  "./host_static_test.js",
+  "./rules_matcher_test.js",
+  "./ppro_audio_classifier_test.js",
+  "./ppro_organize_audio_test.js",
+  "./collect_test.js"
 ];
 
 var total = 0;

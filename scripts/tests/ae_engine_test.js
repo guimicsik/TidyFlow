@@ -119,7 +119,8 @@ h.test("categorias vazias não geram pastas (Regra A3)", function () {
   assert.eq(res.success, true, JSON.stringify(res));
   assert.notOk(mock.api.find("Output"), "Output vazio não deve ser criado");
   assert.notOk(mock.api.find("Audios"), "Audios vazio não deve ser criado");
-  assert.ok(mock.api.find("01_Images"), "apenas a pasta com itens é criada e numerada");
+  assert.notOk(mock.api.find("02_Images"), "categorias vazias não devem pular a sequência para 02_");
+  assert.ok(mock.api.find("01_Images"), "apenas a pasta com itens é criada, numerada continuamente a partir de 01_");
 });
 
 h.test("useNumbering=false mantém a pasta fora da numeração sequencial", function () {
@@ -233,6 +234,123 @@ h.test("resposta inclui métricas de profiling (elapsedMs/scanCount)", function 
   assert.eq(typeof res.elapsedMs, "number", "elapsedMs numérico");
   assert.eq(typeof res.scanCount, "number", "scanCount numérico");
   assert.ok(res.scanCount > 0, "houve varredura do projeto");
+});
+
+h.test("filtro por nomenclatura direciona itens com tag no arquivo ou pasta de origem com prioridade sobre pasta genérica", function () {
+  var mock = newEngine();
+  var aiVideo = mock.api.addFootage("v01.mp4", "C:/Projects/SH010/v01.mp4", { isStill: false });
+  var regularVideo = mock.api.addFootage("normal.mp4", "C:/Projects/Generic/normal.mp4", { isStill: false });
+
+  var preset = {
+    presetName: "Teste Nomenclatura",
+    settings: {
+      usePrefixNumbering: true,
+      deleteEmptyFolders: true,
+      saveProjectBefore: false,
+      reduceProject: false,
+      groupBySourceFolder: true
+    },
+    tree: [
+      {
+        id: "n_ai",
+        name: "AI",
+        label: 6,
+        rules: {
+          types: ["Videos"],
+          extensions: ["mp4"],
+          nameFilter: "SH0",
+          nameFilterMode: "contains",
+          groupSubfoldersByExt: false,
+          groupBySourceFolder: true
+        },
+        children: []
+      },
+      {
+        id: "n_footages",
+        name: "Footages",
+        label: 6,
+        rules: {
+          types: ["Videos"],
+          extensions: ["mp4"],
+          nameFilter: "",
+          groupSubfoldersByExt: false,
+          groupBySourceFolder: true
+        },
+        children: []
+      }
+    ]
+  };
+
+  var res = runOrganize(mock, preset);
+
+  assert.eq(res.success, true, JSON.stringify(res));
+  assert.eq(res.movedFootages, 2, "dois vídeos movidos");
+
+  var aiFolder = mock.api.find("01_AI");
+  assert.ok(aiFolder, "pasta 01_AI criada");
+  var aiSubFolder = mock.api.find("SH010", aiFolder);
+  assert.ok(aiSubFolder, "subpasta SH010 criada dentro de AI");
+  assert.eq(aiVideo.parentFolder.name, "SH010", "vídeo SH010 foi para dentro de 01_AI/SH010");
+
+  var footagesFolder = mock.api.find("02_Footages");
+  assert.ok(footagesFolder, "pasta 02_Footages criada");
+  var genericSubFolder = mock.api.find("Generic", footagesFolder);
+  assert.ok(genericSubFolder, "subpasta Generic criada dentro de Footages");
+  assert.eq(regularVideo.parentFolder.name, "Generic", "vídeo regular foi para 02_Footages/Generic");
+});
+
+h.test("filtro por nomenclatura vence a pasta genérica mesmo com lista de extensões defasada", function () {
+  var mock = newEngine();
+  var tagged = mock.api.addFootage("sem-titulo.mp4", "C:/Projetos/Teste/sem-titulo.mp4", { isStill: false });
+
+  var preset = {
+    presetName: "Teste Nomenclatura Defasada",
+    settings: {
+      usePrefixNumbering: true,
+      deleteEmptyFolders: true,
+      saveProjectBefore: false,
+      reduceProject: false,
+      groupBySourceFolder: false
+    },
+    tree: [
+      {
+        id: "n_teste",
+        name: "Teste",
+        label: 6,
+        rules: {
+          types: ["Videos"],
+          // Lista defasada de propósito: não contém "mp4".
+          extensions: ["mov"],
+          nameFilter: "sem-titulo",
+          nameFilterMode: "contains",
+          groupSubfoldersByExt: false,
+          groupBySourceFolder: false
+        },
+        children: []
+      },
+      {
+        id: "n_footages",
+        name: "Footages",
+        label: 6,
+        rules: {
+          types: ["Videos"],
+          extensions: ["mp4"],
+          catchOthers: true,
+          groupSubfoldersByExt: false,
+          groupBySourceFolder: false
+        },
+        children: []
+      }
+    ]
+  };
+
+  var res = runOrganize(mock, preset);
+
+  assert.eq(res.success, true, JSON.stringify(res));
+  assert.eq(res.movedFootages, 1, "um vídeo movido");
+  assert.ok(mock.api.find("01_Teste"), "pasta 01_Teste criada");
+  assert.eq(tagged.parentFolder.name, "01_Teste", "vídeo com a tag deve ir para Teste, não para Footages");
+  assert.notOk(mock.api.find("02_Footages"), "Footages não deve ser criada quando o filtro por nome casa");
 });
 
 module.exports = h;

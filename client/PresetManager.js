@@ -164,7 +164,9 @@
         "saveProjectBefore": true,
         "reduceProject": false,
         "groupBySourceFolder": true,
-        "unusedFolderName": "Nunca Usadas"
+        "unusedFolderName": "Nunca Usadas",
+        "separateAudioCategories": true,
+        "numberAudioCategories": true
       },
       "tree": [
         {
@@ -302,7 +304,9 @@
     "saveProjectBefore",
     "reduceProject",
     "groupBySourceFolder",
-    "unusedFolderName"
+    "unusedFolderName",
+    "separateAudioCategories",
+    "numberAudioCategories"
   ];
 
   function collectNodeGroupBySourceFolder(nodes, out) {
@@ -338,6 +342,36 @@
     }
   }
 
+  // Assinatura estável da árvore, usada para detectar mudanças que o preset
+  // Default NÃO persiste (ele guarda apenas settings + nodeGroupBySourceFolder).
+  // Ids e rules.groupBySourceFolder ficam de fora de propósito: variam por
+  // motivos legítimos (ex.: propagação do toggle global) sem que o usuário
+  // tenha editado estrutura nenhuma.
+  function buildTreeSignature(nodes) {
+    if (!nodes || !nodes.length) return "[]";
+    var out = "[";
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes[i];
+      if (!node) continue;
+      var rules = node.rules || {};
+      out += "{" + [
+        String(node.name === undefined || node.name === null ? "" : node.name),
+        String(node.label === undefined || node.label === null ? 0 : node.label),
+        node.useNumbering === false ? "0" : "1",
+        (rules.types || []).join("+"),
+        (rules.extensions || []).join("+"),
+        (rules.customExtensions || []).join("+"),
+        rules.groupByMainComp ? "1" : "0",
+        rules.handlePsdBundles ? "1" : "0",
+        rules.groupSubfoldersByExt ? "1" : "0",
+        rules.catchOthers ? "1" : "0",
+        String(rules.nameFilter || ""),
+        String(rules.nameFilterMode || "contains")
+      ].join("|") + "}" + buildTreeSignature(node.children);
+    }
+    return out + "]";
+  }
+
   function getNodeRequire() {
     if (global.cep_node && typeof global.cep_node.require === "function") {
       return global.cep_node.require;
@@ -368,6 +402,20 @@
       }
     }
 
+    var rawCustomExts = Array.isArray(rules.customExtensions) ? rules.customExtensions : null;
+    var cleanCustomExts = null;
+    if (rawCustomExts !== null) {
+      cleanCustomExts = [];
+      var seenCustomExt = {};
+      for (var ce = 0; ce < rawCustomExts.length; ce++) {
+        var cExt = String(rawCustomExts[ce] || "").trim().replace(/^\.+/, "").toLowerCase();
+        if (cExt && !seenCustomExt[cExt]) {
+          seenCustomExt[cExt] = true;
+          cleanCustomExts.push(cExt);
+        }
+      }
+    }
+
     var rawTypes = Array.isArray(rules.types) ? rules.types : [];
     var cleanTypes = [];
     for (var t = 0; t < rawTypes.length; t++) {
@@ -388,22 +436,27 @@
       normalizedChildren.push(normalizeNode(children[c], indexSeed + "_" + c));
     }
 
+    var normalizedRules = {
+      types: cleanTypes,
+      extensions: cleanExts,
+      groupByMainComp: Boolean(rules.groupByMainComp),
+      handlePsdBundles: Boolean(rules.handlePsdBundles),
+      groupSubfoldersByExt: Boolean(rules.groupSubfoldersByExt),
+      groupBySourceFolder: rules.groupBySourceFolder !== undefined ? Boolean(rules.groupBySourceFolder) : true,
+      catchOthers: Boolean(rules.catchOthers),
+      nameFilter: rules.nameFilter ? String(rules.nameFilter) : "",
+      nameFilterMode: rules.nameFilterMode === "regex" ? "regex" : "contains"
+    };
+    if (cleanCustomExts !== null) {
+      normalizedRules.customExtensions = cleanCustomExts;
+    }
+
     return {
       id: (node && node.id) ? String(node.id) : ("node_" + Date.now() + "_" + indexSeed),
       name: (node && node.name && String(node.name).trim()) ? String(node.name).trim() : "Nova Pasta",
       label: labelNum,
       useNumbering: (node && node.useNumbering !== undefined) ? Boolean(node.useNumbering) : true,
-      rules: {
-        types: cleanTypes,
-        extensions: cleanExts,
-        groupByMainComp: Boolean(rules.groupByMainComp),
-        handlePsdBundles: Boolean(rules.handlePsdBundles),
-        groupSubfoldersByExt: Boolean(rules.groupSubfoldersByExt),
-        groupBySourceFolder: rules.groupBySourceFolder !== undefined ? Boolean(rules.groupBySourceFolder) : true,
-        catchOthers: Boolean(rules.catchOthers),
-        nameFilter: rules.nameFilter ? String(rules.nameFilter) : "",
-        nameFilterMode: rules.nameFilterMode === "regex" ? "regex" : "contains"
-      },
+      rules: normalizedRules,
       children: normalizedChildren
     };
   }
@@ -435,7 +488,9 @@
         saveProjectBefore: s.saveProjectBefore !== undefined ? Boolean(s.saveProjectBefore) : true,
         reduceProject: s.reduceProject !== undefined ? Boolean(s.reduceProject) : false,
         groupBySourceFolder: s.groupBySourceFolder !== undefined ? Boolean(s.groupBySourceFolder) : true,
-        unusedFolderName: (s.unusedFolderName && String(s.unusedFolderName).trim()) ? String(s.unusedFolderName).trim() : "Nunca Usadas"
+        unusedFolderName: (s.unusedFolderName && String(s.unusedFolderName).trim()) ? String(s.unusedFolderName).trim() : "Nunca Usadas",
+        separateAudioCategories: s.separateAudioCategories !== undefined ? Boolean(s.separateAudioCategories) : true,
+        numberAudioCategories: s.numberAudioCategories !== undefined ? Boolean(s.numberAudioCategories) : true
       },
       tree: normTree
     };
@@ -452,6 +507,9 @@
     this._presetListCache = null;
     this._presetObjectCache = {};
     this.lastSaveError = null;
+    // Aviso não bloqueante: a última gravação descartou parte do que foi enviado
+    this.lastSaveWarning = null;
+    this._defaultTreeSignature = undefined;
   }
 
   PresetManager.AE_LABELS = AE_LABELS;
@@ -615,6 +673,9 @@
           if (savedSettings.unusedFolderName !== undefined) {
             var savedUnusedName = String(savedSettings.unusedFolderName || "").trim();
             if (savedUnusedName) base.settings.unusedFolderName = savedUnusedName;
+          }
+          if (savedSettings.separateAudioCategories !== undefined) {
+            base.settings.separateAudioCategories = Boolean(savedSettings.separateAudioCategories);
           }
           if (savedSettings.nodeGroupBySourceFolder) {
             applyNodeGroupBySourceFolder(base.tree, savedSettings.nodeGroupBySourceFolder);
@@ -829,12 +890,48 @@
     return this.loadPreset(activeName);
   };
 
+  // Assinatura da árvore do preset Default de fábrica (memoizada: o bundle só
+  // muda com atualização da extensão e savePreset é chamado a cada toggle).
+  PresetManager.prototype._getDefaultTreeSignature = function () {
+    if (this._defaultTreeSignature !== undefined) return this._defaultTreeSignature;
+    var signature = null;
+    try {
+      var base = this.getDefaultPresetFromBundle();
+      signature = buildTreeSignature(normalizePreset(base).tree);
+    } catch (e) {
+      signature = null;
+    }
+    this._defaultTreeSignature = signature;
+    return signature;
+  };
+
+  // Retorna o aviso pendente (e limpa), para a UI mostrar uma única vez.
+  PresetManager.prototype.consumeSaveWarning = function () {
+    var warning = this.lastSaveWarning || null;
+    this.lastSaveWarning = null;
+    return warning;
+  };
+
   PresetManager.prototype.savePreset = function (presetObj) {
     var normalized = normalizePreset(presetObj);
+    this.lastSaveWarning = null;
 
     if (normalized.presetName === DEFAULT_PRESET_NAME) {
       // O preset Default não tem sua árvore sobrescrita, mas as preferências
       // (globais e a regra por pasta "Pasta de Origem") precisam persistir.
+      //
+      // Atenção: qualquer outra mudança de árvore seria DESCARTADA em silêncio
+      // (o preset pareceria salvo e a estrutura voltaria ao padrão ao reabrir).
+      // Detecta esse caso e devolve um aviso para a UI em vez de perder o
+      // trabalho do usuário sem explicação.
+      var factorySignature = this._getDefaultTreeSignature();
+      if (factorySignature !== null && buildTreeSignature(normalized.tree) !== factorySignature) {
+        this.lastSaveWarning =
+          "A árvore do preset '" + DEFAULT_PRESET_NAME + "' é protegida: apenas as opções e a regra " +
+          "'Pasta de Origem' foram salvas. Use 'Salvar Novo' para gravar mudanças de estrutura.";
+        logWarn("PresetManager.savePreset", this.lastSaveWarning, normalized.presetName);
+      }
+
       var defaultOverrides = {};
       for (var k = 0; k < DEFAULT_OVERRIDE_SETTING_KEYS.length; k++) {
         var settingsKey = DEFAULT_OVERRIDE_SETTING_KEYS[k];

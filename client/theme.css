@@ -1,0 +1,467 @@
+/* ==========================================================================
+   TidyFlow — Theme Compartilhado (Design System de Botões)
+   --------------------------------------------------------------------------
+   Fonte única dos tokens de cor e dos componentes de botão/toggle usados
+   pelo Painel Principal (index.html) e pelo Preset Builder + Modal de Regras
+   e Filtros (tree_editor.html).
+
+   Carregue SEMPRE antes de index.css / tree_editor.css.
+
+   Tokens organizados em 3 blocos no :root:
+     A. Preenchimento, texto e efeitos
+     B. Forma (raios e tipografia)
+     C. Bordas & Relevo  ->  pares *-border (contorno) e *-relevo (borda inferior)
+
+   Componentes:
+     .tf-btn                       -> base (tipografia, cursor, transições)
+     -- Tiles (painel principal)
+     .tf-btn--hero                 -> CTA grande azul (Organizar Projeto)
+     .tf-btn--tile                 -> tile azul de ação secundária
+     .tf-btn--tile-danger          -> tile vermelho (Desorganizar Projeto)
+     -- Botões de barra (top bar, rodapé de janela, modais)
+     .tf-btn--primary              -> azul com relevo (ação principal)
+     .tf-btn--destructive          -> vermelho com relevo (Excluir / Confirmar)
+     .tf-btn--success              -> verde com relevo (Salvar e Fechar)
+     .tf-btn--warning              -> laranja com relevo (Fechar sem Salvar)
+     .tf-btn--ghost                -> neutro escuro com relevo (Cancelar / Fechar)
+     -- Tamanhos (aplicar depois da variante)
+     .tf-btn--sm (32px) / --xs (28px) / --mini (22px)
+     -- Toggle em tile
+     .tf-toggle > input + .tf-toggle__face -> cinza/verde/âmbar
+   ========================================================================== */
+
+:root {
+  /* ==========================================================================
+     A. PREENCHIMENTO, TEXTO E EFEITOS
+     ========================================================================== */
+  /* ---- Azul de destaque (identidade TidyFlow) ---- */
+  --tf-accent: #0A85ED;
+  --tf-accent-hover: #1a94fa;
+  --tf-accent-glow: rgba(10, 133, 237, 0.25);
+  --tf-accent-glow-hover: rgba(10, 133, 237, 0.35);
+  --tf-text-shadow: 1px 2px 5px rgba(0, 0, 0, .35);
+
+  /* ---- Vermelho (ações destrutivas / Rollback) ---- */
+  --tf-danger: #c2201a;
+  --tf-danger-hover: #e6211a;
+
+  /* ---- Verde (confirmações seguras / Salvar e Fechar) ---- */
+  --tf-success: #2ea043;
+  --tf-success-hover: #3bb552;
+
+  /* ---- Laranja (avisos / Fechar sem Salvar) ---- */
+  --tf-warning: #c25e1a;
+  --tf-warning-hover: #d66b22;
+
+  /* ---- Superfícies neutras (botões cinza e textos) ---- */
+  --tf-surface: #2e2e2e;
+  --tf-surface-hover: #3a3a3a;
+  --tf-text: #d4d4d4;
+
+  /* ---- Toggle em tile: DESATIVADO (cinza) ---- */
+  --toggle-off-bg: #4a4a4a;
+  --toggle-off-bg-hover: #5a5a5a;
+  --toggle-off-text: #bdbdbd;
+
+  /* ---- Toggle em tile: ATIVADO (verde) ---- */
+  --toggle-on-bg: #2ea043;
+  --toggle-on-bg-hover: #3bb552;
+  --toggle-on-text: #ffffff;
+
+  /* ---- Toggle em tile: estado PARCIAL (aviso) ---- */
+  --toggle-partial-bg: #b8860b;
+  --toggle-partial-text: #fff7da;
+
+  /* ==========================================================================
+     B. FORMA (raios e tipografia dos tiles)
+     ========================================================================== */
+  --tf-tile-radius: 7px;
+  --tf-tile-radius-lg: 10px;
+  --tf-tile-radius-sm: 5px;
+  --tf-tile-font-size: 11px;
+  --tf-tile-font-weight: 700;
+  --tf-tile-line-height: 1.25;
+
+  /* ==========================================================================
+     C. BORDAS & RELEVO  ← é aqui que se ajusta o "degrau" dos botões
+     --------------------------------------------------------------------------
+     Cada estado tem DUAS cores:
+       *-border  -> contorno (topo e laterais)
+       *-relevo  -> borda inferior (mais escura = efeito de degrau 3D)
+     ========================================================================== */
+  /* Espessuras */
+  --tf-border-w: 1px;
+  /* contorno dos botões de barra */
+  --tf-relevo-w: 3px;
+  /* degrau dos botões de barra */
+  --tf-relevo-tile-w: 2px;
+  /* degrau dos tiles e toggles */
+
+  /* Azul */
+  --tf-accent-border: #065BA1;
+  --tf-accent-border-hover: #086ec4;
+  --tf-accent-relevo: #065BA1;
+
+  /* Vermelho */
+  --tf-danger-border: #c2201a9d;
+  --tf-danger-border-hover: #c2201a;
+  --tf-danger-relevo: #8f1712;
+
+  /* Verde */
+  --tf-success-border: #1e7a30;
+  --tf-success-border-hover: #26913b;
+  --tf-success-relevo: #1e7a30;
+
+  /* Laranja */
+  --tf-warning-border: #8a4110;
+  --tf-warning-border-hover: #9e4b14;
+  --tf-warning-relevo: #8a4110;
+
+  /* Cinza (botões ghost: Cancelar / Fechar / ações secundárias) */
+  --tf-ghost-border: #3e3e3e;
+  --tf-ghost-border-hover: #525252;
+  --tf-ghost-relevo: #3e3e3e;
+
+  /* Toggles em tile (cinza / verde / âmbar) */
+  --toggle-off-border: #4a4a4a;
+  --toggle-off-relevo: #333333;
+  --toggle-on-border: #1e7a30;
+  --toggle-on-relevo: #1e7a30;
+  --toggle-partial-border: #e5a93c;
+  --toggle-partial-relevo: #e5a93c;
+}
+
+/* ==========================================================================
+   1. Base
+   ========================================================================== */
+.tf-btn {
+  min-height: 32px;
+  padding: 6px 8px;
+  border-radius: var(--tf-tile-radius-sm);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  outline: none;
+  white-space: nowrap;
+  transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.08s;
+}
+
+.tf-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Rótulo interno dos tiles (permite quebra de linha controlada) */
+.btn-tile-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  white-space: normal;
+  word-break: normal;
+}
+
+.btn-tile-label>span {
+  display: block;
+}
+
+/* ==========================================================================
+   2. Hero — CTA principal (Organizar Projeto)
+   ========================================================================== */
+.tf-btn--hero {
+  width: 100%;
+  height: 100px;
+  min-height: 90px;
+  border-radius: var(--tf-tile-radius-lg);
+  background-color: var(--tf-accent);
+  color: #ffffff;
+  font-size: 30px;
+  font-weight: var(--tf-tile-font-weight);
+  text-shadow: var(--tf-text-shadow);
+  letter-spacing: 0.3px;
+  border: var(--tf-border-w) solid var(--tf-accent-border);
+  border-bottom: var(--tf-relevo-w) solid var(--tf-accent-relevo);
+  box-shadow: 0 4px 12px var(--tf-accent-glow);
+  margin-bottom: 4px;
+  flex-direction: column;
+  gap: 4px;
+  transition: background-color 0.15s, border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+.tf-btn--hero:hover:not(:disabled) {
+  background-color: var(--tf-accent-hover);
+  border-color: var(--tf-accent-border-hover);
+  box-shadow: 0 6px 16px var(--tf-accent-glow-hover);
+}
+
+.tf-btn--hero:active:not(:disabled) {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+  box-shadow: 0 2px 6px var(--tf-accent-glow);
+}
+
+/* ==========================================================================
+   3. Tile azul — ações secundárias
+   ========================================================================== */
+.tf-btn--tile {
+  width: 100%;
+  min-height: 64px;
+  height: 68px;
+  border-radius: var(--tf-tile-radius);
+  background-color: var(--tf-accent);
+  color: #ffffff;
+  font-size: var(--tf-tile-font-size);
+  font-weight: var(--tf-tile-font-weight);
+  line-height: var(--tf-tile-line-height);
+  text-shadow: var(--tf-text-shadow);
+  border: var(--tf-border-w) solid var(--tf-accent-border);
+  border-bottom: var(--tf-relevo-tile-w) solid var(--tf-accent-relevo);
+  padding: 6px 4px;
+  text-align: center;
+}
+
+.tf-btn--tile:hover:not(:disabled) {
+  background-color: var(--tf-accent-hover);
+  border-color: var(--tf-accent-border-hover);
+}
+
+.tf-btn--tile:active:not(:disabled) {
+  transform: translateY(1px);
+  border-bottom-width: 1px;
+}
+
+/* ==========================================================================
+   4. Tile vermelho — Desorganizar / Rollback
+   ========================================================================== */
+.tf-btn--tile-danger {
+  width: 100%;
+  min-height: 64px;
+  height: 68px;
+  padding: 6px 4px;
+  border-radius: var(--tf-tile-radius);
+  font-size: var(--tf-tile-font-size);
+  font-weight: var(--tf-tile-font-weight);
+  line-height: var(--tf-tile-line-height);
+  text-shadow: var(--tf-text-shadow);
+  background-color: var(--tf-danger);
+  color: #ffffff;
+  border: var(--tf-border-w) solid var(--tf-danger-border);
+  border-bottom: var(--tf-relevo-tile-w) solid var(--tf-danger-border);
+}
+
+.tf-btn--tile-danger:hover:not(:disabled) {
+  background-color: var(--tf-danger-hover);
+  border-color: var(--tf-danger-border-hover);
+}
+
+.tf-btn--tile-danger:active:not(:disabled) {
+  transform: translateY(1px);
+  border-bottom-width: 1px;
+}
+
+/* ==========================================================================
+   5. Botões de barra (top bar, rodapé da janela, rodapés de modal)
+   Anatomia única: fundo sólido + relevo de 3px na borda inferior.
+   A COR vem da variante (primary/destructive/success/warning/ghost) e o
+   TAMANHO vem de .tf-btn--sm / .tf-btn--xs / .tf-btn--mini.
+   ========================================================================== */
+.tf-btn--primary,
+.tf-btn--destructive,
+.tf-btn--success,
+.tf-btn--warning {
+  font-weight: var(--tf-tile-font-weight);
+  text-shadow: var(--tf-text-shadow);
+  border-radius: var(--tf-tile-radius);
+  border-style: solid;
+  border-width: var(--tf-border-w) var(--tf-border-w) var(--tf-relevo-w);
+}
+
+.tf-btn--primary {
+  background-color: var(--tf-accent);
+  color: #ffffff;
+  border-color: var(--tf-accent-border);
+  border-bottom-color: var(--tf-accent-relevo);
+}
+
+.tf-btn--destructive {
+  background-color: var(--tf-danger);
+  color: #ffffff;
+  border-color: var(--tf-danger-border);
+  border-bottom-color: var(--tf-danger-relevo);
+}
+
+.tf-btn--success {
+  background-color: var(--tf-success);
+  color: #ffffff;
+  border-color: var(--tf-success-border);
+  border-bottom-color: var(--tf-success-relevo);
+}
+
+.tf-btn--warning {
+  background-color: var(--tf-warning);
+  color: #ffffff;
+  border-color: var(--tf-warning-border);
+  border-bottom-color: var(--tf-warning-relevo);
+}
+
+.tf-btn--primary:hover:not(:disabled) {
+  background-color: var(--tf-accent-hover);
+  border-color: var(--tf-accent-border-hover);
+  box-shadow: 0 4px 12px var(--tf-accent-glow);
+}
+
+.tf-btn--destructive:hover:not(:disabled) {
+  background-color: var(--tf-danger-hover);
+  border-color: var(--tf-danger-border-hover);
+}
+
+.tf-btn--success:hover:not(:disabled) {
+  background-color: var(--tf-success-hover);
+  border-color: var(--tf-success-border-hover);
+}
+
+.tf-btn--warning:hover:not(:disabled) {
+  background-color: var(--tf-warning-hover);
+  border-color: var(--tf-warning-border-hover);
+}
+
+.tf-btn--primary:active:not(:disabled),
+.tf-btn--destructive:active:not(:disabled),
+.tf-btn--success:active:not(:disabled),
+.tf-btn--warning:active:not(:disabled) {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+
+/* Neutro escuro (Cancelar / Fechar): mesmo relevo, sem cor de marca */
+.tf-btn--ghost {
+  background-color: var(--tf-surface);
+  color: var(--tf-text);
+  font-weight: 600;
+  border: var(--tf-border-w) solid var(--tf-ghost-border);
+  border-bottom: var(--tf-relevo-w) solid var(--tf-ghost-relevo);
+  border-radius: var(--tf-tile-radius);
+}
+
+.tf-btn--ghost:hover:not(:disabled) {
+  background-color: var(--tf-surface-hover);
+  border-color: var(--tf-ghost-border-hover);
+  color: #ffffff;
+}
+
+.tf-btn--ghost:active:not(:disabled) {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+}
+
+/* ---- Modificadores de tamanho (aplicar depois da variante) ---- */
+.tf-btn--sm {
+  height: 32px;
+  min-height: 30px;
+  padding: 0 14px;
+  font-size: 11.5px;
+}
+
+.tf-btn--xs {
+  height: 28px;
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 10.5px;
+  border-radius: var(--tf-tile-radius-sm);
+}
+
+.tf-btn--mini {
+  height: 22px;
+  min-height: 22px;
+  padding: 0 8px;
+  font-size: 10px;
+  border-radius: var(--tf-tile-radius-sm);
+}
+
+/* ==========================================================================
+   6. Toggle em forma de tile (cinza = desligado / verde = ligado)
+   Estrutura: <label class="tf-toggle"><input type="checkbox"><span class="tf-toggle__face">…</span></label>
+   ========================================================================== */
+.tf-toggle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tf-toggle input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.tf-toggle__face {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  min-height: 64px;
+  height: 68px;
+  padding: 6px 4px;
+  border-radius: var(--tf-tile-radius);
+  font-size: var(--tf-tile-font-size);
+  font-weight: var(--tf-tile-font-weight);
+  line-height: var(--tf-tile-line-height);
+  text-shadow: var(--tf-text-shadow);
+  background-color: var(--toggle-off-bg);
+  color: var(--toggle-off-text);
+  border: var(--tf-border-w) solid var(--toggle-off-border);
+  border-bottom: var(--tf-relevo-tile-w) solid var(--toggle-off-relevo);
+  transition: background-color 0.15s, border-color 0.15s, transform 0.1s, color 0.15s;
+}
+
+.tf-toggle:hover .tf-toggle__face {
+  background-color: var(--toggle-off-bg-hover);
+}
+
+.tf-toggle:active .tf-toggle__face {
+  transform: translateY(1px);
+  border-bottom-width: 1px;
+}
+
+.tf-toggle input[type="checkbox"]:checked+.tf-toggle__face,
+.tf-toggle.active .tf-toggle__face {
+  background-color: var(--toggle-on-bg);
+  color: var(--toggle-on-text);
+  border-color: var(--toggle-on-border);
+  border-bottom-color: var(--toggle-on-relevo);
+}
+
+.tf-toggle:hover input[type="checkbox"]:checked+.tf-toggle__face,
+.tf-toggle.active:hover .tf-toggle__face {
+  background-color: var(--toggle-on-bg-hover);
+}
+
+.tf-toggle input[type="checkbox"]:disabled+.tf-toggle__face {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Estado parcial (ex.: "Pasta de Origem" ligada em algumas pastas) */
+.tf-toggle.partial .tf-toggle__face,
+.tf-toggle.partial input[type="checkbox"]:checked+.tf-toggle__face {
+  background-color: var(--toggle-partial-bg);
+  color: var(--toggle-partial-text);
+  border-color: var(--toggle-partial-border);
+  border-bottom-color: var(--toggle-partial-relevo);
+}

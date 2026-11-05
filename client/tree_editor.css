@@ -111,70 +111,8 @@ body {
   flex-wrap: wrap;
 }
 
-.btn {
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 3px;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  border: 1px solid #3e3e3e;
-  background-color: #2e2e2e;
-  color: #d4d4d4;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
-  outline: none;
-  white-space: nowrap;
-}
-
-.btn:hover:not(:disabled) {
-  background-color: #3a3a3a;
-  border-color: #525252;
-  color: #ffffff;
-}
-
-.btn:active:not(:disabled) {
-  background-color: #242424;
-}
-
-.btn:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-.btn-primary {
-  background-color: #1473e6;
-  border-color: #1473e6;
-  color: #ffffff;
-  font-weight: 600;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #0d66d0;
-  border-color: #0d66d0;
-}
-
-.btn-danger {
-  background-color: #3a2323;
-  border-color: #5c3030;
-  color: #f28b8b;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background-color: #4d2828;
-  border-color: #7a3b3b;
-  color: #ffb3b3;
-}
-
-.btn-icon {
-  padding: 0 7px;
-  min-width: 26px;
-  height: 24px;
-  font-size: 12px;
-}
+/* Botões: cores, relevo e raios vêm de theme.css (.tf-btn / .tf-btn--*).
+   Este arquivo define apenas dimensionamentos específicos da janela. */
 
 /* Settings Strip */
 .settings-bar {
@@ -207,6 +145,11 @@ body {
 
 .toggle-container:hover {
   color: #ffffff;
+}
+
+.toggle-container.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .toggle-container input[type="checkbox"] {
@@ -610,13 +553,13 @@ body {
   gap: 10px;
 }
 
+/* Utilitário de tamanho das ações do rodapé (34px); o visual vem de theme.css */
 .btn-footer-action {
   height: 34px;
   min-width: 96px;
   padding: 0 16px;
   font-size: 12px;
   font-weight: 600;
-  border-radius: 4px;
 }
 
 /* Color Label Popover Menu */
@@ -738,47 +681,13 @@ body {
   gap: 6px;
 }
 
+/* Utilitário: botões empilhados em largura total (modal "Alterações Não Salvas").
+   A cor vem de .tf-btn--success / --warning / --ghost (theme.css). */
 .modal-btn {
   width: 100%;
   min-height: 30px;
   height: 32px;
   font-size: 11.5px;
-  font-weight: 700;
-  border-radius: 5px;
-}
-
-.modal-btn-save {
-  background-color: #2ea043;
-  color: #ffffff;
-  border: 1px solid #1e7a30;
-}
-
-.modal-btn-save:hover:not(:disabled) {
-  background-color: #3bb552;
-  border-color: #26913b;
-}
-
-.modal-btn-nosave {
-  background-color: #c25e1a;
-  color: #ffffff;
-  border: 1px solid #8a4110;
-}
-
-.modal-btn-nosave:hover:not(:disabled) {
-  background-color: #d66b22;
-  border-color: #9e4b14;
-}
-
-.modal-btn-cancel {
-  background-color: #363636;
-  color: #d4d4d4;
-  border: 1px solid #4a4a4a;
-  font-weight: 600;
-}
-
-.modal-btn-cancel:hover:not(:disabled) {
-  background-color: #444444;
-  color: #ffffff;
 }
 
 .modal-header {
@@ -808,19 +717,6 @@ body {
   gap: 10px;
 }
 
-.rules-two-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  align-items: start;
-}
-
-.rules-col {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
 .modal-footer {
   padding: 10px 14px;
   background-color: #2b2b2b;
@@ -831,11 +727,93 @@ body {
   gap: 8px;
 }
 
+/* Modal de Regras e Filtros V2 (492px, coluna única, 3 seções) */
+.modal-card.modal-card-rules {
+  width: 494px;
+  max-width: calc(100vw - 24px);
+  max-height: 94vh;
+  background-color: #1e1e1e;
+  border: 1px solid #383838;
+  border-radius: 6px;
+}
+
+.modal-card-rules .modal-header {
+  background-color: #1e1e1e;
+  border-bottom: none;
+  padding: 15px 18px 10px;
+  position: relative;
+}
+
+.modal-card-rules .modal-header::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 0;
+  height: 1px;
+  background-color: #2a2a2a;
+}
+
+.modal-card-rules .modal-title {
+  gap: 10px;
+  color: #e0e0e0;
+}
+
+#rulesModalSwatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid #444444;
+}
+
+/* Botão X do modal de regras: .tf-btn--ghost em escala mini (visual em theme.css) */
+#btnCloseRulesModalX {
+  width: 28px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  font-size: 11px;
+  color: #888888;
+}
+
+#btnCloseRulesModalX:hover {
+  color: #ffffff;
+}
+
+.modal-card-rules .modal-body {
+  padding: 16px 18px 18px;
+  gap: 24px;
+}
+
+.modal-card-rules .modal-footer {
+  background-color: #1e1e1e;
+  border-top: none;
+  padding: 10px 18px 14px;
+  position: relative;
+  gap: 8px;
+}
+
+.modal-card-rules .modal-footer::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 0;
+  height: 1px;
+  background-color: #282828;
+}
+
+#btnCancelRulesModal {
+  min-width: 84px;
+  height: 32px;
+}
+
+#btnApplyRulesModal {
+  min-width: 162px;
+  height: 32px;
+}
+
 .rule-section {
-  background-color: #1c1c1c;
-  border: 1px solid #2e2e2e;
-  border-radius: 4px;
-  padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -849,119 +827,93 @@ body {
 }
 
 .rule-section-title {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
-  color: #b0b0b0;
+  color: #8a8a8a;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.05em;
   display: inline-flex;
   align-items: center;
   gap: 5px;
 }
 
-.types-grid-2col {
+/* Seção 1: Grid 3 colunas (7 botões 148x42 + caixa de tags ocupando 2 colunas = 302px) */
+.formats-grid-3col {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.behavior-grid-2col {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.behavior-grid-2col .rule-toggle-btn:last-child:nth-child(odd),
-.packs-grid-3x2 .rule-toggle-btn:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
-  justify-self: center;
-  width: calc((100% - 6px) / 2);
-}
-
-.packs-grid-3x2 {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   align-items: stretch;
 }
 
-.rule-toggle-btn {
-  position: relative;
+.inline-ext-tags-box {
+  grid-column: span 2;
   min-height: 42px;
-  min-width: 0;
-  padding: 6px 18px 6px 6px;
-  border-radius: 6px;
-  background-color: #084083;
-  border: 1px solid #0b4e9e;
-  color: #9cb1c9;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.2;
-  text-align: center;
-  cursor: pointer;
-  user-select: none;
+  max-height: 92px;
+  overflow-y: auto;
+  background-color: #141414;
+  border: 1px solid #2d2d2d;
+  border-radius: 4px;
+  padding: 5px 10px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  align-content: center;
+  gap: 5px;
+  cursor: text;
+  transition: border-color 0.15s;
+}
+
+.inline-ext-tags-box:focus-within {
+  border-color: #1473e6;
+}
+
+.inline-ext-chips {
+  display: contents;
+}
+
+.inline-ext-input {
+  flex: 1 1 70px;
+  min-width: 56px;
+  height: 26px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #e0e0e0;
+  font-size: 11px;
+  font-family: inherit;
+  user-select: text;
+}
+
+.inline-ext-input::placeholder {
+  color: #9a9a9a;
+}
+
+/* Seção 2: Grid 2 linhas (3 em cima + 2 centralizados embaixo, todos 148x42) */
+.behavior-grid-v2 {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.1s, box-shadow 0.15s;
-  box-sizing: border-box;
+  gap: 6px;
 }
 
-.rule-toggle-btn:hover {
-  background-color: #0a4c9a;
-  border-color: #1664c0;
-  color: #c7d7eb;
+.behavior-grid-v2 .rule-toggle-btn {
+  width: calc((100% - 12px) / 3);
+  flex: 0 0 calc((100% - 12px) / 3);
 }
 
-.rule-toggle-btn:active {
-  transform: scale(0.98);
+/* Tiles de Regras e Filtros: reaproveitam o componente .tf-toggle do painel
+   principal (theme.css) em escala compacta de 42px de altura. */
+.rule-toggle-btn {
+  min-width: 0;
 }
 
-.rule-toggle-btn.active {
-  background-color: #0d66d0;
-  border-color: #2e84eb;
-  color: #ffffff;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(13, 102, 208, 0.38);
-}
-
-.rule-toggle-btn.active:hover {
-  background-color: #1170e0;
-  border-color: #4694f0;
-  color: #ffffff;
-}
-
-.rule-toggle-btn input[type="checkbox"] {
-  display: none;
-}
-
-.info-icon {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  font-size: 9.5px;
-  font-weight: 700;
-  font-style: italic;
-  font-family: Georgia, "Times New Roman", serif;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.8);
-  cursor: help;
-  flex-shrink: 0;
-  transition: background-color 0.15s, color 0.15s;
-}
-
-.rule-toggle-btn .info-icon {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-}
-
-.info-icon:hover {
-  background-color: rgba(255, 255, 255, 0.32);
-  color: #ffffff;
+.modal-card-rules .tf-toggle__face {
+  min-height: 42px;
+  height: auto;
+  padding: 6px 8px;
+  border-radius: var(--tf-tile-radius);
+  font-size: 10.5px;
+  line-height: 1.22;
 }
 
 .rule-info-tooltip {
@@ -981,36 +933,51 @@ body {
   display: none;
 }
 
-/* Extensions & Name Tag Manager */
-.ext-preset-btn {
-  font-size: 10px;
-  padding: 2px 7px;
-  height: 20px;
-}
-
+/* Seção 3: Filtro por Nomenclatura & Chips */
 .ext-add-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .ext-add-row input {
   flex: 1;
-  height: 26px;
+  height: 34px;
+  background-color: #141414;
+  border: 1px solid #2d2d2d;
+  border-radius: 4px;
+  padding: 0 10px;
+  font-size: 11px;
+  user-select: text;
+}
+
+.ext-add-row input::placeholder {
+  color: #9a9a9a;
+}
+
+#btnAddNameTag {
+  width: 114px;
+  height: 34px;
+  flex-shrink: 0;
 }
 
 .ext-tags-box {
-  background-color: #151515;
-  border: 1px solid #2c2c2c;
-  border-radius: 3px;
-  padding: 7px;
-  min-height: 46px;
+  background-color: #141414;
+  border: 1px solid #222222;
+  border-radius: 4px;
+  padding: 8px 12px;
+  min-height: 54px;
   max-height: 95px;
   overflow-y: auto;
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
   align-content: flex-start;
+}
+
+.ext-tags-box .rule-empty-hint {
+  font-size: 11px;
+  color: #9a9a9a;
 }
 
 .ext-tag {

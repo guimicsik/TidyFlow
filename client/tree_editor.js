@@ -15,15 +15,15 @@
     }
     var ruleSectionHostTitle = document.getElementById("ruleSectionHostTitle");
     if (ruleSectionHostTitle) {
-      ruleSectionHostTitle.textContent = "1. Tipos de Itens Permitidos";
+      ruleSectionHostTitle.textContent = "1. Formatos";
     }
     var lblTypeMainComp = document.getElementById("lblTypeMainComp");
     if (lblTypeMainComp) {
       lblTypeMainComp.textContent = "Sequência Principal";
     }
-    var infoTypeMainComp = document.getElementById("infoTypeMainComp");
-    if (infoTypeMainComp) {
-      infoTypeMainComp.setAttribute(
+    var tileTypeMainComp = document.getElementById("tileTypeMainComp");
+    if (tileTypeMainComp) {
+      tileTypeMainComp.setAttribute(
         "data-tooltip",
         "Sequências finais de edição que não estão inseridas dentro de nenhuma outra sequência."
       );
@@ -32,20 +32,41 @@
     if (lblTypePreComps) {
       lblTypePreComps.textContent = "Sequências Aninhadas";
     }
-    var infoTypePreComps = document.getElementById("infoTypePreComps");
-    if (infoTypePreComps) {
-      infoTypePreComps.setAttribute(
+    var tileTypePreComps = document.getElementById("tileTypePreComps");
+    if (tileTypePreComps) {
+      tileTypePreComps.setAttribute(
         "data-tooltip",
         "Sequências secundárias ou multicâmera usadas dentro de outras sequências."
+      );
+    }
+    var tileTypeStillImages = document.getElementById("tileTypeStillImages");
+    if (tileTypeStillImages) {
+      tileTypeStillImages.setAttribute(
+        "data-tooltip",
+        "Fotos, artes, ilustrações e logotipos estáticos (.png, .jpg, .jfif, .psd, .ai, .svg, .dng...)."
+      );
+    }
+    var tileTypeVideos = document.getElementById("tileTypeVideos");
+    if (tileTypeVideos) {
+      tileTypeVideos.setAttribute(
+        "data-tooltip",
+        "Gravações de câmera, clipes renderizados e sequências de imagem (.mp4, .mov, .prores, .mxf, .braw, .r3d...)."
+      );
+    }
+    var tileTypeAudios = document.getElementById("tileTypeAudios");
+    if (tileTypeAudios) {
+      tileTypeAudios.setAttribute(
+        "data-tooltip",
+        "Músicas, locuções e efeitos sonoros sem vídeo (.wav, .mp3, .aac, .m4a, .aif, .flac, .asnd, .ac3...)."
       );
     }
     var lblTypeSolids = document.getElementById("lblTypeSolids");
     if (lblTypeSolids) {
       lblTypeSolids.textContent = "Itens Sintéticos";
     }
-    var infoTypeSolids = document.getElementById("infoTypeSolids");
-    if (infoTypeSolids) {
-      infoTypeSolids.setAttribute(
+    var tileTypeSolids = document.getElementById("tileTypeSolids");
+    if (tileTypeSolids) {
+      tileTypeSolids.setAttribute(
         "data-tooltip",
         "Elementos gerados internamente no Premiere, como Color Matte, Adjustment Layer e Black Video."
       );
@@ -54,20 +75,20 @@
     if (lblTypeDataFiles) {
       lblTypeDataFiles.textContent = "Dados, MOGRT e Legendas";
     }
-    var infoTypeDataFiles = document.getElementById("infoTypeDataFiles");
-    if (infoTypeDataFiles) {
-      infoTypeDataFiles.setAttribute(
+    var tileTypeDataFiles = document.getElementById("tileTypeDataFiles");
+    if (tileTypeDataFiles) {
+      tileTypeDataFiles.setAttribute(
         "data-tooltip",
-        "Templates gráficos, arquivos de legenda, tabelas e projetos importados."
+        "Templates gráficos, legendas, tabelas e projetos importados (.mogrt, .srt, .vtt, .xml, .json, .prproj...)."
       );
     }
     var lblRuleGroupByMainComp = document.getElementById("lblRuleGroupByMainComp");
     if (lblRuleGroupByMainComp) {
       lblRuleGroupByMainComp.textContent = "Agrupar por Seq. Principal";
     }
-    var infoRuleGroupByMainComp = document.getElementById("infoRuleGroupByMainComp");
-    if (infoRuleGroupByMainComp) {
-      infoRuleGroupByMainComp.setAttribute(
+    var tileRuleGroupByMainComp = document.getElementById("tileRuleGroupByMainComp");
+    if (tileRuleGroupByMainComp) {
+      tileRuleGroupByMainComp.setAttribute(
         "data-tooltip",
         "Separa as sequências aninhadas em subpastas com o nome da sequência principal onde são usadas."
       );
@@ -75,40 +96,6 @@
     var lblRulePsdBundles = document.getElementById("lblRulePsdBundles");
     if (lblRulePsdBundles) {
       lblRulePsdBundles.textContent = "Isolar PSD / AI";
-    }
-
-    // Tooltips dinâmicos e adaptados ao Premiere Pro para os pacotes de extensão
-    var packDataFiles = document.querySelector('input.rule-pack-chk[value="DataFiles"]');
-    if (packDataFiles && packDataFiles.parentElement) {
-      var tipData = packDataFiles.parentElement.querySelector(".info-icon");
-      if (tipData) {
-        tipData.setAttribute("data-tooltip", "Exemplos: .json, .csv, .prproj, .mogrt, .srt, .vtt, .mcc, .dfxp, .xml, .aaf...");
-      }
-      var lblData = packDataFiles.parentElement.querySelector(".btn-tile-label");
-      if (lblData) {
-        lblData.textContent = "Dados / Legendas";
-      }
-    }
-    var packAudios = document.querySelector('input.rule-pack-chk[value="Audios"]');
-    if (packAudios && packAudios.parentElement) {
-      var tipAud = packAudios.parentElement.querySelector(".info-icon");
-      if (tipAud) {
-        tipAud.setAttribute("data-tooltip", "Exemplos: .wav, .mp3, .aac, .m4a, .aif, .flac, .asnd, .ac3, .caf, .mid...");
-      }
-    }
-    var packVideos = document.querySelector('input.rule-pack-chk[value="Videos"]');
-    if (packVideos && packVideos.parentElement) {
-      var tipVid = packVideos.parentElement.querySelector(".info-icon");
-      if (tipVid) {
-        tipVid.setAttribute("data-tooltip", "Exemplos: .mp4, .mov, .prores, .mxf, .avi, .braw, .r3d, .mod, .tod...");
-      }
-    }
-    var packImages = document.querySelector('input.rule-pack-chk[value="Images"]');
-    if (packImages && packImages.parentElement) {
-      var tipImg = packImages.parentElement.querySelector(".info-icon");
-      if (tipImg) {
-        tipImg.setAttribute("data-tooltip", "Exemplos: .png, .jpg, .jfif, .ico, .psd, .ai, .svg, .exr, .dng...");
-      }
     }
   }
 
@@ -126,6 +113,18 @@
 
   // Elementos DOM - Barra de Configurações
   var chkUsePrefixNumbering = document.getElementById("chkUsePrefixNumbering");
+  var chkSeparateAudioCategories = document.getElementById("chkSeparateAudioCategories");
+  var chkNumberAudioCategories = document.getElementById("chkNumberAudioCategories");
+  var lblNumberAudioCategories = document.getElementById("lblNumberAudioCategories");
+
+  function syncAudioSubToggleState() {
+    if (!chkNumberAudioCategories) return;
+    var espOn = chkSeparateAudioCategories ? Boolean(chkSeparateAudioCategories.checked) : true;
+    chkNumberAudioCategories.disabled = !espOn;
+    if (lblNumberAudioCategories) {
+      lblNumberAudioCategories.classList.toggle("is-disabled", !espOn);
+    }
+  }
 
   // Elementos DOM - Árvore e Rodapé
   var btnAddTopFolder = document.getElementById("btnAddTopFolder");
@@ -144,7 +143,7 @@
   var labelPopover = document.getElementById("labelPopover");
   var ruleInfoTooltip = document.getElementById("ruleInfoTooltip");
 
-  // Modal de Regras
+  // Modal de Regras (V2)
   var rulesModalBackdrop = document.getElementById("rulesModalBackdrop");
   var rulesModalSwatch = document.getElementById("rulesModalSwatch");
   var rulesModalTitleText = document.getElementById("rulesModalTitleText");
@@ -156,10 +155,9 @@
   var chkRulePsdBundles = document.getElementById("chkRulePsdBundles");
   var chkRuleCatchOthers = document.getElementById("chkRuleCatchOthers");
   var btnClearAllExts = document.getElementById("btnClearAllExts");
-  var rulePackCheckboxes = document.querySelectorAll(".rule-pack-chk");
   var inpNewExtension = document.getElementById("inpNewExtension");
-  var btnAddExtension = document.getElementById("btnAddExtension");
   var extTagsContainer = document.getElementById("extTagsContainer");
+  var extChipsList = document.getElementById("extChipsList");
   var btnClearAllNameTags = document.getElementById("btnClearAllNameTags");
   var inpNewNameTag = document.getElementById("inpNewNameTag");
   var btnAddNameTag = document.getElementById("btnAddNameTag");
@@ -186,11 +184,12 @@
   var isDirty = false;
   var activeColorPopoverNodeId = null;
   var editingRulesNodeId = null;
-  var modalWorkingExts = [];
+  var modalCustomExts = [];
   var modalWorkingNameTags = [];
   var pendingConfirmCallback = null;
   var draggedNodeId = null;
   var closeAfterSaveAs = false;
+  var activeDefaultExtensions = presetManager.getDefaultExtensions();
 
   function setStatus(msg, type) {
     if (!editorStatus) return;
@@ -206,6 +205,20 @@
       if (window.OrgLog) OrgLog.error("tree_editor.save", presetManager.lastSaveError);
     } catch (e) { }
     return true;
+  }
+
+  // Gravacao que descartou parte do conteudo (arvore do preset Default):
+  // avisa no rodape e mantem o badge "Nao salvo*" em vez de dar por salvo.
+  function reportSaveWarning() {
+    var warning = (presetManager && typeof presetManager.consumeSaveWarning === "function")
+      ? presetManager.consumeSaveWarning()
+      : null;
+    if (!warning) return;
+    setDirty(true);
+    setStatus(warning, "warning");
+    try {
+      if (window.OrgLog) OrgLog.warn("tree_editor.save", warning);
+    } catch (e) { }
   }
 
   function setDirty(dirtyState) {
@@ -279,9 +292,70 @@
     }
 
     chkUsePrefixNumbering.checked = Boolean(currentPreset.settings.usePrefixNumbering);
+    if (chkSeparateAudioCategories) {
+      chkSeparateAudioCategories.checked = (currentPreset.settings.separateAudioCategories !== false);
+    }
+    if (chkNumberAudioCategories) {
+      chkNumberAudioCategories.checked = (currentPreset.settings.numberAudioCategories !== false);
+    }
+    syncAudioSubToggleState();
 
     setDirty(false);
     renderTree();
+  }
+
+  // Coleta as extensões padrão dos pacotes correspondentes às categorias marcadas
+  function collectStandardPackExtsForTypes(typesArray, includeBothHosts) {
+    var types = Array.isArray(typesArray) ? typesArray : [];
+    var dicts = includeBothHosts
+      ? [PresetManager.DEFAULT_EXTENSIONS_AE, PresetManager.DEFAULT_EXTENSIONS_PPRO]
+      : [activeDefaultExtensions];
+    var result = [];
+    var seen = {};
+
+    function addPack(packName) {
+      for (var d = 0; d < dicts.length; d++) {
+        var dict = dicts[d];
+        var list = (dict && dict[packName]) || [];
+        for (var i = 0; i < list.length; i++) {
+          var ext = String(list[i]).toLowerCase();
+          if (ext && !seen[ext]) {
+            seen[ext] = true;
+            result.push(ext);
+          }
+        }
+      }
+    }
+
+    if (types.indexOf("StillImages") !== -1) addPack("Images");
+    if (types.indexOf("Videos") !== -1 || types.indexOf("ImageSequences") !== -1) {
+      addPack("Videos");
+      addPack("ImageSequences");
+    }
+    if (types.indexOf("Audios") !== -1) addPack("Audios");
+    if (types.indexOf("DataFiles") !== -1) addPack("DataFiles");
+
+    return { list: result, map: seen };
+  }
+
+  // Extrai apenas as tags de formatos específicos/avulsos configuradas na pasta
+  function extractCustomExtsFromRules(rules) {
+    if (!rules) return [];
+    if (Array.isArray(rules.customExtensions)) {
+      return rules.customExtensions.slice();
+    }
+    var rawExts = Array.isArray(rules.extensions) ? rules.extensions : [];
+    if (rawExts.length === 0) return [];
+
+    var std = collectStandardPackExtsForTypes(rules.types, true);
+    var custom = [];
+    for (var i = 0; i < rawExts.length; i++) {
+      var ext = String(rawExts[i] || "").trim().replace(/^\.+/, "").toLowerCase();
+      if (ext && !std.map[ext] && custom.indexOf(ext) === -1) {
+        custom.push(ext);
+      }
+    }
+    return custom;
   }
 
   // Renderiza o resumo de regras em pílulas visuais para cada pasta da árvore
@@ -293,17 +367,21 @@
       MainComp: isPPro ? "Seq. Principal" : "Comp Principal",
       PreComps: isPPro ? "Nested Seqs" : "Pre-Comps",
       StillImages: "Images",
-      Videos: "Videos",
-      ImageSequences: "Img Seq",
+      Videos: "Footages",
+      ImageSequences: "Footages",
       Audios: "Audios",
       Solids: isPPro ? "Sintéticos/Solids" : "Solids",
       DataFiles: isPPro ? "Data/MOGRT" : "Data/3D"
     };
 
     var types = Array.isArray(rules.types) ? rules.types : [];
+    var seenPillLabels = {};
     for (var i = 0; i < types.length; i++) {
       var label = typeLabels[types[i]] || types[i];
-      pills.push({ text: label, cls: "" });
+      if (!seenPillLabels[label]) {
+        seenPillLabels[label] = true;
+        pills.push({ text: label, cls: "" });
+      }
     }
 
     if (rules.groupByMainComp && types.indexOf("PreComps") !== -1) {
@@ -319,11 +397,11 @@
       pills.push({ text: "Pasta Origem", cls: "pill-ext" });
     }
 
-    var exts = Array.isArray(rules.extensions) ? rules.extensions : [];
-    if (exts.length > 0) {
-      var preview = exts.slice(0, 4).map(function (e) { return "." + e; }).join(", ");
-      if (exts.length > 4) {
-        preview += " +" + (exts.length - 4);
+    var customExts = extractCustomExtsFromRules(rules);
+    if (customExts.length > 0) {
+      var preview = customExts.slice(0, 4).map(function (e) { return "." + e; }).join(", ");
+      if (customExts.length > 4) {
+        preview += " +" + (customExts.length - 4);
       }
       pills.push({ text: preview, cls: "pill-ext" });
     }
@@ -762,7 +840,8 @@
     closeColorLabelPopover();
   });
 
-  // Sincronização visual dos botões estilo Tile (Ativo #0d66d0 / Inativo #084083)
+  // Sincronização visual dos tiles de regra: a classe .active alimenta o componente
+  // .tf-toggle (theme.css), compartilhado com os toggles do painel principal.
   var allRuleToggleLabels = document.querySelectorAll(".rule-toggle-btn");
 
   function syncAllRuleToggleButtons() {
@@ -786,90 +865,71 @@
     })(allRuleToggleLabels[tIdx]);
   }
 
-  // Tooltip de informação amigável nos ícones (i)
+  // Tooltip de informação ao deixar o mouse sobre os botões de regra
+  var tooltipHoverTimer = null;
+
   function hideRuleTooltip() {
+    if (tooltipHoverTimer) {
+      clearTimeout(tooltipHoverTimer);
+      tooltipHoverTimer = null;
+    }
     if (ruleInfoTooltip) {
       ruleInfoTooltip.style.display = "none";
     }
   }
 
-  var allInfoIcons = document.querySelectorAll(".info-icon");
-  for (var infIdx = 0; infIdx < allInfoIcons.length; infIdx++) {
-    (function (iconEl) {
-      iconEl.addEventListener("click", function (ev) {
-        ev.preventDefault();
-        ev.stopPropagation();
-      });
+  function showTooltipForElement(targetEl) {
+    var text = targetEl.getAttribute("data-tooltip");
+    if (!text || !ruleInfoTooltip) return;
+    ruleInfoTooltip.textContent = text;
+    ruleInfoTooltip.style.display = "block";
 
-      iconEl.addEventListener("mouseenter", function () {
-        var text = iconEl.getAttribute("data-tooltip");
-        if (!text || !ruleInfoTooltip) return;
-        ruleInfoTooltip.textContent = text;
-        ruleInfoTooltip.style.display = "block";
-
-        var rect = iconEl.getBoundingClientRect();
-        var tipRect = ruleInfoTooltip.getBoundingClientRect();
-        var topPos = rect.top - tipRect.height - 6;
-        if (topPos < 8) {
-          topPos = rect.bottom + 6;
-        }
-        var leftPos = rect.left + rect.width / 2 - tipRect.width / 2;
-        if (leftPos + tipRect.width > window.innerWidth - 10) {
-          leftPos = window.innerWidth - tipRect.width - 10;
-        }
-        if (leftPos < 10) {
-          leftPos = 10;
-        }
-        ruleInfoTooltip.style.top = Math.round(topPos) + "px";
-        ruleInfoTooltip.style.left = Math.round(leftPos) + "px";
-      });
-
-      iconEl.addEventListener("mouseleave", hideRuleTooltip);
-    })(allInfoIcons[infIdx]);
+    var rect = targetEl.getBoundingClientRect();
+    var tipRect = ruleInfoTooltip.getBoundingClientRect();
+    var topPos = rect.top - tipRect.height - 6;
+    if (topPos < 8) {
+      topPos = rect.bottom + 6;
+    }
+    var leftPos = rect.left + rect.width / 2 - tipRect.width / 2;
+    if (leftPos + tipRect.width > window.innerWidth - 10) {
+      leftPos = window.innerWidth - tipRect.width - 10;
+    }
+    if (leftPos < 10) {
+      leftPos = 10;
+    }
+    ruleInfoTooltip.style.top = Math.round(topPos) + "px";
+    ruleInfoTooltip.style.left = Math.round(leftPos) + "px";
   }
 
-  // Modal de Regras e Filtros — Sincronização dos Pacotes de Extensões
+  for (var infIdx = 0; infIdx < allRuleToggleLabels.length; infIdx++) {
+    (function (tileEl) {
+      tileEl.addEventListener("mouseenter", function () {
+        if (tooltipHoverTimer) clearTimeout(tooltipHoverTimer);
+        tooltipHoverTimer = setTimeout(function () {
+          showTooltipForElement(tileEl);
+        }, 220);
+      });
+      tileEl.addEventListener("mouseleave", hideRuleTooltip);
+    })(allRuleToggleLabels[infIdx]);
+  }
+
+  // Modal de Regras e Filtros V2 — Caixa Inline de Formatos Específicos (Seção 1)
   function updateClearExtsButtonVisibility() {
     if (btnClearAllExts) {
-      btnClearAllExts.style.display = modalWorkingExts.length > 0 ? "inline-flex" : "none";
+      btnClearAllExts.style.display = modalCustomExts.length > 0 ? "inline-flex" : "none";
     }
   }
 
-  var activeDefaultExtensions = presetManager.getDefaultExtensions();
-
-  function syncPackButtonsFromExts() {
-    for (var i = 0; i < rulePackCheckboxes.length; i++) {
-      var chk = rulePackCheckboxes[i];
-      var packName = chk.value;
-      var packExts = activeDefaultExtensions[packName] || [];
-      var hasAny = false;
-      for (var e = 0; e < packExts.length; e++) {
-        if (modalWorkingExts.indexOf(packExts[e]) !== -1) {
-          hasAny = true;
-          break;
-        }
-      }
-      chk.checked = hasAny;
-    }
-    syncAllRuleToggleButtons();
-    renderModalExts();
-  }
-
-  // Chips das extensões efetivamente filtradas (pacotes + avulsas) — MANIFESTO §2.1
-  function renderModalExts() {
-    if (!extTagsContainer) return;
-    extTagsContainer.innerHTML = "";
+  function renderModalCustomExts() {
+    if (!extChipsList) return;
+    extChipsList.innerHTML = "";
     updateClearExtsButtonVisibility();
 
-    if (modalWorkingExts.length === 0) {
-      var emptyMsg = document.createElement("span");
-      emptyMsg.className = "rule-empty-hint";
-      emptyMsg.textContent = "Nenhuma extensão filtrada.";
-      extTagsContainer.appendChild(emptyMsg);
-      return;
+    if (inpNewExtension) {
+      inpNewExtension.placeholder = modalCustomExts.length === 0 ? "Avulsa: exr, webp..." : "";
     }
 
-    for (var i = 0; i < modalWorkingExts.length; i++) {
+    for (var i = 0; i < modalCustomExts.length; i++) {
       (function (ext, idx) {
         var tag = document.createElement("span");
         tag.className = "ext-tag";
@@ -880,51 +940,41 @@
         var btnRem = document.createElement("button");
         btnRem.type = "button";
         btnRem.textContent = "×";
-        btnRem.title = "Remover extensão '." + ext + "'";
-        btnRem.addEventListener("click", function () {
-          modalWorkingExts.splice(idx, 1);
-          syncPackButtonsFromExts();
+        btnRem.title = "Remover formato '." + ext + "'";
+        btnRem.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          modalCustomExts.splice(idx, 1);
+          renderModalCustomExts();
         });
 
         tag.appendChild(label);
         tag.appendChild(btnRem);
-        extTagsContainer.appendChild(tag);
-      })(modalWorkingExts[i], i);
+        extChipsList.appendChild(tag);
+      })(modalCustomExts[i], i);
     }
   }
 
-  function addExtensionsFromInputString(rawStr) {
+  function addCustomExtensionsFromString(rawStr) {
     if (!rawStr) return;
     var parts = String(rawStr).split(/[\s,;]+/);
+    var changed = false;
     for (var i = 0; i < parts.length; i++) {
       var clean = parts[i].trim().replace(/^\.+/, "").toLowerCase();
-      if (clean && modalWorkingExts.indexOf(clean) === -1) {
-        modalWorkingExts.push(clean);
+      if (clean && modalCustomExts.indexOf(clean) === -1) {
+        modalCustomExts.push(clean);
+        changed = true;
       }
     }
-    syncPackButtonsFromExts();
+    if (changed) {
+      renderModalCustomExts();
+    }
   }
 
-  // Listener dos botões de pacote de extensão
-  for (var pIdx = 0; pIdx < rulePackCheckboxes.length; pIdx++) {
-    (function (chk) {
-      chk.addEventListener("change", function () {
-        var packName = chk.value;
-        var packList = activeDefaultExtensions[packName] || [];
-        if (chk.checked) {
-          for (var i = 0; i < packList.length; i++) {
-            if (modalWorkingExts.indexOf(packList[i]) === -1) {
-              modalWorkingExts.push(packList[i]);
-            }
-          }
-        } else {
-          modalWorkingExts = modalWorkingExts.filter(function (ext) {
-            return packList.indexOf(ext) === -1;
-          });
-        }
-        syncPackButtonsFromExts();
-      });
-    })(rulePackCheckboxes[pIdx]);
+  if (extTagsContainer && inpNewExtension) {
+    extTagsContainer.addEventListener("click", function (ev) {
+      if (ev.target && ev.target.tagName === "BUTTON") return;
+      inpNewExtension.focus();
+    });
   }
 
   // Modal de Regras e Filtros — Tags de Nomenclatura
@@ -1002,7 +1052,12 @@
     var activeTypes = Array.isArray(rules.types) ? rules.types : [];
     for (var i = 0; i < ruleTypeCheckboxes.length; i++) {
       var chk = ruleTypeCheckboxes[i];
-      chk.checked = (activeTypes.indexOf(chk.value) !== -1);
+      if (chk.value === "Videos") {
+        // "Vídeos / Footages" unifica Videos + ImageSequences
+        chk.checked = (activeTypes.indexOf("Videos") !== -1 || activeTypes.indexOf("ImageSequences") !== -1);
+      } else {
+        chk.checked = (activeTypes.indexOf(chk.value) !== -1);
+      }
     }
 
     chkRuleGroupExt.checked = Boolean(rules.groupSubfoldersByExt);
@@ -1015,8 +1070,8 @@
 
     syncAllRuleToggleButtons();
 
-    modalWorkingExts = Array.isArray(rules.extensions) ? rules.extensions.slice() : [];
-    syncPackButtonsFromExts();
+    modalCustomExts = extractCustomExtsFromRules(rules);
+    renderModalCustomExts();
 
     modalWorkingNameTags = [];
     if (rules.nameFilter && String(rules.nameFilter).trim() !== "") {
@@ -1040,19 +1095,28 @@
   btnCloseRulesModalX.addEventListener("click", closeRulesModal);
   btnCancelRulesModal.addEventListener("click", closeRulesModal);
 
-  if (btnAddExtension && inpNewExtension) {
-    btnAddExtension.addEventListener("click", function () {
-      addExtensionsFromInputString(inpNewExtension.value);
-      inpNewExtension.value = "";
-      inpNewExtension.focus();
-    });
-  }
-
   if (inpNewExtension) {
     inpNewExtension.addEventListener("keydown", function (ev) {
-      if (ev.key === "Enter") {
+      var isSpace = (ev.key === " " || ev.code === "Space" || ev.keyCode === 32);
+      var isCommitKey = isSpace || ev.key === "Enter" || ev.key === "," || ev.key === ";";
+      if (isCommitKey) {
         ev.preventDefault();
-        addExtensionsFromInputString(inpNewExtension.value);
+        if (inpNewExtension.value.trim() !== "") {
+          addCustomExtensionsFromString(inpNewExtension.value);
+        }
+        inpNewExtension.value = "";
+        return;
+      }
+      if (ev.key === "Backspace" && inpNewExtension.value === "" && modalCustomExts.length > 0) {
+        ev.preventDefault();
+        modalCustomExts.pop();
+        renderModalCustomExts();
+      }
+    });
+
+    inpNewExtension.addEventListener("input", function () {
+      if (/[\s,;]$/.test(inpNewExtension.value)) {
+        addCustomExtensionsFromString(inpNewExtension.value);
         inpNewExtension.value = "";
       }
     });
@@ -1060,8 +1124,8 @@
 
   if (btnClearAllExts) {
     btnClearAllExts.addEventListener("click", function () {
-      modalWorkingExts = [];
-      syncPackButtonsFromExts();
+      modalCustomExts = [];
+      renderModalCustomExts();
     });
   }
 
@@ -1095,9 +1159,9 @@
     var found = findNodeAndParentById(currentPreset.tree, editingRulesNodeId);
     if (!found) return;
 
-    // Se o usuário digitou algo no input de extensão e não clicou em [+], adiciona também
+    // Se o usuário digitou um formato específico e não apertou Espaço/Enter, salva também
     if (inpNewExtension && inpNewExtension.value.trim() !== "") {
-      addExtensionsFromInputString(inpNewExtension.value);
+      addCustomExtensionsFromString(inpNewExtension.value);
       inpNewExtension.value = "";
     }
 
@@ -1110,13 +1174,26 @@
     var selectedTypes = [];
     for (var i = 0; i < ruleTypeCheckboxes.length; i++) {
       if (ruleTypeCheckboxes[i].checked) {
-        selectedTypes.push(ruleTypeCheckboxes[i].value);
+        var val = ruleTypeCheckboxes[i].value;
+        selectedTypes.push(val);
+        if (val === "Videos" && selectedTypes.indexOf("ImageSequences") === -1) {
+          selectedTypes.push("ImageSequences");
+        }
+      }
+    }
+
+    var stdPack = collectStandardPackExtsForTypes(selectedTypes, false);
+    var finalExtensions = stdPack.list.slice();
+    for (var c = 0; c < modalCustomExts.length; c++) {
+      if (finalExtensions.indexOf(modalCustomExts[c]) === -1) {
+        finalExtensions.push(modalCustomExts[c]);
       }
     }
 
     found.node.rules = {
       types: selectedTypes,
-      extensions: modalWorkingExts.slice(),
+      extensions: finalExtensions,
+      customExtensions: modalCustomExts.slice(),
       groupSubfoldersByExt: chkRuleGroupExt.checked,
       groupBySourceFolder: chkRuleGroupBySourceFolder ? chkRuleGroupBySourceFolder.checked : true,
       groupByMainComp: chkRuleGroupByMainComp.checked,
@@ -1209,6 +1286,7 @@
     closeSaveAsModal();
     loadSelectedPresetIntoEditor(currentPreset.presetName);
     setStatus("Novo preset '" + currentPreset.presetName + "' salvo com sucesso!", "success");
+    reportSaveWarning();
     try {
       if (window.parent && window.parent !== window && typeof window.parent.onPresetBuilderUpdated === "function") {
         window.parent.onPresetBuilderUpdated(currentPreset.presetName);
@@ -1265,6 +1343,27 @@
     setStatus("Numeração atualizada. Use Salvar para gravar no preset.", "");
   });
 
+  if (chkSeparateAudioCategories) {
+    chkSeparateAudioCategories.addEventListener("change", function () {
+      if (!currentPreset) return;
+      if (!currentPreset.settings) currentPreset.settings = {};
+      currentPreset.settings.separateAudioCategories = chkSeparateAudioCategories.checked;
+      syncAudioSubToggleState();
+      setDirty(true);
+      setStatus("Categorização de áudio atualizada. Use Salvar para gravar no preset.", "");
+    });
+  }
+
+  if (chkNumberAudioCategories) {
+    chkNumberAudioCategories.addEventListener("change", function () {
+      if (!currentPreset) return;
+      if (!currentPreset.settings) currentPreset.settings = {};
+      currentPreset.settings.numberAudioCategories = chkNumberAudioCategories.checked;
+      setDirty(true);
+      setStatus("Numeração das subpastas ESP atualizada. Use Salvar para gravar no preset.", "");
+    });
+  }
+
   btnAddTopFolder.addEventListener("click", function () {
     if (!currentPreset) return;
     var newNode = presetManager.createEmptyNode("Nova Pasta", 8);
@@ -1292,6 +1391,7 @@
     setDirty(false);
     refreshPresetSelectDropdown(currentPreset.presetName);
     setStatus("Preset '" + currentPreset.presetName + "' salvo em disco!", "success");
+    reportSaveWarning();
     try {
       if (window.parent && window.parent !== window && typeof window.parent.onPresetBuilderUpdated === "function") {
         window.parent.onPresetBuilderUpdated(currentPreset.presetName);
@@ -1580,7 +1680,26 @@
             changed = true;
           }
 
-          // Espelha Pasta de Origem nas regras das pastas
+          // Espelha Categorias de Áudio (separateAudioCategories) e Numeração ESP (numberAudioCategories)
+          var storedAudioCat = Boolean(stored.settings && stored.settings.separateAudioCategories !== false);
+          if (Boolean(currentPreset.settings && currentPreset.settings.separateAudioCategories !== false) !== storedAudioCat) {
+            if (!currentPreset.settings) currentPreset.settings = {};
+            currentPreset.settings.separateAudioCategories = storedAudioCat;
+            if (chkSeparateAudioCategories) {
+              chkSeparateAudioCategories.checked = storedAudioCat;
+            }
+            syncAudioSubToggleState();
+            changed = true;
+          }
+          var storedAudioNum = Boolean(stored.settings && stored.settings.numberAudioCategories !== false);
+          if (Boolean(currentPreset.settings && currentPreset.settings.numberAudioCategories !== false) !== storedAudioNum) {
+            if (!currentPreset.settings) currentPreset.settings = {};
+            currentPreset.settings.numberAudioCategories = storedAudioNum;
+            if (chkNumberAudioCategories) {
+              chkNumberAudioCategories.checked = storedAudioNum;
+            }
+            changed = true;
+          }
           (function mirror(nodes) {
             for (var i = 0; i < (nodes || []).length; i++) {
               var f = findNodeAndParentById(currentPreset.tree, nodes[i].id);
@@ -1625,6 +1744,25 @@
           currentPreset.settings.usePrefixNumbering = storedPrefix;
           if (chkUsePrefixNumbering) {
             chkUsePrefixNumbering.checked = storedPrefix;
+          }
+          changed = true;
+        }
+        var storedAudioCat = Boolean(stored.settings && stored.settings.separateAudioCategories !== false);
+        if (Boolean(currentPreset.settings && currentPreset.settings.separateAudioCategories !== false) !== storedAudioCat) {
+          if (!currentPreset.settings) currentPreset.settings = {};
+          currentPreset.settings.separateAudioCategories = storedAudioCat;
+          if (chkSeparateAudioCategories) {
+            chkSeparateAudioCategories.checked = storedAudioCat;
+          }
+          syncAudioSubToggleState();
+          changed = true;
+        }
+        var storedAudioNum = Boolean(stored.settings && stored.settings.numberAudioCategories !== false);
+        if (Boolean(currentPreset.settings && currentPreset.settings.numberAudioCategories !== false) !== storedAudioNum) {
+          if (!currentPreset.settings) currentPreset.settings = {};
+          currentPreset.settings.numberAudioCategories = storedAudioNum;
+          if (chkNumberAudioCategories) {
+            chkNumberAudioCategories.checked = storedAudioNum;
           }
           changed = true;
         }

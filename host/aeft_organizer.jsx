@@ -8,13 +8,15 @@
         var here = $.fileName ? new File($.fileName) : null;
         if (!here || !here.parent) return;
         var baseDir = here.parent.fsName;
-        if (!$.global.OrgLib) {
-            var libFile = new File(baseDir + "/_lib.jsx");
-            if (libFile.exists) $.evalFile(libFile);
+        var libFile = new File(baseDir + "/_lib.jsx");
+        if (libFile.exists) {
+            libFile.encoding = "UTF-8";
+            $.evalFile(libFile);
         }
-        if (!$.global.OrgRules) {
-            var rulesFile = new File(baseDir + "/_rules.jsx");
-            if (rulesFile.exists) $.evalFile(rulesFile);
+        var rulesFile = new File(baseDir + "/_rules.jsx");
+        if (rulesFile.exists) {
+            rulesFile.encoding = "UTF-8";
+            $.evalFile(rulesFile);
         }
     } catch (eLibLoad) { }
 })();
@@ -331,6 +333,8 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
 
     var arrayContainsIgnoreCase = $.global.OrgLib.arrayContainsIgnoreCase;
 
+    var Lib = $.global.OrgLib;
+
     function applyLabelSafe(folderItem, labelIndex) {
         if (!folderItem) return;
         var num = parseInt(labelIndex, 10);
@@ -360,6 +364,13 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
             return "";
         }
         return folderName;
+    }
+
+    function getFileNameFromPath(filePath) {
+        if (!filePath) return "";
+        var clean = String(filePath).replace(/\\/g, "/");
+        var lastSlash = clean.lastIndexOf("/");
+        return lastSlash === -1 ? clean : clean.substring(lastSlash + 1);
     }
 
     var isSameFolder = $.global.OrgLib.isSameItem;
@@ -938,7 +949,11 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                         if (!visitedMap[src.id]) {
                             visitedMap[src.id] = true;
                             if (!isInsideProtectedFolder(src) && !processedIds[src.id]) {
-                                var preMatch = findMatchingNode("PreComps", "", src.name);
+                                var preCandidates = [src.name];
+                                if (src.parentFolder && src.parentFolder !== app.project.rootFolder && src.parentFolder.name) {
+                                    preCandidates.push(src.parentFolder.name);
+                                }
+                                var preMatch = findMatchingNode("PreComps", "", preCandidates);
                                 if (preMatch && preMatch.rec) {
                                     var preNodeFolder = ensureNodeFolder(preMatch.rec.id);
                                     var destPreFolder = preNodeFolder;
@@ -960,7 +975,11 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
 
             for (var mc = 0; mc < targetMainComps.length; mc++) {
                 var mainComp = targetMainComps[mc];
-                var mainMatch = findMatchingNode("MainComp", "", mainComp.name);
+                var mainCandidates = [mainComp.name];
+                if (mainComp.parentFolder && mainComp.parentFolder !== app.project.rootFolder && mainComp.parentFolder.name) {
+                    mainCandidates.push(mainComp.parentFolder.name);
+                }
+                var mainMatch = findMatchingNode("MainComp", "", mainCandidates);
                 if (mainMatch && mainMatch.rec) {
                     var outFolder = ensureNodeFolder(mainMatch.rec.id);
                     if (!isSameFolder(mainComp.parentFolder, outFolder)) {
@@ -993,7 +1012,11 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
 
             if (item instanceof CompItem) {
                 if (!isMediaOnly) {
-                    var loosePreMatch = findMatchingNode("PreComps", "", item.name);
+                    var looseCandidates = [item.name];
+                    if (item.parentFolder && item.parentFolder !== app.project.rootFolder && item.parentFolder.name) {
+                        looseCandidates.push(item.parentFolder.name);
+                    }
+                    var loosePreMatch = findMatchingNode("PreComps", "", looseCandidates);
                     if (loosePreMatch && loosePreMatch.rec) {
                         var looseNodeFolder = ensureNodeFolder(loosePreMatch.rec.id);
                         var targetLooseFolder = looseNodeFolder;
@@ -1009,7 +1032,11 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                 }
             } else if (item instanceof FootageItem) {
                 if (item.mainSource instanceof SolidSource) {
-                    var solidMatch = findMatchingNode("Solids", "", item.name);
+                    var solidCandidates = [item.name];
+                    if (item.parentFolder && item.parentFolder !== app.project.rootFolder && item.parentFolder.name) {
+                        solidCandidates.push(item.parentFolder.name);
+                    }
+                    var solidMatch = findMatchingNode("Solids", "", solidCandidates);
                     if (solidMatch && solidMatch.rec) {
                         var solidFolder = ensureNodeFolder(solidMatch.rec.id);
                         if (!isSameFolder(item.parentFolder, solidFolder)) {
@@ -1034,8 +1061,36 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                         }
                     }
 
+                    var diskFileName = "";
+                    var diskFolderName = "";
+                    if (fileObj) {
+                        if (fileObj.fsName) {
+                            diskFileName = getFileNameFromPath(fileObj.fsName);
+                            diskFolderName = getParentFolderNameFromPath(fileObj.fsName);
+                        } else if (fileObj.name) {
+                            diskFileName = fileObj.name;
+                        }
+                        if (!diskFolderName && fileObj.parent && fileObj.parent.name) {
+                            diskFolderName = fileObj.parent.name;
+                        }
+                    }
+                    var origFolderName = (item.parentFolder && item.parentFolder !== app.project.rootFolder && item.parentFolder.name)
+                        ? item.parentFolder.name
+                        : "";
+
+                    var nameCandidates = [item.name];
+                    if (diskFileName && diskFileName !== item.name) {
+                        nameCandidates.push(diskFileName);
+                    }
+                    if (diskFolderName) {
+                        nameCandidates.push(diskFolderName);
+                    }
+                    if (origFolderName && origFolderName !== diskFolderName && origFolderName !== item.name) {
+                        nameCandidates.push(origFolderName);
+                    }
+
                     var fType = classifyFootageItem(item, fileExt);
-                    var mediaMatch = findMatchingNode(fType, fileExt, item.name);
+                    var mediaMatch = findMatchingNode(fType, fileExt, nameCandidates);
                     if (mediaMatch && mediaMatch.rec) {
                         var targetNode = mediaMatch.rec.node;
                         var nodeFolder = ensureNodeFolder(mediaMatch.rec.id);
@@ -1045,15 +1100,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                             ? Boolean(targetNode.rules.groupBySourceFolder)
                             : groupBySourceFolderGlobal;
 
-                        var sourceFolderName = "";
-                        if (shouldGroupBySource && fileObj) {
-                            if (fileObj.fsName) {
-                                sourceFolderName = getParentFolderNameFromPath(fileObj.fsName);
-                            }
-                            if (!sourceFolderName && fileObj.parent && fileObj.parent.name) {
-                                sourceFolderName = fileObj.parent.name;
-                            }
-                        }
+                        var sourceFolderName = shouldGroupBySource ? diskFolderName : "";
 
                         var subPath = [];
                         if (targetNode.rules && targetNode.rules.groupSubfoldersByExt) {
@@ -1203,6 +1250,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                 }
             }
 
+            // Numeracao sequencial continua (01_, 02_...) apenas nas pastas ativas que receberam itens
             var currentSeq = 0;
             for (var a = 0; a < activeEntries.length; a++) {
                 var entry = activeEntries[a];

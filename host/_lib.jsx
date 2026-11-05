@@ -6,9 +6,7 @@
    Compatível com ExtendScript (ES3): sem const/let/arrow/Array.includes.
    ========================================================================== */
 (function () {
-    if ($.global.OrgLib) return;
-
-    var Lib = {};
+    var Lib = $.global.OrgLib || {};
 
     Lib.escapeJsonString = function (str) {
         return String(str === undefined || str === null ? "" : str)
@@ -75,6 +73,14 @@
         var parentSlash = parent.lastIndexOf("/");
         var folderName = parentSlash === -1 ? parent : parent.substring(parentSlash + 1);
         return folderName || "";
+    };
+
+    Lib.getFileNameFromPath = function (filePath) {
+        var p = String(filePath === undefined || filePath === null ? "" : filePath);
+        if (!p) return "";
+        p = p.replace(/\\/g, "/");
+        var lastSlash = p.lastIndexOf("/");
+        return lastSlash === -1 ? p : p.substring(lastSlash + 1);
     };
 
     Lib.isSameItem = function (a, b) {
