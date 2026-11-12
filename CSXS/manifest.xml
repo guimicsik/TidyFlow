@@ -38,16 +38,16 @@
           <Menu>TidyFlow</Menu>
           <Geometry>
             <Size>
-              <Height>440</Height>
-              <Width>360</Width>
+              <Height>450</Height>
+              <Width>370</Width>
             </Size>
             <MinSize>
-              <Height>440</Height>
-              <Width>360</Width>
+              <Height>450</Height>
+              <Width>370</Width>
             </MinSize>
             <MaxSize>
-              <Height>440</Height>
-              <Width>360</Width>
+              <Height>450</Height>
+              <Width>370</Width>
             </MaxSize>
           </Geometry>
         </UI>
@@ -73,16 +73,16 @@
           <Menu>TidyFlow - Preset Builder</Menu>
           <Geometry>
             <Size>
-              <Height>640</Height>
-              <Width>740</Width>
+              <Height>750</Height>
+              <Width>800</Width>
             </Size>
             <MinSize>
-              <Height>380</Height>
-              <Width>420</Width>
+              <Height>750</Height>
+              <Width>800</Width>
             </MinSize>
             <MaxSize>
-              <Height>2160</Height>
-              <Width>3840</Width>
+              <Height>750</Height>
+              <Width>800</Width>
             </MaxSize>
           </Geometry>
         </UI>
@@ -104,20 +104,20 @@
           <AutoVisible>true</AutoVisible>
         </Lifecycle>
         <UI>
-          <Type>Modeless</Type>
+          <Type>Panel</Type>
           <Menu>TidyFlow - Collect Files</Menu>
           <Geometry>
             <Size>
-              <Height>460</Height>
-              <Width>390</Width>
+              <Height>700</Height>
+              <Width>600</Width>
             </Size>
             <MinSize>
-              <Height>460</Height>
-              <Width>390</Width>
+              <Height>700</Height>
+              <Width>600</Width>
             </MinSize>
             <MaxSize>
-              <Height>460</Height>
-              <Width>390</Width>
+              <Height>700</Height>
+              <Width>600</Width>
             </MaxSize>
           </Geometry>
         </UI>

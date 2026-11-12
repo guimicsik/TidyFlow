@@ -1,0 +1,132 @@
+/* ==========================================================================
+   TidyFlow — Tiles e Ações do Painel Principal
+   ========================================================================== */
+
+/* Rótulo Interno dos Tiles */
+.btn-tile-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  white-space: normal;
+  word-break: normal;
+}
+
+.btn-tile-label > span {
+  display: block;
+}
+
+/* 1. Hero — CTA Principal (Organizar Projeto) */
+.tf-btn--hero {
+  width: 100%;
+  height: var(--tf-hero-height, 98px);
+  min-height: 54px;
+  border-radius: var(--tf-neo-radius);
+  background-color: var(--tf-neo-hero-bg);
+  color: var(--tf-neo-hero-text);
+  font-size: var(--tf-font-size-hero);
+  font-weight: var(--tf-font-weight-hero, 900);
+  font-style: var(--tf-font-style-hero, normal);
+  letter-spacing: var(--tf-hero-letter-spacing, -0.5px);
+  text-transform: var(--tf-hero-text-transform, none);
+  border: var(--tf-neo-border-w) solid var(--tf-neo-border-color);
+  box-shadow: var(--tf-rest-shadow-hero, 0px 0px 0px #000000);
+  margin-bottom: 4px;
+  flex-direction: column;
+  gap: 4px;
+  transform: translate(var(--tf-rest-lift-hero, 0px), var(--tf-rest-lift-hero, 0px));
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              background-color var(--tf-anim-duration, 0.12s) ease;
+}
+
+.tf-btn--hero:hover:not(:disabled),
+body.tf-force-hover .tf-btn--hero:not(:disabled) {
+  background-color: var(--tf-neo-hero-hover);
+  transform: translate(var(--tf-neo-lift-hero), var(--tf-neo-lift-hero));
+  box-shadow: var(--tf-neo-shadow-hero);
+}
+
+.tf-btn--hero:active:not(:disabled),
+body.tf-force-active .tf-btn--hero:not(:disabled) {
+  background-color: var(--tf-neo-hero-active, var(--tf-neo-hero-bg));
+  transform: translate(var(--tf-active-lift-hero, 0px), var(--tf-active-lift-hero, 0px));
+  box-shadow: var(--tf-active-shadow-hero, 0px 0px 0px #000000);
+}
+
+/* 2. Tile Secundário — Criar Estrutura / Mídias / Collect Files */
+.tf-btn--tile {
+  width: 100%;
+  min-height: 44px;
+  height: var(--tf-tile-height, 68px);
+  border-radius: var(--tf-neo-radius);
+  background-color: var(--tf-neo-tile-bg);
+  color: var(--tf-neo-tile-text);
+  font-size: var(--tf-font-size-tile);
+  font-weight: var(--tf-font-weight-tile, var(--tf-font-weight-bold));
+  font-style: var(--tf-font-style-tile, normal);
+  letter-spacing: var(--tf-tile-letter-spacing, 0px);
+  text-transform: var(--tf-tile-text-transform, none);
+  line-height: var(--tf-tile-line-height);
+  border: var(--tf-neo-border-w) solid var(--tf-neo-border-color);
+  box-shadow: var(--tf-rest-shadow-tile, 0px 0px 0px #000000);
+  padding: 6px 4px;
+  text-align: center;
+  transform: translate(var(--tf-rest-lift-tile, 0px), var(--tf-rest-lift-tile, 0px));
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              background-color var(--tf-anim-duration, 0.12s) ease;
+}
+
+.tf-btn--tile:hover:not(:disabled),
+body.tf-force-hover .tf-btn--tile:not(:disabled) {
+  background-color: var(--tf-neo-tile-hover);
+  transform: translate(var(--tf-neo-lift-tile), var(--tf-neo-lift-tile));
+  box-shadow: var(--tf-neo-shadow-tile);
+}
+
+.tf-btn--tile:active:not(:disabled),
+body.tf-force-active .tf-btn--tile:not(:disabled) {
+  background-color: var(--tf-neo-tile-active, var(--tf-neo-tile-bg));
+  transform: translate(var(--tf-active-lift-tile, 0px), var(--tf-active-lift-tile, 0px));
+  box-shadow: var(--tf-active-shadow-tile, 0px 0px 0px #000000);
+}
+
+/* 3. Tile Destrutivo — Desorganizar / Rollback */
+.tf-btn--tile-danger {
+  width: 100%;
+  min-height: 44px;
+  height: var(--tf-rollback-height, 68px);
+  padding: 6px 4px;
+  border-radius: var(--tf-neo-radius);
+  font-size: var(--tf-font-size-rollback);
+  font-weight: var(--tf-font-weight-rollback, var(--tf-font-weight-bold));
+  letter-spacing: var(--tf-tile-letter-spacing, 0px);
+  text-transform: var(--tf-tile-text-transform, none);
+  line-height: var(--tf-tile-line-height);
+  background-color: var(--tf-neo-danger-bg);
+  color: var(--tf-neo-danger-text);
+  border: var(--tf-neo-border-w) solid var(--tf-neo-border-color);
+  box-shadow: var(--tf-rest-shadow-tile, 0px 0px 0px #000000);
+  transform: translate(var(--tf-rest-lift-tile, 0px), var(--tf-rest-lift-tile, 0px));
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              background-color var(--tf-anim-duration, 0.12s) ease;
+}
+
+.tf-btn--tile-danger:hover:not(:disabled),
+body.tf-force-hover .tf-btn--tile-danger:not(:disabled) {
+  background-color: var(--tf-neo-danger-hover);
+  transform: translate(var(--tf-neo-lift-tile), var(--tf-neo-lift-tile));
+  box-shadow: var(--tf-neo-shadow-tile);
+}
+
+.tf-btn--tile-danger:active:not(:disabled),
+body.tf-force-active .tf-btn--tile-danger:not(:disabled) {
+  background-color: var(--tf-neo-danger-active, var(--tf-neo-danger-bg));
+  transform: translate(var(--tf-active-lift-tile, 0px), var(--tf-active-lift-tile, 0px));
+  box-shadow: var(--tf-active-shadow-tile, 0px 0px 0px #000000);
+}

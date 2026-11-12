@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "studio": "vite --open /studio",
     "build": "vite build",
-    "test": "node scripts/tests/run.js"
+    "test": "node scripts/tests/run.js",
+    "package:v1": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build_v1.ps1"
   },
   "devDependencies": {
     "vite": "^8.3.5"

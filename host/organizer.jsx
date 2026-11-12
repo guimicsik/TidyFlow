@@ -105,12 +105,13 @@
 
     $.global.organizerLoadLegacyAE = loadLegacyAE;
 
-    // Carrega o scan do Collect Files (somente After Effects por enquanto)
+    // Carrega o módulo de Collect Files correspondente ao host (AEFT ou PPRO)
     function loadCollect(dirPath, isPPro) {
-        if (isPPro || !dirPath) return false;
+        if (!dirPath) return false;
         var cleanDir = String(dirPath).replace(/\\/g, "/").replace(/\/+$/, "");
+        var collectFile = isPPro ? "/ppro_collect.jsx" : "/aeft_collect.jsx";
         try {
-            return evalHostScriptFile(new File(cleanDir + "/aeft_collect.jsx"));
+            return evalHostScriptFile(new File(cleanDir + collectFile));
         } catch (eCollect) {}
         return false;
     }
@@ -242,7 +243,13 @@
     $.global.collectScan = function (optionsJson) {
         var isPPro = ensureEngineReady();
         if (isPPro) {
-            return '{"success": false, "unsupported": true, "error": "Collect Files ainda não está disponível no Premiere Pro."}';
+            if (typeof $.global.ppro_collectScan !== "function") {
+                $.global.organizerLoadEngine();
+            }
+            if (typeof $.global.ppro_collectScan !== "function") {
+                return '{"success": false, "error": "Módulo de Collect (ppro_collect.jsx) indisponível."}';
+            }
+            return $.global.ppro_collectScan(optionsJson);
         }
         if (typeof $.global.aeft_collectScan !== "function") {
             $.global.organizerLoadEngine();
@@ -262,7 +269,16 @@
     };
 
     $.global.collectSaveDialog = function (promptText, defaultPath, defaultName) {
-        ensureEngineReady();
+        var isPPro = ensureEngineReady();
+        if (isPPro) {
+            if (typeof $.global.ppro_collectSaveDialog !== "function") {
+                $.global.organizerLoadEngine();
+            }
+            if (typeof $.global.ppro_collectSaveDialog === "function") {
+                return $.global.ppro_collectSaveDialog(promptText, defaultPath, defaultName);
+            }
+            return '{"success":false,"error":"ppro_collectSaveDialog indisponível"}';
+        }
         if (typeof $.global.aeft_collectSaveDialog === "function") {
             return $.global.aeft_collectSaveDialog(promptText, defaultPath, defaultName);
         }
@@ -270,7 +286,16 @@
     };
 
     $.global.collectSaveProject = function () {
-        ensureEngineReady();
+        var isPPro = ensureEngineReady();
+        if (isPPro) {
+            if (typeof $.global.ppro_collectSaveProject !== "function") {
+                $.global.organizerLoadEngine();
+            }
+            if (typeof $.global.ppro_collectSaveProject === "function") {
+                return $.global.ppro_collectSaveProject();
+            }
+            return '{"success":false,"error":"ppro_collectSaveProject indisponível"}';
+        }
         if (typeof $.global.aeft_collectSaveProject === "function") {
             return $.global.aeft_collectSaveProject();
         }
@@ -286,7 +311,16 @@
     };
 
     $.global.collectFinalize = function (optionsJson) {
-        ensureEngineReady();
+        var isPPro = ensureEngineReady();
+        if (isPPro) {
+            if (typeof $.global.ppro_collectFinalize !== "function") {
+                $.global.organizerLoadEngine();
+            }
+            if (typeof $.global.ppro_collectFinalize === "function") {
+                return $.global.ppro_collectFinalize(optionsJson);
+            }
+            return '{"success":false,"error":"ppro_collectFinalize indisponível"}';
+        }
         if (typeof $.global.aeft_collectFinalize === "function") {
             return $.global.aeft_collectFinalize(optionsJson);
         }
@@ -294,7 +328,13 @@
     };
 
     $.global.collectReveal = function (folderFsPath) {
-        ensureEngineReady();
+        var isPPro = ensureEngineReady();
+        if (isPPro) {
+            if (typeof $.global.ppro_collectReveal === "function") {
+                return $.global.ppro_collectReveal(folderFsPath);
+            }
+            return '{"success":true}';
+        }
         if (typeof $.global.aeft_collectReveal === "function") {
             return $.global.aeft_collectReveal(folderFsPath);
         }

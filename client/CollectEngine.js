@@ -100,12 +100,12 @@
     var seen = {};
     var result = { sources: sources, offlineItems: 0, proxyCount: 0, sequenceCount: 0 };
 
-    function add(path, isSeq) {
+    function add(path, isSeq, isMogrt) {
       if (!path) return;
       var key = path.toLowerCase();
       if (seen[key]) return;
       seen[key] = true;
-      sources.push({ path: path, isSequence: !!isSeq });
+      sources.push({ path: path, isSequence: !!isSeq, isMogrt: !!isMogrt });
       if (isSeq) result.sequenceCount++;
     }
 
@@ -114,11 +114,11 @@
       var hasProxy = !!it.proxyPath;
       if (!(options.obeyProxy && hasProxy)) {
         if (it.missing) result.offlineItems++;
-        else add(it.path, it.isSequence);
+        else add(it.path, it.isSequence, it.isMogrt);
       }
       if (hasProxy) {
         result.proxyCount++;
-        add(it.proxyPath, it.proxyIsSequence);
+        add(it.proxyPath, it.proxyIsSequence, false);
       }
     }
     return result;
@@ -194,12 +194,26 @@
       return dirCache[key];
     }
 
-    // Expande um arquivo de origem na lista de arquivos físicos (frames, se sequência).
+    // Expande um arquivo de origem na lista de arquivos físicos (frames, se sequência; irmãos, se MOGRT).
     function expandSource(source) {
-      if (!source.isSequence) return Promise.resolve([source.path]);
-      return readdirCached(splitPath(source.path).dir).then(function (names) {
-        return framesFromListing(source.path, names);
-      });
+      if (source.isSequence) {
+        return readdirCached(splitPath(source.path).dir).then(function (names) {
+          return framesFromListing(source.path, names);
+        });
+      }
+      if (source.isMogrt) {
+        var parts = splitPath(source.path);
+        var parentBase = splitPath(parts.dir).base;
+        if (parentBase && parentBase.toLowerCase() !== "motion graphics template media") {
+          return readdirCached(parts.dir).then(function (names) {
+            if (!names || !names.length) return [source.path];
+            var out = [];
+            for (var i = 0; i < names.length; i++) out.push(joinPath(parts.dir, names[i]));
+            return out;
+          });
+        }
+      }
+      return Promise.resolve([source.path]);
     }
 
     /**
@@ -326,6 +340,174 @@
     });
   }
 
+  /* ---------- Reescrita e Forense de .prproj (Premiere Pro XML) ---------- */
+
+  function canonPathKey(p) {
+    var s = String(p || "").replace(/^\\\\\?\\/, "");
+    if (/^file:\/\/\//i.test(s)) {
+      try { s = decodeURIComponent(s.replace(/^file:\/\/\//i, "")); } catch (eU) { s = s.replace(/^file:\/\/\//i, ""); }
+    }
+    return s.replace(/\//g, "\\").replace(/\\+$/, "").toLowerCase();
+  }
+
+  function normalizeLookupMap(rawMap) {
+    var out = {};
+    var src = rawMap || {};
+    for (var k in src) {
+      if (Object.prototype.hasOwnProperty.call(src, k) && src[k]) {
+        out[canonPathKey(k)] = src[k];
+      }
+    }
+    return out;
+  }
+
+  function formatPathMatchingStyle(newPath, sampleOldPath) {
+    var oldStr = String(sampleOldPath || "");
+    var newStr = String(newPath || "");
+    if (/^file:\/\/\//i.test(oldStr)) {
+      var posixUrl = newStr.replace(/\\/g, "/").replace(/^\/+/, "");
+      return "file:///" + encodeURI(posixUrl);
+    }
+    var prefersBackslash = oldStr.indexOf("\\") >= 0 || (oldStr.indexOf("/") < 0 && /^[A-Za-z]:/.test(newStr));
+    return prefersBackslash ? newStr.replace(/\//g, "\\") : newStr.replace(/\\/g, "/");
+  }
+
+  function computeRelativePathPure(fromDir, toFile, sampleOldRel) {
+    if (!fromDir || !toFile) return "";
+    var useBackslash = String(sampleOldRel || fromDir).indexOf("\\") >= 0 || /^[A-Za-z]:/.test(String(toFile));
+    var sep = useBackslash ? "\\" : "/";
+    var fParts = String(fromDir).replace(/[\\/]+$/, "").split(/[\\/]+/);
+    var tParts = String(toFile).split(/[\\/]+/);
+    if (!fParts.length || !tParts.length) return "";
+    if (/^[A-Za-z]:$/.test(fParts[0]) && /^[A-Za-z]:$/.test(tParts[0])) {
+      if (fParts[0].toLowerCase() !== tParts[0].toLowerCase()) {
+        return useBackslash ? String(toFile).replace(/\//g, "\\") : String(toFile).replace(/\\/g, "/");
+      }
+    }
+    var common = 0;
+    var minLen = Math.min(fParts.length, tParts.length);
+    while (common < minLen && fParts[common].toLowerCase() === tParts[common].toLowerCase()) {
+      common++;
+    }
+    var rel = [];
+    for (var u = common; u < fParts.length; u++) rel.push("..");
+    for (var d = common; d < tParts.length; d++) rel.push(tParts[d]);
+    var joined = rel.join(sep);
+    if (sampleOldRel && /^\.[\\/]/.test(String(sampleOldRel)) && !/^\.\./.test(joined)) {
+      joined = "." + sep + joined;
+    }
+    return joined;
+  }
+
+  /**
+   * Reescreve referências de mídia e proxy no XML descompactado de um .prproj.
+   * - Dentro de blocos <Media>...</Media>: atualiza <FilePath>, <ActualMediaFilePath>
+   *   e recalcula <RelativePath> em relação a destRootDir.
+   * - Fora de <Media>: atualiza tags de caminho de arquivo cujo valor seja match
+   *   exato em fileMap (ignorando tags de saída/export/preview/capture).
+   */
+  function rewritePrprojXml(xmlText, fileMap, folderMap, destRootDir, stats) {
+    var fMap = normalizeLookupMap(fileMap);
+    var dMap = normalizeLookupMap(folderMap);
+
+    // 1. Reescrever blocos <Media ...>...</Media> (onde residem mídias full-res, camadas PSD, sequências e proxies)
+    var step1 = String(xmlText || "").replace(/<Media\b[^>]*>[\s\S]*?<\/Media>/g, function (mediaBlock) {
+      var matchedDest = null;
+
+      var updatedBlock = mediaBlock.replace(
+        /<(FilePath|ActualMediaFilePath|MediaFilePath)(\b[^>]*)>([^<]*)<\/\1>/g,
+        function (fullTag, tagName, attrs, rawVal) {
+          var oldPath = xmlUnescape(rawVal);
+          var key = canonPathKey(oldPath);
+          var nw = fMap[key] || dMap[key] || null;
+          if (stats) {
+            stats.push({ ctx: "Media/" + tagName, old: oldPath, nw: nw || "" });
+          }
+          if (!nw) return fullTag;
+          matchedDest = nw;
+          var formatted = formatPathMatchingStyle(nw, oldPath);
+          return "<" + tagName + attrs + ">" + xmlEscape(formatted) + "</" + tagName + ">";
+        }
+      );
+
+      if (matchedDest && destRootDir) {
+        updatedBlock = updatedBlock.replace(
+          /<RelativePath(\b[^>]*)>([^<]*)<\/RelativePath>/g,
+          function (relTag, attrs, rawRel) {
+            var oldRel = xmlUnescape(rawRel);
+            var newRel = computeRelativePathPure(destRootDir, matchedDest, oldRel);
+            if (!newRel) return relTag;
+            if (stats) {
+              stats.push({ ctx: "Media/RelativePath", old: oldRel, nw: newRel });
+            }
+            return "<RelativePath" + attrs + ">" + xmlEscape(newRel) + "</RelativePath>";
+          }
+        );
+      }
+
+      return updatedBlock;
+    });
+
+    // 2. Qualquer outra tag de caminho fora de <Media> com match EXATO em fMap
+    var step2 = step1.replace(
+      /<([A-Za-z0-9_.:-]+Path[A-Za-z0-9_.:-]*)(\b[^>]*)>([^<\r\n]+)<\/\1>/g,
+      function (fullTag, tagName, attrs, rawVal) {
+        if (/output|export|preview|capture|scratch|autosave/i.test(tagName)) {
+          return fullTag;
+        }
+        var oldPath = xmlUnescape(rawVal);
+        var key = canonPathKey(oldPath);
+        var nw = fMap[key] || null;
+        if (!nw) return fullTag;
+        var formatted = formatPathMatchingStyle(nw, oldPath);
+        if (stats) {
+          stats.push({ ctx: "Other/" + tagName, old: oldPath, nw: formatted });
+        }
+        return "<" + tagName + attrs + ">" + xmlEscape(formatted) + "</" + tagName + ">";
+      }
+    );
+
+    return step2;
+  }
+
+  /**
+   * Diagnóstico forense (Fase 0): inspeciona o XML do .prproj para levantar todas
+   * as tags onde os caminhos coletados aparecem antes e depois da reescrita.
+   */
+  function inspectPrprojXml(xmlText, fileMap) {
+    var fMap = normalizeLookupMap(fileMap);
+    var tagCounts = {};
+    var samples = [];
+    var text = String(xmlText || "");
+
+    var rx = /<([A-Za-z0-9_.:-]+)(?:\s[^>]*)?>([^<\r\n]{3,600})<\/\1>/g;
+    var m;
+    while ((m = rx.exec(text)) !== null) {
+      var tName = m[1];
+      var val = xmlUnescape(m[2]);
+      var k = canonPathKey(val);
+      if (fMap[k]) {
+        tagCounts[tName] = (tagCounts[tName] || 0) + 1;
+        if (samples.length < 15) {
+          samples.push("<" + tName + ">" + val + "</" + tName + ">");
+        }
+      }
+    }
+
+    var relSamples = [];
+    var relRx = /<RelativePath(?:\s[^>]*)?>([^<\r\n]+)<\/RelativePath>/g;
+    var rm;
+    while ((rm = relRx.exec(text)) !== null && relSamples.length < 6) {
+      relSamples.push(xmlUnescape(rm[1]));
+    }
+
+    return {
+      tagCounts: tagCounts,
+      samples: samples,
+      relativePathSamples: relSamples
+    };
+  }
+
   /* ---------- Planejador de Destino e Arquivos (§5) ---------- */
 
   function uniqueDestName(usedMap, destDir, name, srcKey) {
@@ -358,13 +540,15 @@
     var copiedBySrc = {};
     var offlineItems = [];
     var itemNames = {};
+    var itemRelinks = {};
 
-    function addCopy(srcPath, destDir, isSeq) {
+    function addCopy(srcPath, destDir, isSeq, isMogrt, clipName) {
       if (!srcPath) return "";
       var key = srcPath.toLowerCase();
       var parts = splitPath(srcPath);
 
       if (isSeq) {
+        if (copiedBySrc[key]) return copiedBySrc[key];
         var names = null;
         if (typeof fsReaddir === "function") {
           try { names = fsReaddir(parts.dir); } catch (eR) {}
@@ -387,9 +571,55 @@
         return firstFrameDest;
       }
 
+      if (isMogrt) {
+        if (copiedBySrc[key]) return copiedBySrc[key];
+        var parentBase = splitPath(parts.dir).base;
+        var isDedicatedMogrtSubdir = parentBase && parentBase.toLowerCase() !== "motion graphics template media";
+        if (isDedicatedMogrtSubdir) {
+          var mogrtDirSafe = uniqueDestName(usedNames, destDir, sanitizeSegment(parentBase), parts.dir.toLowerCase() + "_mogrt");
+          var mogrtDestDir = destDir + sep + mogrtDirSafe;
+          var sibNames = null;
+          if (typeof fsReaddir === "function") {
+            try { sibNames = fsReaddir(parts.dir); } catch (eM) {}
+          }
+          if (sibNames && sibNames.length > 0) {
+            for (var s = 0; s < sibNames.length; s++) {
+              var sibSrc = joinPath(parts.dir, sibNames[s]);
+              var sibDest = mogrtDestDir + sep + sanitizeSegment(sibNames[s]);
+              fileCopies.push({ src: sibSrc, dest: sibDest });
+              fileMap[sibSrc.toLowerCase()] = sibDest;
+              copiedBySrc[sibSrc.toLowerCase()] = sibDest;
+            }
+          }
+          var mainMogrtDest = mogrtDestDir + sep + sanitizeSegment(parts.base);
+          if (!copiedBySrc[key]) {
+            fileCopies.push({ src: srcPath, dest: mainMogrtDest });
+            fileMap[key] = mainMogrtDest;
+            copiedBySrc[key] = mainMogrtDest;
+          }
+          folderMap[parts.dir.toLowerCase()] = mogrtDestDir;
+          return copiedBySrc[key];
+        }
+      }
+
       if (copiedBySrc[key]) return copiedBySrc[key];
 
-      var safeName = sanitizeSegment(parts.base);
+      var candidateName = parts.base;
+      if (options.renameToClipName && clipName && typeof clipName === "string") {
+        var cleanClip = clipName.trim();
+        if (cleanClip) {
+          var extMatch = /\.[^.]+$/.exec(parts.base);
+          var origExt = extMatch ? extMatch[0] : "";
+          var clipExtMatch = /\.[^.]+$/.exec(cleanClip);
+          if (!clipExtMatch && origExt) {
+            candidateName = cleanClip + origExt;
+          } else {
+            candidateName = cleanClip;
+          }
+        }
+      }
+
+      var safeName = sanitizeSegment(candidateName);
       var finalName = uniqueDestName(usedNames, destDir, safeName, key);
       var destFile = destDir + sep + finalName;
       fileCopies.push({ src: srcPath, dest: destFile });
@@ -416,12 +646,18 @@
       var targetDir = sanitizedFolders.length ? fRoot + sep + sanitizedFolders.join(sep) : fRoot;
 
       var hasProxy = !!it.proxyPath;
+      var newMain = "";
+      var newPrx = "";
       if (!(options.obeyProxy && hasProxy)) {
-        addCopy(it.path, targetDir, it.isSequence);
+        newMain = addCopy(it.path, targetDir, it.isSequence, it.isMogrt, it.name);
       }
       if (hasProxy) {
-        addCopy(it.proxyPath, targetDir, it.proxyIsSequence);
+        newPrx = addCopy(it.proxyPath, targetDir, it.proxyIsSequence, false, null);
       }
+      itemRelinks[it.id] = {
+        newPath: newMain,
+        newProxyPath: newPrx
+      };
     }
 
     return {
@@ -429,7 +665,8 @@
       fileMap: fileMap,
       folderMap: folderMap,
       offlineItems: offlineItems,
-      itemNames: itemNames
+      itemNames: itemNames,
+      itemRelinks: itemRelinks
     };
   }
 
@@ -503,6 +740,108 @@
     return lines.join("\r\n");
   }
 
+  /* ---------- Árvore Hierárquica de Alvos (Composições / Sequências) ---------- */
+
+  function buildTargetTree(targets) {
+    var root = {
+      name: "",
+      path: "",
+      foldersList: [],
+      foldersMap: {},
+      items: []
+    };
+
+    if (!targets || !targets.length) return root;
+
+    for (var i = 0; i < targets.length; i++) {
+      var t = targets[i];
+      var fList = t.folders || [];
+      var curr = root;
+      var currentPath = "";
+
+      for (var f = 0; f < fList.length; f++) {
+        var fName = fList[f];
+        currentPath = currentPath ? (currentPath + "/" + fName) : fName;
+        if (!curr.foldersMap[fName]) {
+          var fLabel = (t.folderLabels && typeof t.folderLabels[f] === "number") ? t.folderLabels[f] : 0;
+          var fNode = {
+            name: fName,
+            path: currentPath,
+            label: fLabel,
+            foldersList: [],
+            foldersMap: {},
+            items: []
+          };
+          curr.foldersMap[fName] = fNode;
+          curr.foldersList.push(fNode);
+        }
+        curr = curr.foldersMap[fName];
+      }
+      curr.items.push(t);
+    }
+
+    return root;
+  }
+
+  function countFolderTargets(node) {
+    if (!node) return { total: 0, selected: 0 };
+    var total = node.items ? node.items.length : 0;
+    var selected = 0;
+    if (node.items) {
+      for (var i = 0; i < node.items.length; i++) {
+        if (node.items[i].selected) selected++;
+      }
+    }
+    if (node.foldersList) {
+      for (var f = 0; f < node.foldersList.length; f++) {
+        var subRes = countFolderTargets(node.foldersList[f]);
+        total += subRes.total;
+        selected += subRes.selected;
+      }
+    }
+    return { total: total, selected: selected };
+  }
+
+  function setFolderTargetsSelected(node, isSelected) {
+    if (!node) return;
+    if (node.items) {
+      for (var i = 0; i < node.items.length; i++) {
+        node.items[i].selected = Boolean(isSelected);
+      }
+    }
+    if (node.foldersList) {
+      for (var f = 0; f < node.foldersList.length; f++) {
+        setFolderTargetsSelected(node.foldersList[f], isSelected);
+      }
+    }
+  }
+
+  // Estado inicial das pastas na árvore de alvos:
+  // - nenhuma comp selecionada  -> todas as pastas fechadas;
+  // - uma ou mais selecionadas  -> abertas apenas as pastas (e ancestrais) que
+  //   contêm comps selecionadas; todas as demais ficam fechadas.
+  // Retorna mapa { "caminho/da/pasta": true } das pastas recolhidas.
+  function computeInitialCollapsed(targets) {
+    var collapsed = {};
+    var expanded = {};
+    if (!targets || !targets.length) return collapsed;
+
+    for (var i = 0; i < targets.length; i++) {
+      var t = targets[i];
+      var fList = t.folders || [];
+      var path = "";
+      for (var f = 0; f < fList.length; f++) {
+        path = path ? (path + "/" + fList[f]) : fList[f];
+        if (t.selected) expanded[path] = true;
+        else if (!expanded[path]) collapsed[path] = true;
+      }
+    }
+    for (var p in expanded) {
+      if (expanded.hasOwnProperty(p)) delete collapsed[p];
+    }
+    return collapsed;
+  }
+
   var CollectEngine = {
     sanitizeSegment: sanitizeSegment,
     defaultCollectFolderName: defaultCollectFolderName,
@@ -516,8 +855,16 @@
     formatBytes: formatBytes,
     formatTimeRemaining: formatTimeRemaining,
     rewriteAepxXml: rewriteAepxXml,
+    rewritePrprojXml: rewritePrprojXml,
+    inspectPrprojXml: inspectPrprojXml,
+    computeRelativePathPure: computeRelativePathPure,
+    canonPathKey: canonPathKey,
     buildCollectPlan: buildCollectPlan,
-    buildReportText: buildReportText
+    buildReportText: buildReportText,
+    buildTargetTree: buildTargetTree,
+    countFolderTargets: countFolderTargets,
+    setFolderTargetsSelected: setFolderTargetsSelected,
+    computeInitialCollapsed: computeInitialCollapsed
   };
 
   if (typeof module !== "undefined" && module.exports) {

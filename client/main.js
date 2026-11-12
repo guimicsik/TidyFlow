@@ -11,21 +11,16 @@
   var KEYS = (typeof PresetManager !== "undefined" && PresetManager.STORAGE_KEYS) || {
     rollbackSnapshot: "ae_organizer_rollback_snapshot",
     saveProject: "ae_organizer_save_project",
-    reduceProject: "ae_organizer_reduce_project",
     deleteEmpty: "ae_organizer_delete_empty"
   };
 
   var noticeText = document.getElementById("noticeText");
-  var btnCheckCompsLabel = document.getElementById("btnCheckCompsLabel");
   var presetSelect = document.getElementById("presetSelect");
   var btnOpenPresetBuilder = document.getElementById("btnOpenPresetBuilder");
   var btnOrganize = document.getElementById("btnOrganize");
   var btnCreateStructure = document.getElementById("btnCreateStructure");
   var btnMediaOnly = document.getElementById("btnMediaOnly");
-  var btnCheckComps = document.getElementById("btnCheckComps");
-  var chkPrefixNumbering = document.getElementById("chkPrefixNumbering");
   var chkSaveProject = document.getElementById("chkSaveProject");
-  var chkReduceProject = document.getElementById("chkReduceProject");
   var chkDeleteEmptyFolders = document.getElementById("chkDeleteEmptyFolders");
   var chkGroupBySourceFolder = document.getElementById("chkGroupBySourceFolder");
   var btnRollback = document.getElementById("btnRollback");
@@ -33,30 +28,12 @@
   var btnRollbackSaveAndContinue = document.getElementById("btnRollbackSaveAndContinue");
   var btnRollbackContinueWithoutSave = document.getElementById("btnRollbackContinueWithoutSave");
   var btnRollbackCancel = document.getElementById("btnRollbackCancel");
-  var reduceModalBackdrop = document.getElementById("reduceModalBackdrop");
-  var reduceModalSubtext = document.getElementById("reduceModalSubtext");
-  var btnReduceSaveAndContinue = document.getElementById("btnReduceSaveAndContinue");
-  var btnReduceContinueWithoutSave = document.getElementById("btnReduceContinueWithoutSave");
-  var btnReduceCancel = document.getElementById("btnReduceCancel");
-  var reduceProjectAlert = document.getElementById("reduceProjectAlert");
   var statusMsg = document.getElementById("statusMsg");
 
   if (isPPro) {
     document.title = "TidyFlow — Premiere Pro";
     if (noticeText) {
       noticeText.textContent = "Selecione as sequências no painel Project antes de organizar.";
-    }
-    if (btnCheckCompsLabel) {
-      var word2 = document.getElementById("btnCheckCompsWord2");
-      if (word2) {
-        word2.textContent = "sequências";
-      } else {
-        btnCheckCompsLabel.textContent = "Verificar sequências";
-      }
-    }
-    if (chkReduceProject && chkReduceProject.parentElement) {
-      chkReduceProject.parentElement.title =
-        "Reduzir o projeto e deletar arquivos não usados nas sequências selecionadas";
     }
   }
 
@@ -98,18 +75,18 @@
     btnOrganize.disabled = isBusy;
     if (btnCreateStructure) btnCreateStructure.disabled = isBusy;
     btnMediaOnly.disabled = isBusy;
-    if (btnCheckComps) btnCheckComps.disabled = isBusy;
-    if (presetSelect) presetSelect.disabled = isBusy;
+    if (btnOpenCollect) btnOpenCollect.disabled = isBusy;
+    if (presetSelect) {
+      presetSelect.disabled = isBusy;
+      if (presetSelect.__neoSelect) {
+        presetSelect.__neoSelect.update();
+      }
+    }
     if (btnOpenPresetBuilder) btnOpenPresetBuilder.disabled = isBusy;
-    if (chkPrefixNumbering) chkPrefixNumbering.disabled = isBusy;
     if (chkSaveProject) chkSaveProject.disabled = isBusy;
-    if (chkReduceProject) chkReduceProject.disabled = isBusy;
     if (chkDeleteEmptyFolders) chkDeleteEmptyFolders.disabled = isBusy;
     if (chkGroupBySourceFolder) chkGroupBySourceFolder.disabled = isBusy;
     if (btnRollback) btnRollback.disabled = isBusy;
-    if (btnReduceSaveAndContinue) btnReduceSaveAndContinue.disabled = isBusy;
-    if (btnReduceContinueWithoutSave) btnReduceContinueWithoutSave.disabled = isBusy;
-    if (btnReduceCancel) btnReduceCancel.disabled = isBusy;
   }
 
   function syncRollbackSnapshotToLocalStorage() {
@@ -132,20 +109,161 @@
     } catch (e) { }
   }
 
+  // Dropdown Customizado Neo-Brutalista (Inspirado em neobrutalism.dev/docs/select)
+  function setupNeoSelect(selectEl) {
+    if (!selectEl) return;
+    if (selectEl.__neoSelect) {
+      selectEl.__neoSelect.update();
+      return;
+    }
+
+    // Se já estiver dentro de um wrapper antigo ou órfão, desenrola e remove elementos mortos
+    var existingWrapper = selectEl.closest ? selectEl.closest(".tf-select-wrapper") : null;
+    if (existingWrapper) {
+      var deadElements = existingWrapper.querySelectorAll(".tf-select-trigger, .tf-select-menu");
+      for (var d = 0; d < deadElements.length; d++) {
+        if (deadElements[d].parentNode) {
+          deadElements[d].parentNode.removeChild(deadElements[d]);
+        }
+      }
+      var parentEl = existingWrapper.parentNode;
+      if (parentEl) {
+        parentEl.insertBefore(selectEl, existingWrapper);
+        parentEl.removeChild(existingWrapper);
+      }
+      selectEl.style.display = "";
+    }
+
+    var wrapper = document.createElement("div");
+    wrapper.className = "tf-select-wrapper";
+    selectEl.parentNode.insertBefore(wrapper, selectEl);
+    wrapper.appendChild(selectEl);
+
+    selectEl.style.display = "none";
+
+    var trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "tf-select-trigger";
+    trigger.setAttribute("data-tf-design", "main-preset-trigger");
+    trigger.title = selectEl.title || "Selecionar Preset";
+    trigger.innerHTML =
+      '<span class="tf-select-value"></span>' +
+      '<svg class="tf-select-chevron" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M4 6l4 4 4-4"/>' +
+      '</svg>';
+
+    var menu = document.createElement("div");
+    menu.className = "tf-select-menu";
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(menu);
+
+    function updateFromSelect() {
+      if (selectEl.selectedIndex < 0 && selectEl.options.length > 0) {
+        selectEl.selectedIndex = 0;
+      }
+      var selectedOpt = selectEl.options[selectEl.selectedIndex];
+      var valSpan = trigger.querySelector(".tf-select-value");
+      if (valSpan) {
+        valSpan.textContent = selectedOpt ? selectedOpt.textContent : "";
+      }
+      trigger.disabled = !!selectEl.disabled;
+
+      menu.innerHTML = "";
+      for (var i = 0; i < selectEl.options.length; i++) {
+        (function (opt) {
+          var item = document.createElement("div");
+          item.className = "tf-select-item" + (opt.selected ? " is-selected" : "");
+          item.setAttribute("data-tf-design", "main-preset-option");
+
+          var labelSpan = document.createElement("span");
+          labelSpan.textContent = opt.textContent;
+          item.appendChild(labelSpan);
+
+          if (opt.selected) {
+            var checkSpan = document.createElement("span");
+            checkSpan.className = "tf-select-item-check";
+            checkSpan.textContent = "✓";
+            item.appendChild(checkSpan);
+          }
+
+          item.addEventListener("click", function (e) {
+            e.stopPropagation();
+            closeMenu();
+            if (selectEl.value !== opt.value) {
+              selectEl.value = opt.value;
+              var changeEv;
+              if (typeof Event === "function") {
+                changeEv = new Event("change", { bubbles: true });
+              } else {
+                changeEv = document.createEvent("Event");
+                changeEv.initEvent("change", true, true);
+              }
+              selectEl.dispatchEvent(changeEv);
+            }
+            updateFromSelect();
+          });
+          menu.appendChild(item);
+        })(selectEl.options[i]);
+      }
+    }
+
+    function openMenu() {
+      if (selectEl.disabled) return;
+      var allOpen = document.querySelectorAll(".tf-select-menu.is-open");
+      for (var j = 0; j < allOpen.length; j++) {
+        allOpen[j].classList.remove("is-open");
+      }
+      var allTriggers = document.querySelectorAll(".tf-select-trigger.is-open");
+      for (var k = 0; k < allTriggers.length; k++) {
+        allTriggers[k].classList.remove("is-open");
+      }
+      menu.classList.add("is-open");
+      trigger.classList.add("is-open");
+    }
+
+    function closeMenu() {
+      menu.classList.remove("is-open");
+      trigger.classList.remove("is-open");
+    }
+
+    trigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (selectEl.disabled) return;
+      if (menu.classList.contains("is-open")) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!wrapper.contains(e.target)) {
+        closeMenu();
+      }
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" || e.keyCode === 27) {
+        closeMenu();
+      }
+    });
+
+    if (typeof MutationObserver !== "undefined") {
+      var observer = new MutationObserver(function () {
+        updateFromSelect();
+      });
+      observer.observe(selectEl, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled"] });
+    }
+
+    updateFromSelect();
+    selectEl.__neoSelect = { update: updateFromSelect, close: closeMenu };
+  }
+
   // Reduzir o projeto remove itens (acao destrutiva). Sempre que estiver ativo, o
   // salvamento previo do projeto é obrigatório: sem isso o usuario nao teria como
   // voltar atras. Os toggles vem de chaves independentes no localStorage, entao o
   // par invalido (reduzir=on, salvar=off) pode reaparecer a cada carga.
-  function enforceReduceRequiresSave() {
-    if (!chkReduceProject || !chkSaveProject) return;
-    if (chkReduceProject.checked && !chkSaveProject.checked) {
-      chkSaveProject.checked = true;
-      try {
-        localStorage.setItem(KEYS.saveProject, "true");
-      } catch (e) { }
-    }
-  }
-
   function syncPresetsAndToggles() {
     var list = presetManager.listPresets();
     var currentName = presetManager.getActivePresetName();
@@ -162,12 +280,10 @@
         }
         presetSelect.appendChild(opt);
       }
+      setupNeoSelect(presetSelect);
     }
 
     var s = activePreset.settings || {};
-    if (chkPrefixNumbering) {
-      chkPrefixNumbering.checked = (s.usePrefixNumbering !== false);
-    }
     if (chkDeleteEmptyFolders) {
       chkDeleteEmptyFolders.checked = (s.deleteEmptyFolders !== false);
     }
@@ -176,10 +292,6 @@
       var savedSave = localStorage.getItem(KEYS.saveProject);
       if (chkSaveProject) {
         chkSaveProject.checked = savedSave !== null ? (savedSave === "true") : (s.saveProjectBefore !== false);
-      }
-      var savedReduce = localStorage.getItem(KEYS.reduceProject);
-      if (chkReduceProject) {
-        chkReduceProject.checked = savedReduce !== null ? (savedReduce === "true") : Boolean(s.reduceProject);
       }
       if (chkGroupBySourceFolder) {
         // Reflete o estado real das pastas (fonte única: regras do preset)
@@ -195,24 +307,7 @@
       }
     } catch (e) { }
 
-    enforceReduceRequiresSave();
     updateGroupSourceIndicator();
-    updateReduceProjectWarning();
-  }
-
-  // Alerta de Reduzir Projeto (dependências da composição selecionada)
-  function updateReduceProjectWarning() {
-    if (!reduceProjectAlert || !chkReduceProject) return;
-    var compWord = isPPro ? "sequência selecionada" : "composição selecionada";
-    if (chkReduceProject.checked) {
-      reduceProjectAlert.style.display = "block";
-      reduceProjectAlert.innerHTML = "⚠️ <strong>Atenção:</strong> O projeto será reduzido apenas com as dependências da " + compWord + ".";
-    } else {
-      reduceProjectAlert.style.display = "none";
-    }
-    if (reduceModalSubtext) {
-      reduceModalSubtext.textContent = "O projeto será reduzido apenas com as dependências da " + compWord + ". Itens não utilizados serão removidos.";
-    }
   }
 
   // Sinaliza quando alguma pasta do preset tem "Pasta de Origem" desativada nas Regras e Filtros
@@ -255,19 +350,10 @@
     if (!activePreset) return;
     if (!activePreset.settings) activePreset.settings = {};
 
-    if (chkPrefixNumbering) {
-      activePreset.settings.usePrefixNumbering = chkPrefixNumbering.checked;
-    }
     if (chkSaveProject) {
       activePreset.settings.saveProjectBefore = chkSaveProject.checked;
       try {
         localStorage.setItem(KEYS.saveProject, chkSaveProject.checked ? "true" : "false");
-      } catch (e) { }
-    }
-    if (chkReduceProject) {
-      activePreset.settings.reduceProject = chkReduceProject.checked;
-      try {
-        localStorage.setItem(KEYS.reduceProject, chkReduceProject.checked ? "true" : "false");
       } catch (e) { }
     }
     if (chkDeleteEmptyFolders) {
@@ -310,29 +396,8 @@
     });
   }
 
-  if (chkPrefixNumbering) {
-    chkPrefixNumbering.addEventListener("change", persistTogglesToActivePreset);
-  }
   if (chkSaveProject) {
     chkSaveProject.addEventListener("change", function () {
-      // Nao permitir salvar=off com reduzir=on (perderia a protecao do projeto)
-      if (!chkSaveProject.checked && chkReduceProject && chkReduceProject.checked) {
-        chkSaveProject.checked = true;
-        setStatus(
-          "Salvar projeto antes é obrigatório enquanto 'Reduzir Projeto' estiver ativo.",
-          "warning"
-        );
-        updateReduceProjectWarning();
-        return;
-      }
-      persistTogglesToActivePreset();
-      updateReduceProjectWarning();
-    });
-  }
-  if (chkReduceProject) {
-    chkReduceProject.addEventListener("change", function () {
-      enforceReduceRequiresSave();
-      updateReduceProjectWarning();
       persistTogglesToActivePreset();
     });
   }
@@ -351,6 +416,7 @@
       try {
         if (window.__adobe_cep__) {
           csInterface.requestOpenExtension("com.tidyflow.editor", "");
+          return;
         }
       } catch (e1) { }
 
@@ -383,19 +449,57 @@
     });
   }
 
-  // Collect Files (teste): abre a janela com.tidyflow.collect (COLLECT_FILES_SPEC.md §2)
+  // Collect Files: abre a janela com.tidyflow.collect (COLLECT_FILES_SPEC.md §2)
   var btnOpenCollect = document.getElementById("btnOpenCollect");
   var floatingCollectWin = null;
 
+  function saveMainPanelRect() {
+    try {
+      var req = (window.cep_node && window.cep_node.require) ? window.cep_node.require
+        : (typeof require === "function" ? require : null);
+      if (!req) return;
+      var fs = req("fs");
+      var p = req("path");
+      var extPath = csInterface.getSystemPath(SystemPath.EXTENSION);
+      if (!extPath) return;
+      var cleanExt = extPath.replace(/^file:\/\/\/?/i, "").replace(/^[\\\/]([a-zA-Z]:)/, "$1").replace(/\//g, "\\");
+      var rectFile = p.join(cleanExt, "scripts", "main_panel_rect.json");
+      var data = {
+        screenX: window.screenX || window.screenLeft || 0,
+        screenY: window.screenY || window.screenTop || 0,
+        innerW: window.innerWidth || document.documentElement.clientWidth || 0,
+        innerH: window.innerHeight || document.documentElement.clientHeight || 0,
+        outerW: window.outerWidth || 0,
+        outerH: window.outerHeight || 0,
+        ts: Date.now()
+      };
+      fs.writeFileSync(rectFile, JSON.stringify(data), "utf8");
+    } catch (eRect) { }
+  }
+
+  function triggerCollectWindowResize(width, height) {
+    saveMainPanelRect();
+    try {
+      var req = (window.cep_node && window.cep_node.require) ? window.cep_node.require
+        : (typeof require === "function" ? require : null);
+      if (!req) return;
+      var cp = req("child_process");
+      var p = req("path");
+      var extPath = csInterface.getSystemPath(SystemPath.EXTENSION);
+      if (!extPath) return;
+      var cleanExt = extPath.replace(/^file:\/\/\/?/i, "").replace(/^[\\\/]([a-zA-Z]:)/, "$1").replace(/\//g, "\\");
+      var psScript = p.join(cleanExt, "scripts", "resize_window.ps1");
+      var w = width || 600;
+      var h = height || 750;
+      var cmd = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + psScript + '" -Width ' + w + ' -Height ' + h;
+      setTimeout(function () {
+        try { cp.exec(cmd, { timeout: 4000 }); } catch (eExec) { }
+      }, 60);
+    } catch (e) { }
+  }
+
   if (btnOpenCollect) {
     btnOpenCollect.addEventListener("click", function () {
-      try {
-        if (window.__adobe_cep__) {
-          csInterface.requestOpenExtension("com.tidyflow.collect", "");
-          return;
-        }
-      } catch (e1) { }
-
       try {
         if (floatingCollectWin && !floatingCollectWin.closed) {
           floatingCollectWin.focus();
@@ -403,11 +507,32 @@
         }
       } catch (eFocus) { }
 
-      var winFeatures = "width=390,height=460,resizable=no,scrollbars=no,status=no,toolbar=no,menubar=no,location=no";
+      var width = 600;
+      var height = 750;
+      var left = Math.max(0, Math.round((window.screen.width - width) / 2));
+      var top = Math.max(0, Math.round((window.screen.height - height) / 2));
+      var winFeatures = "width=" + width + ",height=" + height + ",left=" + left + ",top=" + top + ",resizable=no,scrollbars=no,status=no,toolbar=no,menubar=no,location=no";
       try {
         floatingCollectWin = window.open("collect.html", "TidyFlowCollect", winFeatures);
-        if (floatingCollectWin) floatingCollectWin.focus();
-      } catch (e2) { }
+        if (floatingCollectWin) {
+          floatingCollectWin.focus();
+          return;
+        }
+      } catch (eOpen) { }
+
+      try {
+        if (window.__adobe_cep__) {
+          csInterface.requestOpenExtension("com.tidyflow.collect", "");
+          try {
+            var openEvt = new CSEvent("com.tidyflow.collect.open", "APPLICATION");
+            openEvt.data = "reload";
+            csInterface.dispatchEvent(openEvt);
+          } catch (eDispatch) { }
+          triggerCollectWindowResize(600, 750);
+          setTimeout(function () { triggerCollectWindowResize(600, 750); }, 350);
+          setTimeout(function () { triggerCollectWindowResize(600, 750); }, 800);
+        }
+      } catch (e1) { }
     });
   }
 
@@ -507,15 +632,12 @@
 
     activePreset = presetManager.getActivePreset();
     if (!activePreset.settings) activePreset.settings = {};
-    activePreset.settings.usePrefixNumbering = chkPrefixNumbering ? chkPrefixNumbering.checked : true;
-    var reduceProjectOn = chkReduceProject ? chkReduceProject.checked : false;
-    activePreset.settings.reduceProject = reduceProjectOn;
-    // Se overrideSave for booleano explícito (vindo do modal de redução), respeita a escolha do usuário;
-    // caso contrário, exige salvamento se o toggle estiver ativo ou se 'Reduzir Projeto' estiver ligado.
+    activePreset.settings.usePrefixNumbering = activePreset.settings.usePrefixNumbering !== false;
+    activePreset.settings.reduceProject = false;
     if (typeof overrideSave === "boolean") {
       activePreset.settings.saveProjectBefore = overrideSave;
     } else {
-      activePreset.settings.saveProjectBefore = (chkSaveProject ? chkSaveProject.checked : true) || reduceProjectOn;
+      activePreset.settings.saveProjectBefore = chkSaveProject ? chkSaveProject.checked : true;
     }
     activePreset.settings.deleteEmptyFolders = chkDeleteEmptyFolders ? chkDeleteEmptyFolders.checked : true;
     activePreset.settings.groupBySourceFolder = chkGroupBySourceFolder ? chkGroupBySourceFolder.checked : true;
@@ -599,11 +721,7 @@
   }
 
   btnOrganize.addEventListener("click", function () {
-    if (chkReduceProject && chkReduceProject.checked) {
-      openReduceModal();
-    } else {
-      runOrganizer('"selection"', "Organizando projeto...");
-    }
+    runOrganizer('"selection"', "Organizando projeto...");
   });
 
   if (btnCreateStructure) {
@@ -613,7 +731,7 @@
 
       activePreset = presetManager.getActivePreset();
       if (!activePreset.settings) activePreset.settings = {};
-      activePreset.settings.usePrefixNumbering = chkPrefixNumbering ? chkPrefixNumbering.checked : true;
+      activePreset.settings.usePrefixNumbering = activePreset.settings.usePrefixNumbering !== false;
 
       loadOrReloadHostScripts(function () {
         csInterface.evalScript(
@@ -668,77 +786,6 @@
     runOrganizer('"media_only"', "Organizando mídias...");
   });
 
-  if (btnCheckComps) {
-    btnCheckComps.addEventListener("click", function () {
-      setBusy(true);
-      setStatus("Verificando " + compWordLowerPlural + "...", "");
-
-      activePreset = presetManager.getActivePreset();
-
-      loadOrReloadHostScripts(function () {
-        csInterface.evalScript(
-          "$.global.checkUnusedComps(" +
-          JSON.stringify(JSON.stringify(activePreset)) +
-          ")",
-          function (result) {
-            setBusy(false);
-
-            if (!result || result === "EvalScript error.") {
-              setStatus("Erro ao executar script no " + hostAppName + ".", "error");
-              return;
-            }
-
-            try {
-              var response = JSON.parse(result);
-              if (response && response.success) {
-                var moved = response.movedCount || 0;
-                var emptyCount = response.emptyCount || 0;
-                var notUsedCount = response.notUsedCount || 0;
-                var unusedFolderLabel =
-                  (activePreset &&
-                    activePreset.settings &&
-                    activePreset.settings.unusedFolderName) ||
-                  "Nunca Usadas";
-
-                if (moved === 0) {
-                  setStatus("Nenhuma " + compWordSingular + " vazia ou não utilizada encontrada.", "success");
-                } else {
-                  var details = [];
-                  if (emptyCount > 0) {
-                    details.push(emptyCount + " vazia" + (emptyCount > 1 ? "s" : ""));
-                  }
-                  if (notUsedCount > 0) {
-                    details.push(notUsedCount + " não utilizada" + (notUsedCount > 1 ? "s" : ""));
-                  }
-                  var detailsStr = details.length > 0 ? " (" + details.join(", ") + ")" : "";
-
-                  var movedLabel = isPPro ? "sequência(s)" : "composição(ões)";
-                  setStatus(
-                    moved +
-                    " " +
-                    movedLabel +
-                    " movida(s) para '" +
-                    unusedFolderLabel +
-                    "'" +
-                    detailsStr +
-                    ".",
-                    "success"
-                  );
-                  syncRollbackSnapshotToLocalStorage();
-                }
-              } else {
-                var errMsg = (response && response.error) || "Falha desconhecida.";
-                setStatus("Erro: " + errMsg, "error");
-              }
-            } catch (e) {
-              setStatus("Resposta inválida do " + hostAppName + ".", "error");
-            }
-          }
-        );
-      });
-    });
-  }
-
   function openRollbackModal() {
     if (rollbackModalBackdrop) {
       rollbackModalBackdrop.classList.add("open");
@@ -748,18 +795,6 @@
   function closeRollbackModal() {
     if (rollbackModalBackdrop) {
       rollbackModalBackdrop.classList.remove("open");
-    }
-  }
-
-  function openReduceModal() {
-    if (reduceModalBackdrop) {
-      reduceModalBackdrop.classList.add("open");
-    }
-  }
-
-  function closeReduceModal() {
-    if (reduceModalBackdrop) {
-      reduceModalBackdrop.classList.remove("open");
     }
   }
 
@@ -859,44 +894,11 @@
     });
   }
 
-  if (btnReduceSaveAndContinue) {
-    btnReduceSaveAndContinue.addEventListener("click", function () {
-      closeReduceModal();
-      runOrganizer('"selection"', "Salvando e organizando projeto...", true);
-    });
-  }
-
-  if (btnReduceContinueWithoutSave) {
-    btnReduceContinueWithoutSave.addEventListener("click", function () {
-      closeReduceModal();
-      runOrganizer('"selection"', "Organizando projeto...", false);
-    });
-  }
-
-  if (btnReduceCancel) {
-    btnReduceCancel.addEventListener("click", function () {
-      closeReduceModal();
-    });
-  }
-
-  if (reduceModalBackdrop) {
-    reduceModalBackdrop.addEventListener("click", function (evt) {
-      if (evt.target === reduceModalBackdrop) {
-        closeReduceModal();
-      }
-    });
-  }
-
   window.addEventListener("keydown", function (event) {
     if (event.key === "Escape" || event.keyCode === 27) {
       if (rollbackModalBackdrop && rollbackModalBackdrop.classList.contains("open")) {
         event.preventDefault();
         closeRollbackModal();
-        return;
-      }
-      if (reduceModalBackdrop && reduceModalBackdrop.classList.contains("open")) {
-        event.preventDefault();
-        closeReduceModal();
         return;
       }
     }
@@ -912,6 +914,43 @@
       });
     }
   });
+
+  var mainResizeTimer = null;
+  function lockMainFloatingWindow() {
+    saveMainPanelRect();
+    try {
+      var req = (window.cep_node && window.cep_node.require) ? window.cep_node.require
+        : (typeof require === "function" ? require : null);
+      if (!req || req("os").platform() !== "win32") return;
+      var extPath = csInterface.getSystemPath(SystemPath.EXTENSION);
+      if (!extPath) return;
+      var cleanExt = extPath.replace(/^file:\/\/\/?/i, "").replace(/^[\\\/]([a-zA-Z]:)/, "$1").replace(/\//g, "\\");
+      var script = req("path").join(cleanExt, "scripts", "resize_window.ps1");
+      var manifest = req("fs").readFileSync(req("path").join(cleanExt, "CSXS", "manifest.xml"), "utf8");
+      var xml = new DOMParser().parseFromString(manifest, "application/xml");
+      var extensions = xml.getElementsByTagName("Extension");
+      var width = 0;
+      var height = 0;
+      for (var i = 0; i < extensions.length; i++) {
+        if (extensions[i].getAttribute("Id") !== "com.tidyflow") continue;
+        var sizes = extensions[i].getElementsByTagName("Size");
+        if (!sizes.length) continue;
+        width = parseInt(sizes[0].getElementsByTagName("Width")[0].textContent, 10);
+        height = parseInt(sizes[0].getElementsByTagName("Height")[0].textContent, 10);
+        break;
+      }
+      if (!(width >= 280 && width <= 3840 && height >= 240 && height <= 2160)) return;
+      req("child_process").execFile("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", script, "-MainPanel", "-Width", String(width), "-Height", String(height)], { timeout: 4000, windowsHide: true }, function () {});
+    } catch (e) { }
+  }
+
+  window.addEventListener("resize", function () {
+    saveMainPanelRect();
+    if (mainResizeTimer) clearTimeout(mainResizeTimer);
+    mainResizeTimer = setTimeout(lockMainFloatingWindow, 300);
+  });
+  setTimeout(lockMainFloatingWindow, 500);
+  triggerCollectWindowResize(600, 750);
 
   // Garantir que a versão mais recente de host/organizer.jsx + motor AEFT/PPRO esteja avaliada ao inicializar
   loadOrReloadHostScripts();

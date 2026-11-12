@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TidyFlow Overlays &amp; Modais Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&family=Rubik:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/theme/tokens.css">
+  <link rel="stylesheet" href="/theme.css">
+  <link rel="stylesheet" href="/tree_editor.css">
+  <link rel="stylesheet" href="/collect.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-width: 0;
+      max-width: none;
+      height: 100vh;
+      background-color: var(--tf-bg-app, #171717);
+      background-image: radial-gradient(#27272a 1px, transparent 1px);
+      background-size: 16px 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: var(--tf-font-family);
+      color: var(--tf-text-app, #d4d4d4);
+      user-select: none;
+      box-sizing: border-box;
+    }
+
+    .overlay-topbar {
+      height: 38px;
+      background-color: #1a1a1f;
+      border-bottom: 2px solid #000000;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px;
+      overflow-x: auto;
+      flex-shrink: 0;
+      z-index: 2000;
+    }
+
+    .overlay-btn {
+      background: #27272a;
+      color: #d4d4d8;
+      border: 1.5px solid #000000;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-family: inherit;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.1s ease;
+    }
+
+    .overlay-btn:hover {
+      background: #3f3f46;
+      color: #ffffff;
+    }
+
+    .overlay-btn.active {
+      background: #3B82F6;
+      color: #ffffff;
+      border-color: #000000;
+      box-shadow: 1px 1px 0px #000000;
+    }
+
+    .overlay-stage {
+      flex: 1;
+      flex-direction: column;
+      gap: 28px;
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 16px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    /* Modais em exibição direta no Studio */
+    .modal-backdrop.st-overlay-item {
+      position: static;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+      justify-content: center;
+      background: transparent;
+      backdrop-filter: none;
+      width: 100%;
+      padding: 0;
+    }
+
+    .modal-backdrop.st-overlay-item.active {
+      display: flex;
+    }
+
+    .st-overlay-item::before { color: #a1a1aa; font-size: 11px; font-weight: 800; }
+    #ov-rules::before { content: "Regras e filtros"; }
+    #ov-rollback::before { content: "Confirmar rollback"; }
+    #ov-del-folder::before { content: "Remover pasta"; }
+    #ov-save-as::before { content: "Salvar novo preset"; }
+    #ov-del-preset::before { content: "Excluir preset"; }
+    #ov-unsaved::before { content: "Alterações não salvas"; }
+    #ov-reduce::before { content: "Confirmação de redução"; }
+    #ov-comments::before { content: "Comentários do Collect"; }
+    .st-overlay-item { border: 1px solid #444; border-radius:8px; padding:16px !important; align-self:start; }
+    body:has(.st-overlay-item:target) .overlay-topbar { display: none; }
+    body:has(.st-overlay-item:target) .overlay-stage { grid-template-columns: minmax(0, 1fr); justify-items: center; align-content: start; }
+    body:has(.st-overlay-item:target) .st-overlay-item:not(:target) { display: none !important; }
+    body:has(.st-overlay-item:target) .st-overlay-item:target { width: min(100%, 680px); }
+
+    .modal-card.modal-card-rules {
+      width: 494px !important;
+      max-width: 494px !important;
+      min-width: 494px !important;
+      margin: 0 auto;
+    }
+  </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // As telas usam os mesmos cards dos arquivos do aplicativo.
+      fetch('/api/studio/state').then(function (r) { return r.json(); }).then(function (data) {
+        var parser = new DOMParser();
+        var sources = {
+          main: parser.parseFromString(data.htmlMain, 'text/html'),
+          editor: parser.parseFromString(data.htmlEditor, 'text/html'),
+          collect: parser.parseFromString(data.htmlCollect, 'text/html')
+        };
+        var mapping = [['ov-rules','editor','rulesModalBackdrop'],['ov-rollback','main','rollbackModalBackdrop'],['ov-save-as','editor','saveAsModalBackdrop'],['ov-unsaved','editor','unsavedCloseModalBackdrop'],['ov-del-folder','editor','confirmModalBackdrop'],['ov-reduce','main','reduceModalBackdrop'],['ov-comments','collect','commentsBackdrop']];
+        var duplicate = document.getElementById('ov-del-preset');
+        if (duplicate) duplicate.remove();
+        mapping.forEach(function (entry) {
+          var source = sources[entry[1]].getElementById(entry[2]);
+          if (!source) return;
+          var target = document.getElementById(entry[0]);
+          if (!target) { target = document.createElement('div'); target.id = entry[0]; target.className = 'modal-backdrop st-overlay-item'; document.querySelector('.overlay-stage').appendChild(target); }
+          target.innerHTML = source.innerHTML;
+        });
+      });
+      var btns = document.querySelectorAll(".overlay-btn");
+      btns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var targetId = btn.getAttribute("data-overlay-target");
+          var card = document.getElementById(targetId);
+          if (card) card.scrollIntoView({behavior:'smooth', block:'start'});
+          btns.forEach(function (b) { b.classList.toggle("active", b === btn); });
+          document.querySelectorAll(".st-overlay-item").forEach(function (ov) {
+            ov.classList.toggle("active", ov.id === targetId);
+          });
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+<!-- BARRA DE SELEÇÃO DE OVERLAYS -->
+  <div class="overlay-topbar">
+    <span style="font-size: 10px; font-weight: 800; color: #a1a1aa; margin-right: 2px;">OVERLAY ATIVO:</span>
+    <button type="button" class="overlay-btn active" data-overlay-target="ov-rules">⚙️ Regras &amp; Filtros</button>
+    <button type="button" class="overlay-btn" data-overlay-target="ov-rollback">↺ Confirmar Rollback</button>
+    <button type="button" class="overlay-btn" data-overlay-target="ov-del-folder">🗑️ Remover Pasta</button>
+    <button type="button" class="overlay-btn" data-overlay-target="ov-save-as">💾 Salvar Novo Preset</button>
+    <button type="button" class="overlay-btn" data-overlay-target="ov-unsaved">⚠️ Alterações Não Salvas</button>
+    <button type="button" class="overlay-btn" data-overlay-target="ov-reduce">⚠️ Confirmação de Redução</button>
+    <button type="button" class="overlay-btn" data-overlay-target="ov-comments">💬 Comentários</button>
+  </div>
+
+  <div class="overlay-stage">
+
+    <!-- 1. MODAL: REGRAS E FILTROS DA PASTA -->
+    <div id="ov-rules" class="modal-backdrop st-overlay-item active">
+    <div class="modal-card modal-card-rules" data-tf-design="editor-rules-modal-card">
+        <div class="modal-header">
+          <div class="modal-title st-text-box" data-tf-design="editor-rules-modal-title">
+            <span id="rulesModalSwatch" class="label-option-dot" style="background-color: #585858;"></span>
+            <span id="rulesModalTitleText">Regras e Filtros — Pasta: Solids</span>
+          </div>
+          <button type="button" id="btnCloseRulesModalX" class="tf-btn tf-btn--ghost tf-btn--mini" style="">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- 1. Formatos -->
+          <div class="rule-section st-section-group">
+            <div class="rule-section-header">
+              <div class="rule-section-title">
+                <span id="ruleSectionHostTitle" class="st-text-box">1. Formatos</span>
+              </div>
+              <button type="button" id="btnClearAllExts" class="tf-btn tf-btn--destructive tf-btn--mini" style="display: none;">Limpar tags</button>
+            </div>
+            <div class="formats-grid-3col st-section-group">
+              <label id="tileTypeMainComp" class="rule-toggle-btn tf-toggle st-text-box">
+                <input type="checkbox" class="rule-type-chk" value="MainComp">
+                <span id="lblTypeMainComp" class="btn-tile-label tf-toggle__face st-text-box">Composição Principal</span>
+              </label>
+              <label id="tileTypePreComps" class="rule-toggle-btn tf-toggle st-text-box">
+                <input type="checkbox" class="rule-type-chk" value="PreComps">
+                <span id="lblTypePreComps" class="btn-tile-label tf-toggle__face st-text-box">Pré-Composições</span>
+              </label>
+              <label id="tileTypeStillImages" class="rule-toggle-btn tf-toggle st-text-box" data-tf-design="editor-still-images-toggle">
+                <input type="checkbox" class="rule-type-chk" value="StillImages">
+                <span class="btn-tile-label tf-toggle__face st-text-box" data-tf-design="editor-still-images-label">Imagens Estáticas</span>
+              </label>
+              <label id="tileTypeVideos" class="rule-toggle-btn tf-toggle st-text-box" data-tf-design="editor-videos-toggle">
+                <input type="checkbox" class="rule-type-chk" value="Videos">
+                <span class="btn-tile-label tf-toggle__face st-text-box" data-tf-design="editor-videos-label">Vídeos / Footages</span>
+              </label>
+              <label id="tileTypeAudios" class="rule-toggle-btn tf-toggle st-text-box" data-tf-design="editor-audios-toggle">
+                <input type="checkbox" class="rule-type-chk" value="Audios">
+                <span class="btn-tile-label tf-toggle__face st-text-box" data-tf-design="editor-audios-label">Áudios</span>
+              </label>
+              <label id="tileTypeDataFiles" class="rule-toggle-btn tf-toggle st-text-box">
+                <input type="checkbox" class="rule-type-chk" value="DataFiles">
+                <span id="lblTypeDataFiles" class="btn-tile-label tf-toggle__face st-text-box">Dados e 3D</span>
+              </label>
+              <label id="tileTypeSolids" class="rule-toggle-btn tf-toggle st-text-box">
+                <input type="checkbox" class="rule-type-chk" value="Solids" checked="">
+                <span id="lblTypeSolids" class="btn-tile-label tf-toggle__face st-text-box">Sólidos</span>
+              </label>
+              <div id="extTagsContainer" class="inline-ext-tags-box" title="Digite formatos específicos e aperte Espaço para criar a tag">
+                <div id="extChipsList" class="inline-ext-chips"></div>
+                <input type="text" id="inpNewExtension" class="inline-ext-input" placeholder="Avulsa: exr, webp...">
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Subpastas e Comportamento -->
+          <div class="rule-section st-section-group">
+            <div class="rule-section-header">
+              <div class="rule-section-title">
+                <span data-tf-design="editor-behavior-heading" class="st-text-box">2. Subpastas e Comportamento</span>
+              </div>
+            </div>
+            <div class="behavior-grid-v2 st-section-group">
+              <label class="rule-toggle-btn tf-toggle st-text-box" data-tf-design="editor-group-ext-toggle">
+                <input type="checkbox" id="chkRuleGroupExt">
+                <span class="btn-tile-label tf-toggle__face st-text-box" data-tf-design="editor-group-ext-label">Subpastas por Extensão</span>
+              </label>
+              <label class="rule-toggle-btn tf-toggle st-text-box" data-tf-design="editor-source-folder-toggle">
+                <input type="checkbox" id="chkRuleGroupBySourceFolder" checked="">
+                <span class="btn-tile-label tf-toggle__face st-text-box" data-tf-design="editor-source-folder-label">Pasta de Origem</span>
+              </label>
+              <label id="tileRuleGroupByMainComp" class="rule-toggle-btn tf-toggle st-text-box">
+                <input type="checkbox" id="chkRuleGroupByMainComp">
+                <span id="lblRuleGroupByMainComp" class="btn-tile-label tf-toggle__face st-text-box">Agrupar por Comp Principal</span>
+              </label>
+              <label class="rule-toggle-btn tf-toggle st-text-box" data-tf-design="editor-psd-bundles-toggle">
+                <input type="checkbox" id="chkRulePsdBundles">
+                <span id="lblRulePsdBundles" class="btn-tile-label tf-toggle__face st-text-box">Isolar PSD / AI</span>
+              </label>
+              <label class="rule-toggle-btn tf-toggle st-text-box" data-tf-design="editor-catch-others-toggle">
+                <input type="checkbox" id="chkRuleCatchOthers">
+                <span class="btn-tile-label tf-toggle__face st-text-box" data-tf-design="editor-catch-others-label">Pasta OTHERS (Fallback)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 3. Filtro por Nomenclatura -->
+          <div class="rule-section st-section-group">
+            <div class="rule-section-header">
+              <div class="rule-section-title">
+                <span data-tf-design="editor-name-filter-heading" class="st-text-box">3. Filtro por Nomenclatura</span>
+              </div>
+              <button type="button" id="btnClearAllNameTags" class="tf-btn tf-btn--destructive tf-btn--mini" style="display: none;">Limpar</button>
+            </div>
+            <div class="ext-add-row">
+              <input type="text" id="inpNewNameTag" class="text-input" placeholder="Digite uma palavra do nome e aperte Enter">
+              <button type="button" id="btnAddNameTag" class="tf-btn tf-btn--primary tf-btn--sm">[+] Adicionar</button>
+            </div>
+            <div id="nameTagsContainer" class="ext-tags-box">
+              <span class="rule-empty-hint">Nenhuma palavra filtrada.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="btnCancelRulesModal" class="tf-btn tf-btn--ghost tf-btn--sm" style="">Cancelar</button>
+          <button type="button" id="btnApplyRulesModal" class="tf-btn tf-btn--primary tf-btn--sm">Aplicar Regras na Pasta</button>
+        </div>
+      </div>
+  </div>
+
+    <!-- 2. MODAL: CONFIRMAR ROLLBACK -->
+    <div id="ov-rollback" class="modal-backdrop st-overlay-item">
+    <div class="modal-card" data-tf-design="main-rollback-modal-card">
+        <div class="modal-header">
+          <span class="modal-title st-text-box" id="rollbackModalTitle">Confirmar Rollback</span>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text st-text-box" id="lblRollbackText">Deseja salvar o projeto antes de continuar?</p>
+          <p class="modal-subtext st-text-box" id="lblRollbackSubtext">O projeto será desorganizado, as pastas novas deletadas e os arquvios espalhados no projeto</p>
+        </div>
+        <div class="modal-footer modal-footer--3btns">
+          <button type="button" id="btnRollbackCancel" class="tf-btn tf-btn--ghost tf-btn--sm"><span>Cancelar</span></button>
+          <button type="button" id="btnRollbackContinueWithoutSave" class="tf-btn tf-btn--warning tf-btn--sm"><span>Continuar sem Salvar</span></button><button type="button" id="btnRollbackSaveAndContinue" class="tf-btn tf-btn--primary tf-btn--sm"><span>Salvar e Continuar</span></button>
+          
+        </div>
+      </div>
+  </div>
+
+    <!-- 3. MODAL: REMOVER PASTA -->
+    <div id="ov-del-folder" class="modal-backdrop st-overlay-item">
+    <div class="modal-card modal-sm" data-tf-design="editor-confirm-modal-card">
+      <div class="modal-header">
+        <div id="confirmModalTitle" class="modal-title st-text-box">Confirmar Ação</div>
+      </div>
+      <div class="modal-body">
+        <p id="confirmModalMessage" style="font-size: 12px; color: #d4d4d4; line-height: 1.45;" class="st-text-box"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnAcceptConfirm" class="tf-btn tf-btn--destructive tf-btn--sm">Confirmar</button><button type="button" id="btnCancelConfirm" class="tf-btn tf-btn--ghost tf-btn--sm">Cancelar</button>
+        
+      </div>
+    </div>
+  </div>
+
+    <!-- 4. MODAL: SALVAR COMO NOVO PRESET -->
+    <div id="ov-save-as" class="modal-backdrop st-overlay-item">
+    <div class="modal-card modal-sm" data-tf-design="editor-save-as-modal-card">
+        <div class="modal-header">
+          <div class="modal-title st-text-box" id="lblSaveAsTitle">Salvar Como Novo Preset</div>
+        </div>
+        <div class="modal-body">
+          <label style="font-size: 11.5px; color: #d4d4d8; font-weight: 600;" id="lblSaveAsInstruction" class="st-text-box">Digite o nome do novo perfil (ex: Motion Design, VFX Pipeline):</label>
+          <input type="text" id="inpSaveAsName" class="text-input" value="Motion Design" style="margin-top: 6px;">
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btnCancelSaveAs" class="tf-btn tf-btn--ghost tf-btn--sm"><span>Cancelar</span></button>
+          <button type="button" id="btnConfirmSaveAs" class="tf-btn tf-btn--primary tf-btn--sm"><span>Salvar</span></button>
+        </div>
+      </div>
+  </div>
+
+    <!-- 5. MODAL: EXCLUIR PRESET -->
+    
+
+    <!-- 6. MODAL: ALTERAÇÕES NÃO SALVAS -->
+    <div id="ov-unsaved" class="modal-backdrop st-overlay-item">
+    <div class="modal-card modal-card-unsaved" data-tf-design="editor-unsaved-modal-card">
+        <div class="modal-header">
+          <span class="modal-title st-text-box" id="lblUnsavedTitle">Alterações Não Salvas</span>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text st-text-box" id="lblUnsavedQuestion">Deseja salvar o preset antes de fechar?</p>
+          <p class="modal-subtext st-text-box" id="lblUnsavedDesc">O preset possui alterações que ainda não foram salvas e serão perdidas.</p>
+        </div>
+        <div class="modal-footer">
+          
+          <button type="button" id="btnUnsavedCancel" class="tf-btn tf-btn--ghost tf-btn--sm"><span>Cancelar</span></button><button type="button" id="btnUnsavedDiscard" class="tf-btn tf-btn--warning tf-btn--sm"><span>Fechar sem Salvar</span></button>
+          <button type="button" id="btnUnsavedSaveClose" class="tf-btn tf-btn--primary tf-btn--sm"><span>Salvar e Fechar</span></button>
+        </div>
+      </div>
+  </div>
+
+  <div id="ov-reduce" class="modal-backdrop st-overlay-item">
+    <div class="modal-card" data-tf-design="main-reduce-modal-card">
+      <div class="modal-header">
+        <span id="reduceModalTitle" class="modal-title st-text-box">⚠️ Confirmar Redução</span>
+      </div>
+      <div class="modal-body">
+        <p class="modal-text st-text-box" data-tf-design="main-reduce-question">Deseja salvar o projeto antes de continuar?</p>
+        <p id="reduceModalSubtext" class="modal-subtext st-text-box">O projeto será reduzido apenas com as dependências da
+          composição selecionada. Itens não utilizados serão removidos.</p>
+      </div>
+      <div class="modal-footer modal-footer--3btns">
+        <button type="button" id="btnReduceCancel" class="tf-btn tf-btn--ghost modal-btn">
+          Cancelar
+        </button>
+        <button type="button" id="btnReduceContinueWithoutSave" class="tf-btn tf-btn--warning modal-btn">
+          Continuar sem Salvar
+        </button>
+        <button type="button" id="btnReduceSaveAndContinue" class="tf-btn tf-btn--primary modal-btn">
+          Salvar e Continuar
+        </button>
+      </div>
+    </div>
+  </div><div id="ov-comments" class="modal-backdrop st-overlay-item">
+    <div class="collect-modal-card" data-tf-design="collect-comments-modal-card">
+      <div id="commentsTitle" class="collect-modal-title">Comentários</div>
+      <p class="collect-modal-text st-text-box" data-tf-design="collect-comments-description">Os comentários são gravados no Report.txt do Collect.</p>
+      <textarea id="txtComments" rows="6"></textarea>
+      <div class="collect-modal-footer">
+        <button type="button" id="btnCommentsOk" class="collect-btn-ok">OK</button>
+        <button type="button" id="btnCommentsCancel" class="collect-btn-cancel">Cancelar</button>
+      </div>
+    </div>
+  </div></div>
+</body>
+</html>
+

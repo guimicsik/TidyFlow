@@ -8,58 +8,63 @@
 html {
   width: 100%;
   height: 100%;
-  background-color: #1e1e1e;
+  background-color: var(--tf-bg-app, #171717);
   overflow-x: hidden;
   overflow-y: auto;
 }
 
 body {
-  background-color: #1e1e1e;
-  color: #d4d4d4;
-  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-  font-size: 12px;
-  padding: 14px;
+  background-color: var(--tf-bg-app, #171717);
+  color: var(--tf-text-app, #d4d4d4);
+  font-family: var(--tf-font-family, "Segoe UI", sans-serif);
+  font-size: 16px;
+  padding: var(--tf-panel-padding, 14px);
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: var(--tf-section-gap, 11px);
   width: 100%;
-  max-width: 360px;
   margin: 0;
 }
 
 .preset-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background-color: #1c1c1c;
-  border: 1px solid #303030;
-  border-radius: 3px;
-  padding: 6px 8px;
+  gap: var(--tf-preset-bar-gap, 6px);
+  background-color: var(--tf-preset-bar-bg, #212121);
+  border: var(--tf-neo-border-w, 2px) solid var(--tf-preset-bar-border, #000000);
+  border-radius: var(--tf-neo-radius, 6px);
+  box-shadow: 2px 2px 0px #000000;
+  padding: var(--tf-preset-bar-padding, 6px 8px);
+  position: relative;
+  z-index: 50;
 }
 
 .preset-bar-label {
-  font-size: 10px;
-  font-weight: 700;
+  font-family: var(--tf-font-family);
+  font-size: var(--tf-font-size-preset-label, 10px);
+  font-weight: 800;
   text-transform: uppercase;
-  color: #8a8a8a;
-  letter-spacing: 0.4px;
+  color: #ffffff;
+  letter-spacing: 0.6px;
 }
 
 #presetSelect {
   flex: 1;
   min-width: 0;
   height: 24px;
-  background-color: #262626;
-  color: #e0e0e0;
-  border: 1px solid #3c3c3c;
-  border-radius: 3px;
+  background-color: #121212;
+  color: #ffffff;
+  border: 1.5px solid #000000;
+  border-radius: 4px;
   padding: 0 6px;
-  font-size: 11px;
+  font-family: var(--tf-font-family);
+  font-size: var(--tf-font-size-preset-select, 11.5px);
+  font-weight: 600;
   outline: none;
 }
 
 #presetSelect:focus {
-  border-color: #1473e6;
+  border-color: var(--tf-neo-hero-bg, #3B82F6);
 }
 
 /* Botão do Preset Builder: .tf-btn--ghost em escala mini (visual em theme.css) */
@@ -68,19 +73,19 @@ body {
 }
 
 #btnOpenPresetBuilder span:first-child {
-  font-size: 12px;
+  font-size: var(--tf-icon-size, 12px);
   line-height: 1;
 }
 
 .field-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--tf-field-group-gap, 6px);
 }
 
 .notice-text {
   font-size: 11px;
-  color: #9a9a9a;
+  color: var(--tf-notice-color, #9a9a9a);
   line-height: 1.4;
 }
 
@@ -88,16 +93,8 @@ body {
 .actions-grid-secondary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: var(--tf-grid-gap, 8px);
   width: 100%;
-}
-
-.options-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 8px;
-  border-top: 3px solid #2e2e2e;
 }
 
 /* ===== TOGGLES EM BOTÕES (grid 3 + 2) ===== */
@@ -106,7 +103,7 @@ body {
 
 .toggles-grid {
   display: grid;
-  gap: 8px;
+  gap: var(--tf-toggles-gap, 8px);
   width: 100%;
 }
 
@@ -114,9 +111,65 @@ body {
   grid-template-columns: repeat(3, 1fr);
 }
 
-/* Linha inferior: 3 colunas (2 toggles + botão Rollback) */
-.toggles-grid-bottom {
-  grid-template-columns: repeat(3, 1fr);
+/* Linha inferior de segurança: Desorganizar Projeto com a mesma largura dos tiles superiores */
+.rollback-row {
+  display: flex;
+  justify-content: var(--tf-rollback-justify, flex-end);
+  width: 100%;
+  margin-top: var(--tf-rollback-margin-top, 12px);
+}
+
+.rollback-row #btnRollback {
+  width: var(--tf-rollback-width, calc((100% - 16px) / 3));
+}
+
+/* ==========================================================================
+   Tamanho individual do texto de cada botão / toggle
+   (Ajuste os valores aqui ou diretamente no topo de theme/tokens.css)
+   ========================================================================== */
+
+/* 1. Botão Principal */
+#btnOrganize .btn-tile-label {
+  font-size: var(--tf-font-size-hero, 26px);
+  font-weight: var(--tf-font-weight-hero, 900);
+}
+
+/* 2. Botões Secundários */
+#btnCreateStructure .btn-tile-label {
+  font-size: var(--tf-font-size-tile, 14px);
+  font-weight: var(--tf-font-weight-tile, 800);
+}
+
+#btnMediaOnly .btn-tile-label {
+  font-size: var(--tf-font-size-tile, 14px);
+  font-weight: var(--tf-font-weight-tile, 800);
+}
+
+#btnOpenCollect .btn-tile-label {
+  font-size: var(--tf-font-size-tile, 14px);
+  font-weight: var(--tf-font-weight-tile, 800);
+}
+
+/* 3. Toggles de Preferências */
+#chkSaveProject+.tf-toggle__face {
+  font-size: var(--tf-font-size-toggle, 11px);
+  font-weight: var(--tf-font-weight-toggle, 600);
+}
+
+#chkDeleteEmptyFolders+.tf-toggle__face {
+  font-size: var(--tf-font-size-toggle, 11px);
+  font-weight: var(--tf-font-weight-toggle, 600);
+}
+
+#chkGroupBySourceFolder+.tf-toggle__face {
+  font-size: var(--tf-font-size-toggle, 11px);
+  font-weight: var(--tf-font-weight-toggle, 600);
+}
+
+/* 4. Botão Desorganizar Projeto */
+#btnRollback .btn-tile-label {
+  font-size: var(--tf-font-size-rollback, 11.5px);
+  font-weight: var(--tf-font-weight-rollback, 800);
 }
 
 #groupSourceNote {
@@ -127,26 +180,13 @@ body {
   margin-top: 6px;
 }
 
-.reduce-alert {
-  display: none;
-  font-size: 11px;
-  line-height: 1.4;
-  color: #ffc107;
-  background-color: rgba(255, 193, 7, 0.12);
-  border: 1px solid rgba(255, 193, 7, 0.35);
-  border-radius: 6px;
-  padding: 8px 10px;
-  margin-top: 6px;
-  text-align: center;
-  word-break: normal;
-}
-
 #statusMsg {
   min-height: 16px;
   font-size: 11px;
   color: #8f8f8f;
   word-break: break-word;
   line-height: 1.4;
+  font-family: var(--tf-font-family);
 }
 
 #statusMsg.success {
@@ -162,88 +202,12 @@ body {
 }
 
 /* ===== MODAL DE CONFIRMAÇÃO DE ROLLBACK ===== */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.72);
-  z-index: 900;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 14px;
+/* Estilos compartilhados herdados de theme.css (Seção 9: Alert Dialog Neo-Brutalista) */
+#rollbackModalBackdrop {
+  padding: 6px;
 }
 
-.modal-backdrop.open {
-  display: flex;
-}
-
-.modal-card {
-  background-color: #242424;
-  border: 1px solid #424242;
-  border-radius: 8px;
+#rollbackModalBackdrop .modal-card {
+  max-width: 346px;
   width: 100%;
-  max-width: 310px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.78);
-  overflow: hidden;
-}
-
-.modal-header {
-  padding: 10px 12px;
-  background-color: #2b2b2b;
-  border-bottom: 1px solid #383838;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.modal-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #ececec;
-}
-
-.modal-body {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.modal-text {
-  font-size: 12px;
-  font-weight: 600;
-  color: #ffffff;
-  line-height: 1.4;
-}
-
-.modal-subtext {
-  font-size: 11px;
-  color: #a8a8a8;
-  line-height: 1.4;
-}
-
-.modal-footer {
-  padding: 10px 12px 12px;
-  background-color: #202020;
-  border-top: 1px solid #333333;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* Utilitário: botões empilhados em largura total (modal de Rollback).
-   A cor vem de .tf-btn--success / --warning / --ghost (theme.css). */
-.modal-btn {
-  width: 100%;
-  min-height: 30px;
-  height: 32px;
-  font-size: 11.5px;
-}
-/* Botão temporário de teste do Collect Files (abre com.tidyflow.collect).
-   Visual vem de .tf-btn--ghost / --xs (theme.css). */
-.collect-test-btn {
-  width: 100%;
-  flex-shrink: 0;
 }

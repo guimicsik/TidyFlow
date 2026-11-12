@@ -1009,6 +1009,7 @@
             var allSeqEntries = [];
             var clipCountByNodeId = {};
             var usedInNodeIds = {}; // childSeqNodeId -> [parentSeqNodeId, ...]
+            var mediaUsedInSeqIds = {}; // mediaNodeId -> [parentSeqNodeId, ...]
 
             for (var sIdx = 0; sIdx < app.project.sequences.numSequences; sIdx++) {
                 var seq = app.project.sequences[sIdx];
@@ -1020,12 +1021,21 @@
 
                 for (var refIdx = 0; refIdx < trackInfo.items.length; refIdx++) {
                     var refItem = trackInfo.items[refIdx];
-                    if (refItem && refItem.nodeId && seqMap[refItem.nodeId] && refItem.nodeId !== nid) {
-                        if (!usedInNodeIds[refItem.nodeId]) {
-                            usedInNodeIds[refItem.nodeId] = [];
-                        }
-                        if (!arrayContains(usedInNodeIds[refItem.nodeId], nid)) {
-                            usedInNodeIds[refItem.nodeId].push(nid);
+                    if (refItem && refItem.nodeId && refItem.nodeId !== nid) {
+                        if (seqMap[refItem.nodeId]) {
+                            if (!usedInNodeIds[refItem.nodeId]) {
+                                usedInNodeIds[refItem.nodeId] = [];
+                            }
+                            if (!arrayContains(usedInNodeIds[refItem.nodeId], nid)) {
+                                usedInNodeIds[refItem.nodeId].push(nid);
+                            }
+                        } else {
+                            if (!mediaUsedInSeqIds[refItem.nodeId]) {
+                                mediaUsedInSeqIds[refItem.nodeId] = [];
+                            }
+                            if (!arrayContains(mediaUsedInSeqIds[refItem.nodeId], nid)) {
+                                mediaUsedInSeqIds[refItem.nodeId].push(nid);
+                            }
                         }
                     }
                 }
@@ -1147,6 +1157,37 @@
                 }
             }
 
+            // Passo 3: Identificar midias nao utilizadas em nenhuma sequencia ativa
+            var unusedMediaCount = 0;
+            var allProjectItems = snap.allItems || [];
+            for (var mi = 0; mi < allProjectItems.length; mi++) {
+                var mItem = allProjectItems[mi];
+                if (!mItem || !mItem.nodeId || isBin(mItem) || seqMap[mItem.nodeId]) {
+                    continue;
+                }
+                var mParent = parentByNodeId[mItem.nodeId];
+                var mediaAlreadyInUnused = Boolean(
+                    existingUnusedBin &&
+                    (isSameBin(mParent, existingUnusedBin) || isInsideTargetBin(mItem, existingUnusedBin))
+                );
+                if (mediaAlreadyInUnused) {
+                    continue;
+                }
+                var mUsedBy = mediaUsedInSeqIds[mItem.nodeId] || [];
+                var usedInActiveSeq = false;
+                for (var ms = 0; ms < mUsedBy.length; ms++) {
+                    if (!unusedSeqMap[mUsedBy[ms]]) {
+                        usedInActiveSeq = true;
+                        break;
+                    }
+                }
+                if (!usedInActiveSeq) {
+                    toMove.push(mItem);
+                    unusedMediaCount++;
+                    notUsedCount++;
+                }
+            }
+
             var movedCount = 0;
             if (toMove.length > 0) {
                 if (typeof $.global.ppro_ensurePreOrganizeSnapshot === "function") {
@@ -1182,6 +1223,8 @@
                 emptyCount +
                 ', "notUsedCount": ' +
                 notUsedCount +
+                ', "unusedMediaCount": ' +
+                unusedMediaCount +
                 "}"
             );
         } catch (err) {

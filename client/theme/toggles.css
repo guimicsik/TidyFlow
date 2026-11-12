@@ -1,0 +1,194 @@
+/* ==========================================================================
+   TidyFlow — Toggles e Checkboxes Neo-Brutalistas
+   ========================================================================== */
+
+/* 1. Toggle em Tile (Salvar antes / Excluir vazias / Pasta de origem / Regras) */
+.tf-toggle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tf-toggle input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.tf-toggle__face {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  min-height: 44px;
+  height: var(--tf-toggle-height, 68px);
+  padding: 6px 4px;
+  border-radius: var(--tf-neo-radius);
+  font-family: var(--tf-font-family);
+  font-size: var(--tf-font-size-toggle);
+  font-weight: var(--tf-font-weight-toggle, var(--tf-font-weight-medium));
+  letter-spacing: var(--tf-toggle-letter-spacing, 0px);
+  text-transform: var(--tf-toggle-text-transform, none);
+  line-height: var(--tf-tile-line-height);
+  background-color: var(--tf-neo-toggle-off-bg);
+  color: var(--tf-neo-toggle-off-text);
+  border: var(--tf-neo-border-w) solid var(--tf-neo-border-color);
+  box-shadow: var(--tf-rest-shadow-tile, 0px 0px 0px #000000);
+  transform: translate(var(--tf-rest-lift-tile, 0px), var(--tf-rest-lift-tile, 0px));
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              background-color var(--tf-anim-duration, 0.12s) ease,
+              color var(--tf-anim-duration, 0.12s) ease;
+}
+
+/* Indicador opcional de Checkmark nos Toggles em Tile */
+.tf-toggle input[type="checkbox"]:checked + .tf-toggle__face::after,
+.tf-toggle.active .tf-toggle__face::after {
+  content: "✓";
+  display: var(--tf-toggle-check-display, none);
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  width: 14px;
+  height: 14px;
+  font-size: 9px;
+  font-weight: 900;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+  color: #FFFFFF;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.tf-toggle:hover .tf-toggle__face,
+body.tf-force-hover .tf-toggle .tf-toggle__face {
+  background-color: var(--tf-neo-toggle-off-hover);
+  transform: translate(var(--tf-neo-lift-tile), var(--tf-neo-lift-tile));
+  box-shadow: var(--tf-neo-shadow-tile);
+}
+
+.tf-toggle:active .tf-toggle__face,
+body.tf-force-active .tf-toggle .tf-toggle__face {
+  transform: translate(var(--tf-active-lift-tile, 0px), var(--tf-active-lift-tile, 0px));
+  box-shadow: var(--tf-active-shadow-tile, 0px 0px 0px #000000);
+}
+
+/* Estado Ativado (Ligado) */
+.tf-toggle input[type="checkbox"]:checked + .tf-toggle__face,
+.tf-toggle.active .tf-toggle__face {
+  background-color: var(--tf-neo-toggle-on-bg);
+  color: var(--tf-neo-toggle-on-text);
+}
+
+.tf-toggle:hover input[type="checkbox"]:checked + .tf-toggle__face,
+.tf-toggle.active:hover .tf-toggle__face,
+body.tf-force-hover .tf-toggle input[type="checkbox"]:checked + .tf-toggle__face {
+  background-color: var(--tf-neo-toggle-on-hover);
+}
+
+/* Estado Parcial */
+.tf-toggle.partial .tf-toggle__face,
+.tf-toggle.partial input[type="checkbox"]:checked + .tf-toggle__face {
+  background-color: var(--tf-neo-toggle-partial-bg);
+  color: var(--tf-neo-toggle-partial-text);
+}
+
+.tf-toggle input[type="checkbox"]:disabled + .tf-toggle__face {
+  opacity: 0.5;
+  cursor: default;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* 2. Checkbox e Switch Vetorial (.tf-checkbox / .toggle-slider) */
+.tf-checkbox,
+.toggle-slider {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tf-checkbox-size, 18px);
+  height: var(--tf-checkbox-size, 18px);
+  background-color: var(--tf-neo-switch-off-bg, #262626);
+  border: var(--tf-neo-border-w, 2px) solid var(--tf-neo-switch-border, #000000);
+  border-radius: var(--tf-checkbox-radius, var(--tf-neo-radius-sm, 4px));
+  box-shadow: 0px 0px 0px #000000;
+  box-sizing: border-box;
+  transform: translate(0, 0);
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              background-color var(--tf-anim-duration, 0.12s) ease;
+  flex-shrink: 0;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+/* Checkmark em Vetor Puro (45deg) perfeitamente centralizado */
+.tf-checkbox::after,
+.toggle-slider::after {
+  content: "";
+  position: absolute;
+  width: 4.5px;
+  height: 9px;
+  border: solid var(--tf-neo-switch-check-color, #000000);
+  border-width: 0 2.4px 2.4px 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%) rotate(45deg) scale(0);
+  transform-origin: center center;
+  box-sizing: border-box;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Feedback Mecânico no Hover e no Clique */
+label:hover .tf-checkbox,
+label:hover .toggle-slider,
+.tf-checkbox:hover,
+.toggle-slider:hover,
+label:hover input[type="checkbox"]:checked + .tf-checkbox,
+label:hover input[type="checkbox"]:checked + .toggle-slider,
+.tf-checkbox.is-checked:hover {
+  transform: translate(var(--tf-neo-lift-mini, -2px), var(--tf-neo-lift-mini, -2px));
+  box-shadow: var(--tf-neo-shadow-mini, 2px 2px 0px #000000);
+}
+
+label:active .tf-checkbox,
+label:active .toggle-slider,
+.tf-checkbox:active,
+.toggle-slider:active,
+label:active input[type="checkbox"]:checked + .tf-checkbox,
+label:active input[type="checkbox"]:checked + .toggle-slider,
+.tf-checkbox.is-checked:active {
+  transform: translate(0, 0);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+/* Estado Marcado (Checked) - Preenchimento Azul Vibrante */
+input[type="checkbox"]:checked + .tf-checkbox,
+input[type="checkbox"]:checked + .toggle-slider,
+.tf-checkbox.is-checked {
+  background-color: var(--tf-neo-switch-on-bg, #3B82F6);
+  border-color: #000000;
+  box-shadow: 0px 0px 0px #000000;
+  transform: translate(0, 0);
+}
+
+input[type="checkbox"]:checked + .tf-checkbox::after,
+input[type="checkbox"]:checked + .toggle-slider::after,
+.tf-checkbox.is-checked::after {
+  transform: translate(-50%, -60%) rotate(45deg) scale(1);
+}
+
+input[type="checkbox"]:focus-visible + .tf-checkbox,
+input[type="checkbox"]:focus-visible + .toggle-slider {
+  outline: 2px solid var(--tf-neo-primary-bg, #3B82F6);
+  outline-offset: 2px;
+}

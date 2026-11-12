@@ -4,4 +4,6 @@ dist/
 Thumbs.db
 _backup/
 backups/
+tools/studio/.browser-test/
+tools/studio/preview-test.png
 

@@ -1,0 +1,146 @@
+/* ==========================================================================
+   TidyFlow — Modais e Alert Dialog (.modal-*)
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal-card {
+  background-color: var(--tf-modal-bg, #212121);
+  border: var(--tf-neo-border-w, 2px) solid var(--tf-modal-border, #000000);
+  border-radius: var(--tf-neo-radius, 6px);
+  box-shadow: var(--tf-modal-shadow, 6px 6px 0px 0px #000000);
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.modal-card.modal-sm {
+  max-width: 340px;
+}
+
+.modal-card.modal-card-unsaved {
+  max-width: 440px;
+}
+
+.modal-header {
+  padding: 11px 14px;
+  background-color: var(--tf-modal-header-bg, #181818);
+  border-bottom: var(--tf-neo-border-w, 2px) solid var(--tf-modal-border, #000000);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-family: var(--tf-font-family);
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--tf-modal-bg, #212121);
+}
+
+.modal-text {
+  font-family: var(--tf-font-family);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.modal-subtext {
+  font-size: 11.5px;
+  color: #A1A1AA;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.modal-footer {
+  padding: 11px 14px;
+  background-color: var(--tf-modal-header-bg, #181818);
+  border-top: var(--tf-neo-border-w, 2px) solid var(--tf-modal-border, #000000);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-footer--3btns {
+  padding: 10px 8px;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.modal-footer--3btns .tf-btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 30px;
+  min-height: 30px;
+  padding: 0 6px;
+  font-size: 10.5px;
+  box-shadow: 0px 0px 0px #000000;
+}
+
+.modal-footer-vertical {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  gap: 8px !important;
+}
+
+.modal-footer-vertical .modal-btn {
+  width: 100% !important;
+  min-height: 32px !important;
+  height: 34px !important;
+  font-size: var(--tf-font-size-modal-btn, 12px) !important;
+  font-weight: 800 !important;
+  font-family: var(--tf-font-family) !important;
+  box-shadow: 0px 0px 0px #000000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transform: translate(0, 0) !important;
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              background-color var(--tf-anim-duration, 0.12s) ease !important;
+}
+
+.modal-footer-vertical .modal-btn:hover:not(:disabled) {
+  transform: translate(var(--tf-neo-lift-mini, -2px), var(--tf-neo-lift-mini, -2px)) !important;
+  box-shadow: var(--tf-neo-shadow-mini, 2px 2px 0px #000000) !important;
+}
+
+.modal-footer-vertical .modal-btn:active:not(:disabled) {
+  transform: translate(0, 0) !important;
+  box-shadow: 0px 0px 0px #000000 !important;
+}
+

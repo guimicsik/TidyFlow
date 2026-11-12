@@ -1,0 +1,212 @@
+/* ==========================================================================
+   TidyFlow — Tokens Globais do Design System (:root)
+   ========================================================================== */
+
+:root {
+  /* 1. Tipografia & Pesos (Google Fonts: Archivo) */
+  --tf-font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --tf-font-weight-bold: 700;
+  --tf-font-weight-medium: 600;
+  --tf-font-weight-hero: 900;
+  --tf-font-weight-tile: 600;
+  --tf-font-weight-toggle: 600;
+  --tf-font-weight-rollback: 800;
+
+  /* Tamanhos de Fonte */
+  --tf-font-size-hero: 33.5px;
+  --tf-font-size-tile: 14px;
+  --tf-font-size-toggle: 14px;
+  --tf-font-size-rollback: 14px;
+  --tf-font-size-preset-label: 13px;
+  --tf-font-size-preset-select: 13px;
+  --tf-font-size-modal-btn: 12px;
+
+  /* Estilos Tipográficos Extras */
+  --tf-hero-letter-spacing: -0.5px;
+  --tf-tile-letter-spacing: 0px;
+  --tf-toggle-letter-spacing: 0px;
+  --tf-tile-line-height: 1.25;
+  --tf-hero-text-transform: none;
+  --tf-tile-text-transform: none;
+  --tf-toggle-text-transform: none;
+  --tf-font-style-hero: normal;
+  --tf-font-style-tile: normal;
+
+  /* 2. Paleta de Cores Neo-Brutalista (Monochrome Editorial + Electric Blue) */
+  --tf-bg-app: #171717;
+  --tf-text-app: #d4d4d4;
+  --tf-notice-color: #9a9a9a;
+
+  --tf-neo-hero-bg: #3B82F6;
+  --tf-neo-hero-text: #FFFFFF;
+  --tf-neo-hero-hover: #60A5FA;
+  --tf-neo-hero-active: #2563EB;
+
+  --tf-neo-tile-bg: #E4E4E7;
+  --tf-neo-tile-text: #000000;
+  --tf-neo-tile-hover: #F4F4F5;
+  --tf-neo-tile-active: #D4D4D8;
+
+  --tf-neo-danger-bg: #EF4444;
+  --tf-neo-danger-text: #000000;
+  --tf-neo-danger-hover: #F87171;
+  --tf-neo-danger-active: #DC2626;
+
+  --tf-neo-primary-bg: #3B82F6;
+  --tf-neo-primary-text: #FFFFFF;
+  --tf-neo-primary-hover: #60A5FA;
+
+  --tf-neo-toggle-off-bg: #262626;
+  --tf-neo-toggle-off-text: #F4F4F5;
+  --tf-neo-toggle-off-hover: #323238;
+
+  --tf-neo-toggle-on-bg: #3B82F6;
+  --tf-neo-toggle-on-text: #FFFFFF;
+  --tf-neo-toggle-on-hover: #60A5FA;
+
+  --tf-neo-toggle-partial-bg: #0EA5E9;
+  --tf-neo-toggle-partial-text: #FFFFFF;
+
+  --tf-neo-ghost-bg: #262626;
+  --tf-neo-ghost-text: #E4E4E7;
+  --tf-neo-ghost-hover: #3E84F6;
+
+  --tf-neo-success-bg: #10B981;
+  --tf-neo-success-text: #000000;
+  --tf-neo-success-hover: #26EBAB;
+  --tf-neo-warning-bg: #EF4444;
+  --tf-neo-warning-text: #000000;
+  --tf-neo-warning-hover: #F87171;
+
+  --tf-neo-switch-off-bg: #262626;
+  --tf-neo-switch-on-bg: #3B82F6;
+  --tf-neo-switch-border: #000000;
+  --tf-neo-switch-thumb-bg: #FFFFFF;
+  --tf-neo-switch-thumb-border: #000000;
+  --tf-neo-switch-check-color: #000000;
+  --tf-checkbox-size: 19px;
+  --tf-checkbox-radius: 5px;
+
+  /* 3. Dropdown e Barra de Presets */
+  --tf-preset-dropdown-width-editor: 220px;
+  --tf-preset-dropdown-width-panel: 100%;
+  --tf-preset-dropdown-height: 30px;
+  --tf-preset-bar-bg: #212121;
+  --tf-preset-bar-border: #000000;
+  --tf-preset-dropdown-bg: #3B82F6;
+  --tf-preset-dropdown-text: #000000;
+  --tf-preset-dropdown-hover: #60A5FA;
+  --tf-preset-menu-bg: #DBEAFE;
+  --tf-preset-menu-text: #000000;
+  --tf-preset-menu-hover-bg: #3B82F6;
+  --tf-preset-menu-hover-text: #FFFFFF;
+  --tf-preset-menu-selected-bg: #2563EB;
+
+  /* 4. Modais e Alert Dialog */
+  --tf-modal-bg: #212121;
+  --tf-modal-header-bg: #181818;
+  --tf-modal-border: #000000;
+  --tf-modal-shadow: 6px 6px 0px 0px #000000;
+
+  /* 5. Geometria, Animação & Física dos Estados (Rest, Hover, Click) */
+  --tf-neo-border-color: #000000;
+  --tf-neo-border-w: 2px;
+  --tf-neo-radius: 5px;
+  --tf-neo-radius-sm: 4px;
+
+  /* Estado Rest (Repouso) */
+  --tf-rest-lift-hero: 0px;
+  --tf-rest-shadow-hero: 0px 0px 0px #000000;
+  --tf-rest-lift-tile: 0px;
+  --tf-rest-shadow-tile: 0px 0px 0px #000000;
+
+  /* Estado Hover (Elevação e Sombra Rígida) */
+  --tf-neo-shadow-hero: 4px 4px 0px #000000;
+  --tf-neo-shadow-tile: 2px 2px 0px #000000;
+  --tf-neo-shadow-mini: 2px 2px 0px #000000;
+
+  --tf-neo-lift-hero: -4px;
+  --tf-neo-lift-tile: -3px;
+  --tf-neo-lift-mini: -2px;
+
+  /* Estado Click / Active (Compressão ao Clicar) */
+  --tf-active-lift-hero: 0px;
+  --tf-active-shadow-hero: 0px 0px 0px #000000;
+  --tf-active-lift-tile: 0px;
+  --tf-active-shadow-tile: 0px 0px 0px #000000;
+
+  /* Velocidade e Curva de Animação */
+  --tf-anim-duration: 0.12s;
+  --tf-anim-easing: cubic-bezier(0.2, 0, 0, 1);
+
+  /* 6. Layout, Gaps, Alturas & Posicionamento */
+  --tf-panel-padding: 7px;
+  --tf-section-gap: 11px;
+  --tf-field-group-gap: 4px;
+  --tf-grid-gap: 2px;
+  --tf-toggles-gap: 2px;
+  --tf-options-gap: 3px;
+  --tf-preset-bar-gap: 6px;
+  --tf-preset-bar-padding: 6px 8px;
+
+  --tf-hero-height: 80px;
+  --tf-tile-height: 62px;
+  --tf-toggle-height: 68px;
+  --tf-rollback-height: 56px;
+
+  --tf-rollback-justify: center;
+  --tf-rollback-width: 50%;
+  --tf-rollback-margin-top: 4px;
+  --tf-toggle-check-display: none;
+  --tf-icon-size: 18px;
+
+  /* 7. Preset Builder (Janela Editor) */
+  --tf-editor-bg: #1e1e1e;
+  --tf-editor-topbar-bg: #252525;
+  --tf-editor-tree-bg: #181818;
+  --tf-editor-row-bg: #212121;
+  --tf-editor-row-border: #303030;
+  --tf-editor-tree-gap: 4px;
+  --tf-editor-tag-type-bg: #2f353d;
+  --tf-editor-tag-type-text: #b8d4f2;
+  --tf-editor-tag-ext-bg: #2b332c;
+  --tf-editor-tag-ext-text: #9cd6a4;
+  --tf-editor-tag-fallback-bg: #3d3122;
+  --tf-editor-tag-fallback-text: #f0bc74;
+  --tf-editor-tag-name-bg: #382a3d;
+  --tf-editor-tag-name-text: #dda5f0;
+  --tf-editor-footer-bg: #252525;
+  --tf-editor-padding: 6px;
+
+  /* Preset Builder: Toolbar de Ícones do Topo (Totalmente Desacoplada do Rodapé) */
+  --tf-toolbar-icon-bg: #262626;
+  --tf-toolbar-icon-hover: #EF4444;
+  --tf-toolbar-icon-active: #1e1e1e;
+  --tf-toolbar-icon-text: #E4E4E7;
+
+  /* Preset Builder: Botão Fechar do Rodapé */
+  --tf-btn-close-bg: #262626;
+  --tf-btn-close-hover: #EF4444;
+  --tf-btn-close-active: #B91C1C;
+  --tf-btn-close-text: #FFFFFF;
+
+  /* 8. Collect Files (Project Manager) */
+  --tf-collect-bg: #181818;
+  --tf-collect-box-bg: #212121;
+  --tf-collect-box-border: #000000;
+  --tf-collect-box-padding: 8px 12px;
+  --tf-collect-gap: 9px;
+  --tf-collect-options-gap-y: 10px;
+  --tf-collect-options-gap-x: 17px;
+  --tf-collect-btn-ok-bg: #3B82F6;
+  --tf-collect-btn-ok-hover: #60A5FA;
+  --tf-collect-btn-ok-text: #000000;
+  --tf-collect-btn-cancel-bg: #262626;
+  --tf-collect-btn-cancel-border: #000000;
+  --tf-collect-btn-cancel-text: #E4E4E7;
+
+  /* 9. Aliases de Compatibilidade */
+  --tf-accent: var(--tf-neo-primary-bg, #3B82F6);
+  --tf-accent-hover: var(--tf-neo-primary-hover, #60A5FA);
+  --tf-tile-radius: var(--tf-neo-radius, 6px);
+}

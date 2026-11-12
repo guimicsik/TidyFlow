@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-    Script de setup e deploy em desenvolvimento para a extensao Adobe CEP "AE Organizer".
+    Script de setup e deploy em desenvolvimento para a extensao Adobe CEP "TidyFlow".
 
 .DESCRIPTION
     Executa de forma segura e idempotente:
     1. Habilita PlayerDebugMode = "1" (REG_SZ) em HKCU\Software\Adobe\CSXS.9 ate CSXS.16.
     2. Garante a existencia de %APPDATA%\Adobe\CEP\extensions e recria a Junction
-       apontando para a raiz do projeto (AE_File_Organizer).
+       apontando para a raiz do projeto (TidyFlow).
     3. Verifica o arquivo .debug (porta 8089) e exibe instrucoes de abertura e inspecao.
 #>
 
@@ -25,7 +25,7 @@ $c_Proximos  = "Pr$([char]0x00F3)ximos"
 
 Write-Host ""
 Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host "  AE Organizer - Setup de Ambiente de Desenvolvimento (CEP) " -ForegroundColor Cyan
+Write-Host "    TidyFlow - Setup de Ambiente de Desenvolvimento (CEP)   " -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -47,9 +47,10 @@ foreach ($Version in $CsxsVersions) {
     $RegKey = "HKCU\Software\Adobe\CSXS.$Version"
     $null = & reg.exe add $RegKey /v PlayerDebugMode /t REG_SZ /d "1" /f
     if ($LASTEXITCODE -ne 0) {
-        throw "Falha ao gravar PlayerDebugMode na chave $RegKey (codigo $LASTEXITCODE)."
+        Write-Host "  [AVISO] Falha ao gravar PlayerDebugMode na chave $RegKey (codigo $LASTEXITCODE)." -ForegroundColor DarkYellow
+    } else {
+        Write-Host "  [OK] $RegKey -> PlayerDebugMode = `"1`" (REG_SZ)" -ForegroundColor Green
     }
-    Write-Host "  [OK] $RegKey -> PlayerDebugMode = `"1`" (REG_SZ)" -ForegroundColor Green
 }
 
 Write-Host ""
@@ -71,7 +72,21 @@ if (-not (Test-Path -LiteralPath $CepExtensionsDir)) {
     Write-Host "  [OK] Diretorio verificado: $CepExtensionsDir" -ForegroundColor DarkGray
 }
 
-$ExtensionFolderName = 'AE_File_Organizer'
+# Limpa junctions legadas se existirem com nomes antigos ('AE_File_Organizer', 'AE_Organizer', 'AE Organizer')
+$LegacyFolderNames = @('AE_File_Organizer', 'AE_Organizer', 'AE Organizer')
+foreach ($LegacyName in $LegacyFolderNames) {
+    $LegacyLinkPath = Join-Path $CepExtensionsDir $LegacyName
+    $LegacyItem = Get-Item -LiteralPath $LegacyLinkPath -Force -ErrorAction SilentlyContinue
+    if ($null -ne $LegacyItem) {
+        $IsReparsePoint = ($LegacyItem.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0
+        if ($IsReparsePoint) {
+            Write-Host "  [..] Removendo junction legada ($LegacyName): $LegacyLinkPath" -ForegroundColor DarkYellow
+            & cmd.exe /d /c rmdir "$LegacyLinkPath"
+        }
+    }
+}
+
+$ExtensionFolderName = 'TidyFlow'
 $TargetLinkPath = Join-Path $CepExtensionsDir $ExtensionFolderName
 
 # Get-Item -Force detecta inclusive links/junctions quebrados (dangling reparse points)
@@ -139,8 +154,8 @@ Write-Host ""
 Write-Host "$c_Proximos passos:" -ForegroundColor White
 Write-Host "  1. Reinicie o Adobe After Effects ou o Premiere Pro 22.x+ (caso $c_ja estejam abertos)."
 Write-Host "  2. No After Effects ou Premiere Pro, abra o painel em:"
-Write-Host "       - PT-BR: Janela > Extens$c_oes > AE Organizer" -ForegroundColor Cyan
-Write-Host "       - EN-US: Window > Extensions > AE Organizer" -ForegroundColor Cyan
+Write-Host "       - PT-BR: Janela > Extens$c_oes > TidyFlow" -ForegroundColor Cyan
+Write-Host "       - EN-US: Window > Extensions > TidyFlow" -ForegroundColor Cyan
 Write-Host "  3. Para inspecionar o console do painel (DevTools):"
 Write-Host "       - After Effects : http://localhost:8089 (Editor: 8090)" -ForegroundColor Cyan
 Write-Host "       - Premiere Pro  : http://localhost:8091 (Editor: 8092)" -ForegroundColor Cyan

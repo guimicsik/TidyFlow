@@ -10,80 +10,65 @@
 </head>
 
 <body>
-
-  <!-- Barra Superior: Seleção e Ações de Preset -->
-  <div class="top-bar">
-    <div class="preset-selector-group">
-      <span class="preset-label">Preset:</span>
-      <select id="presetSelect" class="select-input"></select>
-      <span id="badgeBuiltIn" class="badge-builtin">Padrão</span>
-      <button type="button" id="btnDeletePreset" class="tf-btn tf-btn--destructive tf-btn--xs"
-        title="Excluir este preset de usuário">Excluir</button>
-      <span id="badgeUnsaved" class="badge-unsaved">Não salvo*</span>
+<!-- Barra Superior: Seleção e Ações de Preset -->
+  <div class="top-bar" data-tf-design="editor-top-bar" style="">
+    <div class="preset-selector-group" data-tf-design="editor-preset-selector-group" style="">
+      <span class="preset-label st-text-box" data-tf-design="editor-preset-label">Preset:</span>
+      <select id="presetSelect" class="select-input" style=""><option value="Default Clean">Default Clean (Default)</option><option value="Motion Design Copy">Motion Design Copy</option></select>
+      <span id="badgeBuiltIn" class="badge-builtin st-text-box" style="display: inline-block;">Padrão</span>
+      <button type="button" id="btnDeletePreset" class="tf-btn tf-btn--ghost tf-btn--xs preset-icon-btn" title="Excluir este preset de usuário" aria-label="Excluir preset" disabled=""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"></path></svg></button>
+      <span id="badgeUnsaved" class="badge-unsaved st-text-box" style="display: none;">Não salvo*</span>
     </div>
 
-    <div class="preset-actions">
-      <button type="button" id="btnSaveAsPreset" class="tf-btn tf-btn--ghost tf-btn--xs"
-        title="Salvar estrutura como um novo Preset">Salvar
-        Novo</button>
-      <button type="button" id="btnResetDefault" class="tf-btn tf-btn--ghost tf-btn--xs"
-        title="Restaurar o preset padrão de fábrica">Reset
-        Default</button>
-      <button type="button" id="btnImportJson" class="tf-btn tf-btn--ghost tf-btn--xs"
-        title="Importar arquivo .json de preset">Importar
-        Preset</button>
-      <button type="button" id="btnExportJson" class="tf-btn tf-btn--ghost tf-btn--xs"
-        title="Exportar preset atual para .json">Exportar
-        Preset</button>
-      <button type="button" id="btnOpenPresetsFolder" class="tf-btn tf-btn--ghost tf-btn--xs"
-        title="Abrir pasta de Presets no Explorer/Finder">Abrir Pasta Local</button>
+    <div class="preset-actions" data-tf-design="editor-preset-actions">
+      <button type="button" id="btnSaveAsPreset" class="tf-btn tf-btn--ghost tf-btn--xs preset-icon-btn" title="Salvar estrutura como um novo Preset" aria-label="Salvar novo preset" style=""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2m6-5v6m-3-3h6"></path></svg></button>
+      <button type="button" id="btnResetDefault" class="tf-btn tf-btn--ghost tf-btn--xs preset-icon-btn" title="Restaurar o preset padrão de fábrica" aria-label="Restaurar padrão" style=""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8m0-5v5h5"></path></svg></button>
+      <button type="button" id="btnImportJson" class="tf-btn tf-btn--ghost tf-btn--xs preset-icon-btn" title="Importar arquivo .json de preset" aria-label="Importar preset" style=""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m-4-4 4 4 4-4M4 17v3h16v-3"></path></svg></button>
+      <button type="button" id="btnExportJson" class="tf-btn tf-btn--ghost tf-btn--xs preset-icon-btn" title="Exportar preset atual para .json" aria-label="Exportar preset" style=""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M8 8l4-4 4 4M4 17v3h16v-3"></path></svg></button>
+      <button type="button" id="btnOpenPresetsFolder" class="tf-btn tf-btn--ghost tf-btn--xs preset-icon-btn" title="Abrir pasta de Presets no Explorer/Finder" aria-label="Abrir pasta de presets" style=""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h7l2 2h9v11H3z"></path></svg></button>
       <input type="file" id="hiddenFileInput" accept=".json,application/json" style="display: none;">
     </div>
   </div>
 
   <!-- Área Principal: Editor Visual da Árvore de Pastas -->
-  <div class="tree-workspace">
-    <div class="tree-toolbar">
-      <span id="treeToolbarTitle" class="tree-toolbar-title">Estrutura da Árvore de Pastas • Clique nas regras para
+  <div class="tree-workspace" data-tf-design="editor-workspace" style="">
+    <div class="tree-toolbar" data-tf-design="editor-toolbar">
+      <span id="treeToolbarTitle" class="tree-toolbar-title st-text-box">Estrutura da Árvore de Pastas • Clique nas regras para
         filtrar</span>
       <button type="button" id="btnAddTopFolder" class="tf-btn tf-btn--primary tf-btn--xs">+ Add pasta</button>
     </div>
 
-    <div id="treeScrollArea" class="tree-scroll-area">
+    <div id="treeScrollArea" class="tree-scroll-area" data-tf-design="editor-tree-area">
       <!-- Configurações do Preset (dentro da estrutura, acima da primeira pasta) -->
-      <div class="settings-bar">
-        <div class="settings-toggles">
-          <label class="toggle-container"
-            title="Adiciona automaticamente 01_, 02_, 03_ nas pastas da árvore que possuírem arquivos, pulando categorias vazias">
-            <input type="checkbox" id="chkUsePrefixNumbering" checked>
+      <div class="settings-bar" data-tf-design="editor-settings-bar">
+        <div class="settings-toggles" data-tf-design="editor-settings-toggles">
+          <label class="toggle-container" data-tf-design="editor-numbering-toggle" title="Adiciona automaticamente 01_, 02_, 03_ nas pastas da árvore que possuírem arquivos, pulando categorias vazias">
+            <input type="checkbox" id="chkUsePrefixNumbering" checked="">
             <span class="toggle-slider"></span>
-            <span>Numeração Sequencial</span>
+            <span class="st-text-box" data-tf-design="editor-numbering-label">Numeração Sequencial</span>
           </label>
-          <label class="toggle-container"
-            title="No Premiere Pro, separa automaticamente os áudios em subpastas de Dialogue, Music, SFX e Ambience via Essential Sound e inteligência de nomes.">
-            <input type="checkbox" id="chkSeparateAudioCategories" checked>
+          <label id="lblSeparateAudioCategories" class="toggle-container is-disabled" title="Disponível apenas no Premiere Pro (Essential Sound)">
+            <input type="checkbox" id="chkSeparateAudioCategories" checked="" disabled="">
             <span class="toggle-slider"></span>
-            <span>Categorias de Áudio (ESP)</span>
+            <span class="st-text-box" data-tf-design="editor-audio-categories-label">Categorias de Áudio (ESP)</span>
           </label>
-          <label id="lblNumberAudioCategories" class="toggle-container"
-            title="Adiciona numeração sequencial (01_, 02_...) nas subpastas de áudio criadas pelo ESP. Desative para manter apenas Dialogue, Music, SFX, Ambience e Others sem número.">
-            <input type="checkbox" id="chkNumberAudioCategories" checked>
+          <label id="lblNumberAudioCategories" class="toggle-container is-disabled" title="Disponível apenas no Premiere Pro (Essential Sound)">
+            <input type="checkbox" id="chkNumberAudioCategories" checked="" disabled="">
             <span class="toggle-slider"></span>
-            <span>Numerar ESP</span>
+            <span class="st-text-box" data-tf-design="editor-number-audio-label">Numerar ESP</span>
           </label>
         </div>
       </div>
 
-      <ul id="treeRootList" class="tree-list"></ul>
+      <ul id="treeRootList" class="tree-list"><li><div class="tree-row" data-tf-design="folder-row" data-node-id="node_output"><span class="drag-handle" data-tf-design="folder-drag-handle" title="Clique e arraste para reordenar ou mover esta pasta" draggable="true">⋮⋮</span><button type="button" data-tf-design="folder-collapse" class="collapse-btn empty" title="Recolher subpastas">▾</button><button type="button" data-tf-design="folder-label-swatch" class="label-swatch-btn" style="background-color: rgb(74, 164, 76);" title="Cor no After Effects: 9. Green (Verde)"></button><button type="button" data-tf-design="folder-prefix" class="prefix-preview" title="Numeração: ATIVADA para esta pasta (01_). Clique para desativar a numeração desta pasta.">01_</button><input type="text" data-tf-design="folder-name-input" class="folder-name-input" placeholder="Nome da pasta"><button type="button" data-tf-design="folder-rules-summary" class="rules-summary-btn" title="Clique para configurar tipos de arquivo, extensões e filtros desta pasta"><span class="rule-pill st-text-box" data-tf-design="tag-Comp%20Principal">Comp Principal</span></button><div class="row-actions"><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-up" title="Mover pasta para cima" disabled="">↑</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-down" title="Mover pasta para baixo">↓</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn add-child" data-tf-design="folder-add" title="Adicionar subpasta filha dentro de 'Output'">+</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn remove-node" data-tf-design="folder-remove" title="Remover pasta 'Output'">−</button></div></div></li><li><div class="tree-row" data-tf-design="folder-row" data-node-id="node_assets"><span class="drag-handle" data-tf-design="folder-drag-handle" title="Clique e arraste para reordenar ou mover esta pasta" draggable="true">⋮⋮</span><button type="button" data-tf-design="folder-collapse" class="collapse-btn" title="Recolher subpastas">▾</button><button type="button" data-tf-design="folder-label-swatch" class="label-swatch-btn" style="background-color: rgb(88, 88, 88);" title="Cor no After Effects: Nenhum (None)"></button><button type="button" data-tf-design="folder-prefix" class="prefix-preview" title="Numeração: ATIVADA para esta pasta (02_). Clique para desativar a numeração desta pasta.">02_</button><input type="text" data-tf-design="folder-name-input" class="folder-name-input" placeholder="Nome da pasta"><button type="button" data-tf-design="folder-rules-summary" class="rules-summary-btn" title="Clique para configurar tipos de arquivo, extensões e filtros desta pasta"><span class="rule-empty-hint" data-tf-design="folder-rules-empty">Pasta contêiner (clique p/ adicionar regras)</span></button><div class="row-actions"><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-up" title="Mover pasta para cima">↑</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-down" title="Mover pasta para baixo" disabled="">↓</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn add-child" data-tf-design="folder-add" title="Adicionar subpasta filha dentro de 'Assets'">+</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn remove-node" data-tf-design="folder-remove" title="Remover pasta 'Assets'">−</button></div></div><ul class="tree-children"><li><div class="tree-row" data-tf-design="folder-row" data-node-id="node_precomps"><span class="drag-handle" data-tf-design="folder-drag-handle" title="Clique e arraste para reordenar ou mover esta pasta" draggable="true">⋮⋮</span><button type="button" data-tf-design="folder-collapse" class="collapse-btn empty" title="Recolher subpastas">▾</button><button type="button" data-tf-design="folder-label-swatch" class="label-swatch-btn" style="background-color: rgb(169, 169, 202);" title="Cor no After Effects: 5. Lavender (Lavanda)"></button><button type="button" data-tf-design="folder-prefix" class="prefix-preview" title="Numeração: ATIVADA para esta pasta (01_). Clique para desativar a numeração desta pasta.">01_</button><input type="text" data-tf-design="folder-name-input" class="folder-name-input" placeholder="Nome da pasta"><button type="button" data-tf-design="folder-rules-summary" class="rules-summary-btn" title="Clique para configurar tipos de arquivo, extensões e filtros desta pasta"><span class="rule-pill st-text-box" data-tf-design="tag-Pre-Comps">Pre-Comps</span><span class="rule-pill pill-ext st-text-box" data-tf-design="tag-Agrupar%20por%20MainComp">Agrupar por MainComp</span></button><div class="row-actions"><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-up" title="Mover pasta para cima" disabled="">↑</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-down" title="Mover pasta para baixo">↓</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn add-child" data-tf-design="folder-add" title="Adicionar subpasta filha dentro de 'PreComps'">+</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn remove-node" data-tf-design="folder-remove" title="Remover pasta 'PreComps'">−</button></div></div></li><li><div class="tree-row" data-tf-design="folder-row" data-node-id="node_images"><span class="drag-handle" data-tf-design="folder-drag-handle" title="Clique e arraste para reordenar ou mover esta pasta" draggable="true">⋮⋮</span><button type="button" data-tf-design="folder-collapse" class="collapse-btn empty" title="Recolher subpastas">▾</button><button type="button" data-tf-design="folder-label-swatch" class="label-swatch-btn" style="background-color: rgb(229, 188, 201);" title="Cor no After Effects: 4. Pink (Rosa)"></button><button type="button" data-tf-design="folder-prefix" class="prefix-preview" title="Numeração: ATIVADA para esta pasta (02_). Clique para desativar a numeração desta pasta.">02_</button><input type="text" data-tf-design="folder-name-input" class="folder-name-input" placeholder="Nome da pasta"><button type="button" data-tf-design="folder-rules-summary" class="rules-summary-btn" title="Clique para configurar tipos de arquivo, extensões e filtros desta pasta"><span class="rule-pill st-text-box" data-tf-design="tag-Images">Images</span><span class="rule-pill pill-ext st-text-box" data-tf-design="tag-Bundles%20PSD%2FAI">Bundles PSD/AI</span><span class="rule-pill pill-ext st-text-box" data-tf-design="tag-Subpastas%3A%20EXT">Subpastas: EXT</span><span class="rule-pill pill-fallback st-text-box" data-tf-design="tag-Fallback%3A%20OTHERS">Fallback: OTHERS</span></button><div class="row-actions"><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-up" title="Mover pasta para cima">↑</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-down" title="Mover pasta para baixo">↓</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn add-child" data-tf-design="folder-add" title="Adicionar subpasta filha dentro de 'Images'">+</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn remove-node" data-tf-design="folder-remove" title="Remover pasta 'Images'">−</button></div></div></li><li><div class="tree-row" data-tf-design="folder-row" data-node-id="node_footages"><span class="drag-handle" data-tf-design="folder-drag-handle" title="Clique e arraste para reordenar ou mover esta pasta" draggable="true">⋮⋮</span><button type="button" data-tf-design="folder-collapse" class="collapse-btn empty" title="Recolher subpastas">▾</button><button type="button" data-tf-design="folder-label-swatch" class="label-swatch-btn" style="background-color: rgb(231, 193, 158);" title="Cor no After Effects: 6. Peach (Pêssego)"></button><button type="button" data-tf-design="folder-prefix" class="prefix-preview" title="Numeração: ATIVADA para esta pasta (03_). Clique para desativar a numeração desta pasta.">03_</button><input type="text" data-tf-design="folder-name-input" class="folder-name-input" placeholder="Nome da pasta"><button type="button" data-tf-design="folder-rules-summary" class="rules-summary-btn" title="Clique para configurar tipos de arquivo, extensões e filtros desta pasta"><span class="rule-pill st-text-box" data-tf-design="tag-Footages">Footages</span><span class="rule-pill st-text-box" data-tf-design="tag-Data%2F3D">Data/3D</span><span class="rule-pill pill-ext st-text-box" data-tf-design="tag-Subpastas%3A%20EXT">Subpastas: EXT</span><span class="rule-pill pill-fallback st-text-box" data-tf-design="tag-Fallback%3A%20OTHERS">Fallback: OTHERS</span></button><div class="row-actions"><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-up" title="Mover pasta para cima">↑</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-down" title="Mover pasta para baixo">↓</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn add-child" data-tf-design="folder-add" title="Adicionar subpasta filha dentro de 'Footages'">+</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn remove-node" data-tf-design="folder-remove" title="Remover pasta 'Footages'">−</button></div></div></li><li><div class="tree-row" data-tf-design="folder-row" data-node-id="node_audios"><span class="drag-handle" data-tf-design="folder-drag-handle" title="Clique e arraste para reordenar ou mover esta pasta" draggable="true">⋮⋮</span><button type="button" data-tf-design="folder-collapse" class="collapse-btn empty" title="Recolher subpastas">▾</button><button type="button" data-tf-design="folder-label-swatch" class="label-swatch-btn" style="background-color: rgb(179, 199, 179);" title="Cor no After Effects: 7. Seafoam (Espuma)"></button><button type="button" data-tf-design="folder-prefix" class="prefix-preview" title="Numeração: ATIVADA para esta pasta (04_). Clique para desativar a numeração desta pasta.">04_</button><input type="text" data-tf-design="folder-name-input" class="folder-name-input" placeholder="Nome da pasta"><button type="button" data-tf-design="folder-rules-summary" class="rules-summary-btn" title="Clique para configurar tipos de arquivo, extensões e filtros desta pasta"><span class="rule-pill st-text-box" data-tf-design="tag-Audios">Audios</span><span class="rule-pill pill-ext st-text-box" data-tf-design="tag-Subpastas%3A%20EXT">Subpastas: EXT</span><span class="rule-pill pill-fallback st-text-box" data-tf-design="tag-Fallback%3A%20OTHERS">Fallback: OTHERS</span></button><div class="row-actions"><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-up" title="Mover pasta para cima">↑</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-down" title="Mover pasta para baixo">↓</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn add-child" data-tf-design="folder-add" title="Adicionar subpasta filha dentro de 'Audios'">+</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn remove-node" data-tf-design="folder-remove" title="Remover pasta 'Audios'">−</button></div></div></li><li><div class="tree-row" data-tf-design="folder-row" data-node-id="node_solids"><span class="drag-handle" data-tf-design="folder-drag-handle" title="Clique e arraste para reordenar ou mover esta pasta" draggable="true">⋮⋮</span><button type="button" data-tf-design="folder-collapse" class="collapse-btn empty" title="Recolher subpastas">▾</button><button type="button" data-tf-design="folder-label-swatch" class="label-swatch-btn" style="background-color: rgb(88, 88, 88);" title="Cor no After Effects: Nenhum (None)"></button><button type="button" data-tf-design="folder-prefix" class="prefix-preview" title="Numeração: ATIVADA para esta pasta (05_). Clique para desativar a numeração desta pasta.">05_</button><input type="text" data-tf-design="folder-name-input" class="folder-name-input" placeholder="Nome da pasta"><button type="button" data-tf-design="folder-rules-summary" class="rules-summary-btn" title="Clique para configurar tipos de arquivo, extensões e filtros desta pasta"><span class="rule-pill st-text-box" data-tf-design="tag-Solids">Solids</span></button><div class="row-actions"><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-up" title="Mover pasta para cima">↑</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn" data-tf-design="folder-down" title="Mover pasta para baixo" disabled="">↓</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn add-child" data-tf-design="folder-add" title="Adicionar subpasta filha dentro de 'Solids'">+</button><button type="button" class="tf-btn tf-btn--ghost tf-btn--mini row-btn remove-node" data-tf-design="folder-remove" title="Remover pasta 'Solids'">−</button></div></div></li></ul></li></ul>
     </div>
   </div>
 
   <!-- Barra Inferior: Status e Ações Finais -->
   <div class="footer-bar">
-    <div id="editorStatus">Configure as pastas e regras do preset.</div>
+    <div id="editorStatus" class="warning st-text-box">Pasta 'Assets' removida.</div>
     <div class="footer-actions">
-      <button type="button" id="btnFooterSave" class="tf-btn tf-btn--primary btn-footer-action"
-        title="Salvar alterações no preset atual">Salvar</button>
+      <button type="button" id="btnFooterSave" class="tf-btn tf-btn--primary btn-footer-action" title="Salvar alterações no preset atual">Salvar</button>
       <button type="button" id="btnCloseModal" class="tf-btn tf-btn--ghost btn-footer-action">Fechar</button>
     </div>
   </div>
@@ -96,154 +81,136 @@
 
   <!-- Modal: Configuração de Regras e Filtros da Pasta (V2 Compacto) -->
   <div id="rulesModalBackdrop" class="modal-backdrop">
-    <div class="modal-card modal-card-rules">
-      <div class="modal-header">
-        <div class="modal-title">
-          <span id="rulesModalSwatch" class="label-option-dot"></span>
-          <span id="rulesModalTitleText">Regras e Filtros da Pasta</span>
-        </div>
-        <button type="button" id="btnCloseRulesModalX" class="tf-btn tf-btn--ghost tf-btn--mini">✕</button>
-      </div>
-
-      <div class="modal-body">
-        <!-- 1. Formatos (Tipos + Caixa Inline de Formatos Específicos) -->
-        <div class="rule-section">
-          <div class="rule-section-header">
-            <div class="rule-section-title">
-              <span id="ruleSectionHostTitle">1. Formatos</span>
-            </div>
-            <button type="button" id="btnClearAllExts" class="tf-btn tf-btn--destructive tf-btn--mini"
-              style="display: none;">Limpar tags</button>
+    <div class="modal-card modal-card-rules" data-tf-design="editor-rules-modal-card">
+        <div class="modal-header">
+          <div class="modal-title" data-tf-design="editor-rules-modal-title">
+            <span id="rulesModalSwatch" class="label-option-dot" style="background-color: #585858;"></span>
+            <span id="rulesModalTitleText">Regras e Filtros — Pasta: Solids</span>
           </div>
-          <div class="formats-grid-3col">
-            <label id="tileTypeMainComp" class="rule-toggle-btn tf-toggle"
-              data-tooltip="Composições finais de entrega que não estão inseridas dentro de nenhuma outra composição.">
-              <input type="checkbox" class="rule-type-chk" value="MainComp">
-              <span id="lblTypeMainComp" class="btn-tile-label tf-toggle__face">Composição Principal</span>
-            </label>
-            <label id="tileTypePreComps" class="rule-toggle-btn tf-toggle"
-              data-tooltip="Composições secundárias utilizadas como camadas dentro de outras composições.">
-              <input type="checkbox" class="rule-type-chk" value="PreComps">
-              <span id="lblTypePreComps" class="btn-tile-label tf-toggle__face">Pré-Composições</span>
-            </label>
-            <label id="tileTypeStillImages" class="rule-toggle-btn tf-toggle"
-              data-tooltip="Fotos, artes, ilustrações e logotipos estáticos (.png, .jpg, .psd, .ai, .svg, .exr...).">
-              <input type="checkbox" class="rule-type-chk" value="StillImages">
-              <span class="btn-tile-label tf-toggle__face">Imagens Estáticas</span>
-            </label>
-            <label id="tileTypeVideos" class="rule-toggle-btn tf-toggle"
-              data-tooltip="Gravações de câmera, clipes renderizados e sequências de imagem (.mp4, .mov, .prores, .mxf, .braw, .exr...).">
-              <input type="checkbox" class="rule-type-chk" value="Videos">
-              <span class="btn-tile-label tf-toggle__face">Vídeos / Footages</span>
-            </label>
-            <label id="tileTypeAudios" class="rule-toggle-btn tf-toggle"
-              data-tooltip="Músicas, locuções e efeitos sonoros sem vídeo (.wav, .mp3, .aac, .aif, .flac, .m4a...).">
-              <input type="checkbox" class="rule-type-chk" value="Audios">
-              <span class="btn-tile-label tf-toggle__face">Áudios</span>
-            </label>
-            <label id="tileTypeDataFiles" class="rule-toggle-btn tf-toggle"
-              data-tooltip="Modelos 3D, arquivos de dados, tabelas e projetos importados (.json, .c4d, .obj, .fbx, .csv, .aep...).">
-              <input type="checkbox" class="rule-type-chk" value="DataFiles">
-              <span id="lblTypeDataFiles" class="btn-tile-label tf-toggle__face">Dados e 3D</span>
-            </label>
-            <label id="tileTypeSolids" class="rule-toggle-btn tf-toggle"
-              data-tooltip="Camadas de cor sólida e ajustes criadas diretamente dentro do programa.">
-              <input type="checkbox" class="rule-type-chk" value="Solids">
-              <span id="lblTypeSolids" class="btn-tile-label tf-toggle__face">Sólidos</span>
-            </label>
-            <div id="extTagsContainer" class="inline-ext-tags-box"
-              title="Digite formatos específicos e aperte Espaço para criar a tag">
-              <div id="extChipsList" class="inline-ext-chips"></div>
-              <input type="text" id="inpNewExtension" class="inline-ext-input" placeholder="Avulsa: exr, webp...">
-            </div>
-          </div>
+          <button type="button" id="btnCloseRulesModalX" class="tf-btn tf-btn--ghost tf-btn--mini" style="">✕</button>
         </div>
 
-        <!-- 2. Subpastas Automáticas e Comportamento (Grid 3 em cima + 2 centralizados embaixo) -->
-        <div class="rule-section">
-          <div class="rule-section-header">
-            <div class="rule-section-title">
-              <span>2. Subpastas e Comportamento</span>
+        <div class="modal-body">
+          <!-- 1. Formatos -->
+          <div class="rule-section">
+            <div class="rule-section-header">
+              <div class="rule-section-title">
+                <span id="ruleSectionHostTitle">1. Formatos</span>
+              </div>
+              <button type="button" id="btnClearAllExts" class="tf-btn tf-btn--destructive tf-btn--mini" style="display: none;">Limpar tags</button>
+            </div>
+            <div class="formats-grid-3col">
+              <label id="tileTypeMainComp" class="rule-toggle-btn tf-toggle">
+                <input type="checkbox" class="rule-type-chk" value="MainComp">
+                <span id="lblTypeMainComp" class="btn-tile-label tf-toggle__face">Composição Principal</span>
+              </label>
+              <label id="tileTypePreComps" class="rule-toggle-btn tf-toggle">
+                <input type="checkbox" class="rule-type-chk" value="PreComps">
+                <span id="lblTypePreComps" class="btn-tile-label tf-toggle__face">Pré-Composições</span>
+              </label>
+              <label id="tileTypeStillImages" class="rule-toggle-btn tf-toggle" data-tf-design="editor-still-images-toggle">
+                <input type="checkbox" class="rule-type-chk" value="StillImages">
+                <span class="btn-tile-label tf-toggle__face" data-tf-design="editor-still-images-label">Imagens Estáticas</span>
+              </label>
+              <label id="tileTypeVideos" class="rule-toggle-btn tf-toggle" data-tf-design="editor-videos-toggle">
+                <input type="checkbox" class="rule-type-chk" value="Videos">
+                <span class="btn-tile-label tf-toggle__face" data-tf-design="editor-videos-label">Vídeos / Footages</span>
+              </label>
+              <label id="tileTypeAudios" class="rule-toggle-btn tf-toggle" data-tf-design="editor-audios-toggle">
+                <input type="checkbox" class="rule-type-chk" value="Audios">
+                <span class="btn-tile-label tf-toggle__face" data-tf-design="editor-audios-label">Áudios</span>
+              </label>
+              <label id="tileTypeDataFiles" class="rule-toggle-btn tf-toggle">
+                <input type="checkbox" class="rule-type-chk" value="DataFiles">
+                <span id="lblTypeDataFiles" class="btn-tile-label tf-toggle__face">Dados e 3D</span>
+              </label>
+              <label id="tileTypeSolids" class="rule-toggle-btn tf-toggle">
+                <input type="checkbox" class="rule-type-chk" value="Solids" checked="">
+                <span id="lblTypeSolids" class="btn-tile-label tf-toggle__face">Sólidos</span>
+              </label>
+              <div id="extTagsContainer" class="inline-ext-tags-box" title="Digite formatos específicos e aperte Espaço para criar a tag">
+                <div id="extChipsList" class="inline-ext-chips"></div>
+                <input type="text" id="inpNewExtension" class="inline-ext-input" placeholder="Avulsa: exr, webp...">
+              </div>
             </div>
           </div>
-          <div class="behavior-grid-v2">
-            <label class="rule-toggle-btn tf-toggle"
-              data-tooltip="Cria automaticamente uma subpasta separada para cada formato de arquivo encontrado.">
-              <input type="checkbox" id="chkRuleGroupExt">
-              <span class="btn-tile-label tf-toggle__face">Subpastas por Extensão</span>
-            </label>
-            <label class="rule-toggle-btn tf-toggle"
-              data-tooltip="Agrupa os arquivos em uma subpasta com o mesmo nome da pasta onde estão salvos no seu computador.">
-              <input type="checkbox" id="chkRuleGroupBySourceFolder">
-              <span class="btn-tile-label tf-toggle__face">Pasta de Origem</span>
-            </label>
-            <label id="tileRuleGroupByMainComp" class="rule-toggle-btn tf-toggle"
-              data-tooltip="Separa as pré-composições em subpastas com o nome da composição principal onde cada uma é usada.">
-              <input type="checkbox" id="chkRuleGroupByMainComp">
-              <span id="lblRuleGroupByMainComp" class="btn-tile-label tf-toggle__face">Agrupar por Comp Principal</span>
-            </label>
-            <label class="rule-toggle-btn tf-toggle"
-              data-tooltip="Mantém intacta a pasta original de camadas importadas do Photoshop ou Illustrator sem espalhar seus itens.">
-              <input type="checkbox" id="chkRulePsdBundles">
-              <span id="lblRulePsdBundles" class="btn-tile-label tf-toggle__face">Isolar PSD / AI</span>
-            </label>
-            <label class="rule-toggle-btn tf-toggle"
-              data-tooltip="Guarda em uma subpasta chamada OTHERS os arquivos da categoria escolhida que não tiverem extensão específica definida.">
-              <input type="checkbox" id="chkRuleCatchOthers">
-              <span class="btn-tile-label tf-toggle__face">Pasta OTHERS (Fallback)</span>
-            </label>
+
+          <!-- 2. Subpastas e Comportamento -->
+          <div class="rule-section">
+            <div class="rule-section-header">
+              <div class="rule-section-title">
+                <span data-tf-design="editor-behavior-heading">2. Subpastas e Comportamento</span>
+              </div>
+            </div>
+            <div class="behavior-grid-v2">
+              <label class="rule-toggle-btn tf-toggle" data-tf-design="editor-group-ext-toggle">
+                <input type="checkbox" id="chkRuleGroupExt">
+                <span class="btn-tile-label tf-toggle__face" data-tf-design="editor-group-ext-label">Subpastas por Extensão</span>
+              </label>
+              <label class="rule-toggle-btn tf-toggle" data-tf-design="editor-source-folder-toggle">
+                <input type="checkbox" id="chkRuleGroupBySourceFolder" checked="">
+                <span class="btn-tile-label tf-toggle__face" data-tf-design="editor-source-folder-label">Pasta de Origem</span>
+              </label>
+              <label id="tileRuleGroupByMainComp" class="rule-toggle-btn tf-toggle">
+                <input type="checkbox" id="chkRuleGroupByMainComp">
+                <span id="lblRuleGroupByMainComp" class="btn-tile-label tf-toggle__face">Agrupar por Comp Principal</span>
+              </label>
+              <label class="rule-toggle-btn tf-toggle" data-tf-design="editor-psd-bundles-toggle">
+                <input type="checkbox" id="chkRulePsdBundles">
+                <span id="lblRulePsdBundles" class="btn-tile-label tf-toggle__face">Isolar PSD / AI</span>
+              </label>
+              <label class="rule-toggle-btn tf-toggle" data-tf-design="editor-catch-others-toggle">
+                <input type="checkbox" id="chkRuleCatchOthers">
+                <span class="btn-tile-label tf-toggle__face" data-tf-design="editor-catch-others-label">Pasta OTHERS (Fallback)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 3. Filtro por Nomenclatura -->
+          <div class="rule-section">
+            <div class="rule-section-header">
+              <div class="rule-section-title">
+                <span data-tf-design="editor-name-filter-heading">3. Filtro por Nomenclatura</span>
+              </div>
+              <button type="button" id="btnClearAllNameTags" class="tf-btn tf-btn--destructive tf-btn--mini" style="display: none;">Limpar</button>
+            </div>
+            <div class="ext-add-row">
+              <input type="text" id="inpNewNameTag" class="text-input" placeholder="Digite uma palavra do nome e aperte Enter">
+              <button type="button" id="btnAddNameTag" class="tf-btn tf-btn--primary tf-btn--sm">[+] Adicionar</button>
+            </div>
+            <div id="nameTagsContainer" class="ext-tags-box">
+              <span class="rule-empty-hint">Nenhuma palavra filtrada.</span>
+            </div>
           </div>
         </div>
 
-        <!-- 3. Filtro por Nomenclatura (Tags) -->
-        <div class="rule-section">
-          <div class="rule-section-header">
-            <div class="rule-section-title">
-              <span>3. Filtro por Nomenclatura</span>
-            </div>
-            <button type="button" id="btnClearAllNameTags" class="tf-btn tf-btn--destructive tf-btn--mini"
-              style="display: none;">Limpar</button>
-          </div>
-
-          <div class="ext-add-row">
-            <input type="text" id="inpNewNameTag" class="text-input"
-              placeholder="Digite uma palavra do nome e aperte Enter">
-            <button type="button" id="btnAddNameTag" class="tf-btn tf-btn--primary tf-btn--sm">[+] Adicionar</button>
-          </div>
-
-          <div id="nameTagsContainer" class="ext-tags-box"></div>
+        <div class="modal-footer">
+          <button type="button" id="btnCancelRulesModal" class="tf-btn tf-btn--ghost tf-btn--sm" style="">Cancelar</button>
+          <button type="button" id="btnApplyRulesModal" class="tf-btn tf-btn--primary tf-btn--sm">Aplicar Regras na Pasta</button>
         </div>
       </div>
-
-      <div class="modal-footer">
-        <button type="button" id="btnCancelRulesModal" class="tf-btn tf-btn--ghost tf-btn--sm">Cancelar</button>
-        <button type="button" id="btnApplyRulesModal" class="tf-btn tf-btn--primary tf-btn--sm">Aplicar Regras na
-          Pasta</button>
-      </div>
-    </div>
   </div>
 
   <!-- Modal: Salvar Como Novo Preset -->
   <div id="saveAsModalBackdrop" class="modal-backdrop">
-    <div class="modal-card modal-sm">
-      <div class="modal-header">
-        <div class="modal-title">Salvar Como Novo Preset</div>
+    <div class="modal-card modal-sm" data-tf-design="editor-save-as-modal-card">
+        <div class="modal-header">
+          <div class="modal-title" id="lblSaveAsTitle">Salvar Como Novo Preset</div>
+        </div>
+        <div class="modal-body">
+          <label style="font-size: 11.5px; color: #d4d4d8; font-weight: 600;" id="lblSaveAsInstruction">Digite o nome do novo perfil (ex: Motion Design, VFX Pipeline):</label>
+          <input type="text" id="inpSaveAsName" class="text-input" value="Motion Design" style="margin-top: 6px;">
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btnCancelSaveAs" class="tf-btn tf-btn--ghost tf-btn--sm"><span>Cancelar</span></button>
+          <button type="button" id="btnConfirmSaveAs" class="tf-btn tf-btn--primary tf-btn--sm"><span>Salvar</span></button>
+        </div>
       </div>
-      <div class="modal-body">
-        <label style="font-size: 11px; color: #b4b4b4;">Digite o nome do novo perfil (ex: Motion Design, VFX
-          Pipeline):</label>
-        <input type="text" id="inpSaveAsName" class="text-input" placeholder="Meu Preset Customizado">
-      </div>
-      <div class="modal-footer">
-        <button type="button" id="btnConfirmSaveAs" class="tf-btn tf-btn--primary tf-btn--sm">Salvar</button>
-        <button type="button" id="btnCancelSaveAs" class="tf-btn tf-btn--ghost tf-btn--sm">Cancelar</button>
-      </div>
-    </div>
   </div>
 
   <!-- Modal: Confirmação (Exclusão de Pasta / Preset / Reset) -->
   <div id="confirmModalBackdrop" class="modal-backdrop">
-    <div class="modal-card modal-sm">
+    <div class="modal-card modal-sm" data-tf-design="editor-confirm-modal-card">
       <div class="modal-header">
         <div id="confirmModalTitle" class="modal-title">Confirmar Ação</div>
       </div>
@@ -251,34 +218,28 @@
         <p id="confirmModalMessage" style="font-size: 12px; color: #d4d4d4; line-height: 1.45;"></p>
       </div>
       <div class="modal-footer">
-        <button type="button" id="btnCancelConfirm" class="tf-btn tf-btn--ghost tf-btn--sm">Cancelar</button>
-        <button type="button" id="btnAcceptConfirm" class="tf-btn tf-btn--destructive tf-btn--sm">Confirmar</button>
+        <button type="button" id="btnAcceptConfirm" class="tf-btn tf-btn--destructive tf-btn--sm">Confirmar</button><button type="button" id="btnCancelConfirm" class="tf-btn tf-btn--ghost tf-btn--sm">Cancelar</button>
+        
       </div>
     </div>
   </div>
 
   <!-- Modal: Alterações Não Salvas ao Fechar -->
   <div id="unsavedCloseModalBackdrop" class="modal-backdrop">
-    <div class="modal-card modal-card-unsaved">
-      <div class="modal-header">
-        <span class="modal-title">⚠️ Alterações Não Salvas</span>
+    <div class="modal-card modal-card-unsaved" data-tf-design="editor-unsaved-modal-card">
+        <div class="modal-header">
+          <span class="modal-title" id="lblUnsavedTitle">Alterações Não Salvas</span>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text" id="lblUnsavedQuestion">Deseja salvar o preset antes de fechar?</p>
+          <p class="modal-subtext" id="lblUnsavedDesc">O preset possui alterações que ainda não foram salvas e serão perdidas.</p>
+        </div>
+        <div class="modal-footer">
+          
+          <button type="button" id="btnUnsavedCancel" class="tf-btn tf-btn--ghost tf-btn--sm"><span>Cancelar</span></button><button type="button" id="btnUnsavedDiscard" class="tf-btn tf-btn--warning tf-btn--sm"><span>Fechar sem Salvar</span></button>
+          <button type="button" id="btnUnsavedSaveClose" class="tf-btn tf-btn--primary tf-btn--sm"><span>Salvar e Fechar</span></button>
+        </div>
       </div>
-      <div class="modal-body">
-        <p class="modal-text">Deseja salvar o preset antes de fechar?</p>
-        <p class="modal-subtext">O preset possui alterações que ainda não foram salvas e serão perdidas.</p>
-      </div>
-      <div class="modal-footer modal-footer-vertical">
-        <button type="button" id="btnUnsavedSaveClose" class="tf-btn tf-btn--success modal-btn">
-          Salvar e Fechar
-        </button>
-        <button type="button" id="btnUnsavedDiscard" class="tf-btn tf-btn--warning modal-btn">
-          Fechar sem Salvar
-        </button>
-        <button type="button" id="btnUnsavedCancel" class="tf-btn tf-btn--ghost modal-btn">
-          Cancelar
-        </button>
-      </div>
-    </div>
   </div>
 
   <script>

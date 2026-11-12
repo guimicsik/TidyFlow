@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TidyFlow Design Studio — Localhost Visual Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@500;700;800&family=Rubik:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/studio.css">
+</head>
+
+<body>
+  <!-- TOPBAR -->
+  <header class="st-topbar">
+    <div class="st-brand">
+      <div class="st-logo">TF</div>
+      <div>
+        <div class="st-title">TIDYFLOW DESIGN STUDIO</div>
+        <div class="st-subtitle" id="syncStatus">
+          <span class="st-dot st-dot--ok"></span>
+          <span>Sincronizado com <code>theme/tokens.css</code> &amp; HTMLs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comutador Dinâmico de Painel Ativo -->
+    <div class="st-toolbar-group" title="Escolha qual janela visualizar e configurar">
+      <span class="st-toolbar-label">PAINEL ATIVO:</span>
+      <button type="button" class="st-pill active" data-panel-btn="main">1. Painel Principal</button>
+      <button type="button" class="st-pill" data-panel-btn="editor">2. Preset Builder</button>
+      <button type="button" class="st-pill" data-panel-btn="collect">3. Collect Files</button>
+      <button type="button" class="st-pill" data-panel-btn="overlays">4. 🪟 Overlays</button>
+      <button type="button" class="st-pill" data-panel-btn="all">⊞ Todos Lado a Lado</button>
+    </div>
+
+    <!-- Simulador de Estado (Rest / Hover / Click) -->
+    <div class="st-toolbar-group" title="Travar estado dos botões para editar cores e sombras ao vivo">
+      <span class="st-toolbar-label">ESTADO:</span>
+      <button type="button" class="st-pill active" data-force-state="normal">🟢 Rest</button>
+      <button type="button" class="st-pill" data-force-state="hover">🔵 Hover</button>
+      <button type="button" class="st-pill" data-force-state="active">🟠 Click</button>
+    </div>
+
+    <!-- Modo Editar & Arrastar -->
+    <div class="st-toolbar-group">
+      <button type="button" id="btnToggleEditMode" class="st-btn st-btn--edit" title="Clique em qualquer botão ou texto no preview para abrir o Inspector e customizar individualmente (estilo Illustrator)">
+        ✏️ Modo Editar: <strong id="editModeStatus">OFF</strong>
+      </button>
+      <button type="button" id="btnToggleDragMode" class="st-btn st-btn--outline" title="Ative para arrastar botões, toggles e seções diretamente com o mouse no preview">
+        ✋ Arrastar: <strong id="dragModeStatus">OFF</strong>
+      </button>
+    </div>
+
+    <!-- Ações de Persistência -->
+    <div class="st-actions">
+      <label class="st-autosave-toggle" title="Grava automaticamente no código a cada ajuste">
+        <input type="checkbox" id="chkAutoSave" checked>
+        <span>Auto-Save</span>
+      </label>
+      <button type="button" id="btnResetDefaults" class="st-btn st-btn--ghost" title="Restaurar todos os valores para o padrão original">
+        ↺ Padrão
+      </button>
+      <button type="button" id="btnCopyCss" class="st-btn st-btn--ghost" title="Copiar variáveis :root para a área de transferência">
+        📋 Copiar CSS
+      </button>
+      <button type="button" id="btnSaveDisk" class="st-btn st-btn--primary">
+        💾 Salvar no Projeto
+      </button>
+    </div>
+  </header>
+
+  <!-- WORKSPACE -->
+  <div class="st-workspace">
+    <!-- SIDEBAR DE CONTROLES -->
+    <aside class="st-sidebar">
+      <!-- Indicador de Painel Selecionado na Sidebar -->
+      <div class="st-panel-indicator">
+        <span class="st-panel-indicator-lbl">EDITANDO AGORA:</span>
+        <span class="st-panel-indicator-badge" id="lblActivePanelBadge">Painel Principal (index.html)</span>
+      </div>
+
+      <!-- INSPECTOR CONTEXTUAL (Ativado ao clicar em qualquer botão ou texto no Modo Editar) -->
+      <div id="stInspectorPanel" class="st-inspector-panel" style="display: none;">
+        <div class="st-inspector-header">
+          <div class="st-inspector-header-info">
+            <span class="st-inspector-tag" id="inspTag">BOTÃO SELECIONADO</span>
+            <span class="st-inspector-title" id="inspTitle">Organizar Projeto</span>
+            <span class="st-inspector-id" id="inspId">#btnHero</span>
+          </div>
+          <button type="button" id="btnCloseInspector" class="st-btn st-btn--ghost st-btn--xs" title="Voltar para as abas gerais">✕ Fechar</button>
+        </div>
+
+        <div class="st-inspector-body">
+          <!-- 1. Texto do Elemento -->
+          <div class="st-inspector-section" id="inspSecText">
+            <div class="st-inspector-section-title">
+              <span>✏️ Texto / Conteúdo</span>
+            </div>
+            <div class="st-field">
+              <label>Texto do Elemento</label>
+              <textarea id="inspInputText" class="st-input" rows="3" placeholder="Digite o texto; use Enter para quebrar a linha"></textarea>
+            </div>
+          </div>
+
+          <!-- 2. Cores & Estados -->
+          <div class="st-inspector-section" id="inspSecColors">
+            <div class="st-inspector-section-title">
+              <span>🎨 Cores &amp; Estados</span>
+            </div>
+            <div class="st-inspector-grid-3">
+              <div class="st-inspector-color-card">
+                <span class="st-inspector-color-label">🟢 Rest</span>
+                <div class="st-inspector-color-inputs">
+                  <input type="color" id="inspColRest">
+                  <input type="text" id="inspHexRest" maxlength="7">
+                </div>
+              </div>
+              <div class="st-inspector-color-card">
+                <span class="st-inspector-color-label">🔵 Hover</span>
+                <div class="st-inspector-color-inputs">
+                  <input type="color" id="inspColHover">
+                  <input type="text" id="inspHexHover" maxlength="7">
+                </div>
+              </div>
+              <div class="st-inspector-color-card">
+                <span class="st-inspector-color-label">🟠 Click</span>
+                <div class="st-inspector-color-inputs">
+                  <input type="color" id="inspColActive">
+                  <input type="text" id="inspHexActive" maxlength="7">
+                </div>
+              </div>
+            </div>
+
+            <div class="st-inspector-grid-2" style="margin-top: 6px;">
+              <div class="st-inspector-color-card">
+                <span class="st-inspector-color-label">Cor do Texto</span>
+                <div class="st-inspector-color-inputs">
+                  <input type="color" id="inspColText">
+                  <input type="text" id="inspHexText" maxlength="7">
+                </div>
+              </div>
+              <div class="st-inspector-color-card">
+                <span class="st-inspector-color-label">Cor da Borda</span>
+                <div class="st-inspector-color-inputs">
+                  <input type="color" id="inspColBorder">
+                  <input type="text" id="inspHexBorder" maxlength="7">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Tipografia -->
+          <div class="st-inspector-section" id="inspSecTypo">
+            <div class="st-inspector-section-title">
+              <span>🔤 Tipografia</span>
+            </div>
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho da Fonte</label>
+                <span class="st-val" id="inspValFontSize">14px</span>
+              </div>
+              <input type="range" id="inspRngFontSize" min="9" max="48" step="0.5" value="14">
+            </div>
+            <div class="st-field">
+              <label>Peso da Fonte (Weight)</label>
+              <select id="inspSelFontWeight" class="st-select">
+                <option value="400">Regular (400)</option>
+                <option value="600">Semibold (600)</option>
+                <option value="700">Bold (700)</option>
+                <option value="800">Extrabold (800)</option>
+                <option value="900">Black (900)</option>
+              </select>
+            </div>
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Espaçamento de Letras</label>
+                <span class="st-val" id="inspValLetterSpacing">0px</span>
+              </div>
+              <input type="range" id="inspRngLetterSpacing" min="-2" max="4" step="0.1" value="0">
+            </div>
+          </div>
+
+          <!-- 4. Sombra & Borda -->
+          <div class="st-inspector-section" id="inspSecShadow">
+            <div class="st-inspector-section-title">
+              <span>📐 Borda &amp; Elevação</span>
+            </div>
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Raio dos Cantos (Border Radius)</label>
+                <span class="st-val" id="inspValRadius">6px</span>
+              </div>
+              <input type="range" id="inspRngRadius" min="0" max="24" step="1" value="6">
+            </div>
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Sombra individual no hover (elementos com ID)</label>
+                <span class="st-val" id="inspValShadowHover">3px</span>
+              </div>
+              <input type="range" id="inspRngShadowHover" min="0" max="10" step="1" value="3">
+            </div>
+          </div>
+
+          <!-- 5. Ícone do Elemento -->
+          <div class="st-inspector-section" id="inspSecIcon">
+            <div class="st-inspector-section-title">
+              <span>✨ Ícone</span>
+            </div>
+            <p class="st-help" style="margin: 0;">Selecione um ícone para aplicar diretamente a este botão:</p>
+            <div id="inspIconCatalogGrid" class="st-icon-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISÃO GERAL DE ABAS DA SIDEBAR -->
+      <div id="stDefaultSidebar" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+        <!-- Abas de Navegação -->
+        <nav class="st-tabs">
+        <button type="button" class="st-tab active" data-tab="tab-text">
+          <span>🔤</span>
+          <span>Texto</span>
+        </button>
+        <button type="button" class="st-tab" data-tab="tab-buttons">
+          <span>🎨</span>
+          <span>Botões</span>
+        </button>
+        <button type="button" class="st-tab" data-tab="tab-anim">
+          <span>⚡</span>
+          <span>Animação</span>
+        </button>
+        <button type="button" class="st-tab" data-tab="tab-layout">
+          <span>📐</span>
+          <span>Geral &amp; Gaps</span>
+        </button>
+        <button type="button" class="st-tab" data-tab="tab-icons">
+          <span>✨</span>
+          <span>Ícones</span>
+        </button>
+      </nav>
+
+      <!-- CONTEÚDO DAS ABAS -->
+      <div class="st-sidebar-body">
+
+        <!-- ==============================================================
+             ABA 1: TEXTO (Peso, Conteúdo, Tamanho e Estilos)
+             ============================================================== -->
+        <section class="st-pane active" id="tab-text">
+          <!-- 1. Global: Família da Fonte & Estilos -->
+          <div class="st-card">
+            <h3 class="st-card-title">1. Fonte &amp; Estilos Globais</h3>
+
+            <div class="st-field">
+              <label>Família da Fonte</label>
+              <select id="selFontFamily" class="st-select">
+                <option value='"Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'>Archivo (Neo-Brutalista Padrão)</option>
+                <option value='"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'>Inter (Clean UI)</option>
+                <option value='"Space Grotesk", sans-serif'>Space Grotesk (Tech Editorial)</option>
+                <option value='"Plus Jakarta Sans", sans-serif'>Plus Jakarta Sans (Geométrica)</option>
+                <option value='"Rubik", sans-serif'>Rubik (Arredondada Forte)</option>
+                <option value='"Syne", sans-serif'>Syne (Display Brutalista)</option>
+                <option value='"JetBrains Mono", monospace'>JetBrains Mono (Industrial Dev)</option>
+                <option value='"Segoe UI", system-ui, sans-serif'>Segoe UI (Nativa Windows)</option>
+              </select>
+            </div>
+
+            <div class="st-grid-2">
+              <div class="st-field">
+                <label>Caixa do Hero</label>
+                <select class="st-select" data-token="--tf-hero-text-transform">
+                  <option value="none">Normal (Aa)</option>
+                  <option value="uppercase">MAIÚSCULAS (AA)</option>
+                  <option value="capitalize">Capitalizado</option>
+                  <option value="lowercase">minúsculas (aa)</option>
+                </select>
+              </div>
+              <div class="st-field">
+                <label>Caixa dos Botões</label>
+                <select class="st-select" data-token="--tf-tile-text-transform">
+                  <option value="none">Normal (Aa)</option>
+                  <option value="uppercase">MAIÚSCULAS (AA)</option>
+                  <option value="capitalize">Capitalizado</option>
+                  <option value="lowercase">minúsculas (aa)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="st-grid-2">
+              <div class="st-field">
+                <label>Caixa dos Toggles</label>
+                <select class="st-select" data-token="--tf-toggle-text-transform">
+                  <option value="none">Normal (Aa)</option>
+                  <option value="uppercase">MAIÚSCULAS (AA)</option>
+                  <option value="capitalize">Capitalizado</option>
+                  <option value="lowercase">minúsculas (aa)</option>
+                </select>
+              </div>
+              <div class="st-field">
+                <label>Estilo (Itálico)</label>
+                <select class="st-select" data-token="--tf-font-style-hero">
+                  <option value="normal">Normal (Reto)</option>
+                  <option value="italic">Itálico (Inclinado)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Pesos & Tamanhos (Adaptáveis por Painel) -->
+          <div class="st-card" data-panel-card="main">
+            <h3 class="st-card-title">2. Peso &amp; Tamanho — Painel Principal</h3>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Peso — Botão Hero (Organizar)</label>
+                <span class="st-val" data-val-for="--tf-font-weight-hero">900</span>
+              </div>
+              <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-hero" data-unit="">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho — Botão Hero</label>
+                <span class="st-val" data-val-for="--tf-font-size-hero">32px</span>
+              </div>
+              <input type="range" min="14" max="44" step="0.5" data-token="--tf-font-size-hero" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Peso — Tiles Secundários</label>
+                <span class="st-val" data-val-for="--tf-font-weight-tile">800</span>
+              </div>
+              <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-tile" data-unit="">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho — Tiles Secundários</label>
+                <span class="st-val" data-val-for="--tf-font-size-tile">14px</span>
+              </div>
+              <input type="range" min="9" max="24" step="0.5" data-token="--tf-font-size-tile" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Peso — Toggles de Preferências</label>
+                <span class="st-val" data-val-for="--tf-font-weight-toggle">600</span>
+              </div>
+              <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-toggle" data-unit="">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho — Toggles</label>
+                <span class="st-val" data-val-for="--tf-font-size-toggle">11px</span>
+              </div>
+              <input type="range" min="8" max="20" step="0.5" data-token="--tf-font-size-toggle" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Peso — Botão Desorganizar (Rollback)</label>
+                <span class="st-val" data-val-for="--tf-font-weight-rollback">800</span>
+              </div>
+              <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-rollback" data-unit="">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho — Botão Desorganizar</label>
+                <span class="st-val" data-val-for="--tf-font-size-rollback">11.5px</span>
+              </div>
+              <input type="range" min="8" max="22" step="0.5" data-token="--tf-font-size-rollback" data-unit="px">
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="editor">
+            <h3 class="st-card-title">2. Peso &amp; Tamanho — Preset Builder</h3>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Peso — Botões Gerais (.tf-btn)</label>
+                <span class="st-val" data-val-for="--tf-font-weight-bold">800</span>
+              </div>
+              <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-bold" data-unit="">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Peso — Rótulos &amp; Toggles da Árvore</label>
+                <span class="st-val" data-val-for="--tf-font-weight-medium">600</span>
+              </div>
+              <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-medium" data-unit="">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho — Rótulo 'PRESET'</label>
+                <span class="st-val" data-val-for="--tf-font-size-preset-label">10px</span>
+              </div>
+              <input type="range" min="8" max="16" step="0.5" data-token="--tf-font-size-preset-label" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho — Seletor de Presets</label>
+                <span class="st-val" data-val-for="--tf-font-size-preset-select">13px</span>
+              </div>
+              <input type="range" min="9" max="18" step="0.5" data-token="--tf-font-size-preset-select" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho — Botões de Confirmação/Modal</label>
+                <span class="st-val" data-val-for="--tf-font-size-modal-btn">12px</span>
+              </div>
+              <input type="range" min="8" max="18" step="0.5" data-token="--tf-font-size-modal-btn" data-unit="px">
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="collect">
+            <h3 class="st-card-title">2. Peso &amp; Tamanho — Collect Files</h3>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Peso — Botão OK (.collect-btn-ok)</label>
+                <span class="st-val" data-val-for="--tf-font-weight-bold">800</span>
+              </div>
+              <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-bold" data-unit="">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Peso — Opções &amp; Checkboxes</label>
+                <span class="st-val" data-val-for="--tf-font-weight-medium">600</span>
+              </div>
+              <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-medium" data-unit="">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho do Checkmark</label>
+                <span class="st-val" data-val-for="--tf-checkbox-size">18px</span>
+              </div>
+              <input type="range" min="14" max="26" step="1" data-token="--tf-checkbox-size" data-unit="px">
+            </div>
+          </div>
+
+          <!-- 2. Peso & Tamanho: Overlays & Modais -->
+          <div class="st-card" data-panel-card="overlays">
+            <h3 class="st-card-title">2. Peso &amp; Tamanho — Overlays &amp; Modais</h3>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho da Fonte dos Botões de Modal</label>
+                <span class="st-val" data-val-for="--tf-font-size-modal-btn">12px</span>
+              </div>
+              <input type="range" min="9" max="20" step="0.5" data-token="--tf-font-size-modal-btn" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Peso das Fontes de Alerta / Modal</label>
+                <span class="st-val" data-val-for="--tf-font-weight-bold">700</span>
+              </div>
+              <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-bold" data-unit="">
+            </div>
+          </div>
+
+          <!-- 3. Conteúdo dos Textos (Específico por Painel) -->
+          <div class="st-card" data-panel-card="main">
+            <h3 class="st-card-title">3. Textos — Painel Principal</h3>
+            <p class="st-help">Dica: Use <code>|</code> para separar linhas nos botões, ou dê <strong>duplo clique</strong> no botão direto no preview!</p>
+
+            <div class="st-field">
+              <label>Botão Principal (Hero)</label>
+              <input type="text" class="st-input" data-text-panel="main" data-text-target="btnOrganize" value="Organizar Projeto">
+            </div>
+            <div class="st-field">
+              <label>Tile 1 (Criar Estrutura)</label>
+              <input type="text" class="st-input" data-text-panel="main" data-text-target="btnCreateStructure" value="Criar estrutura | de pastas">
+            </div>
+            <div class="st-field">
+              <label>Tile 2 (Organizar Mídias)</label>
+              <input type="text" class="st-input" data-text-panel="main" data-text-target="btnMediaOnly" value="Organizar | Mídias">
+            </div>
+            <div class="st-field">
+              <label>Tile 3 (Collect Files)</label>
+              <input type="text" class="st-input" data-text-panel="main" data-text-target="btnOpenCollect" value="Collect | Files">
+            </div>
+            <div class="st-field">
+              <label>Toggle 1 (Salvar)</label>
+              <input type="text" class="st-input" data-text-panel="main" data-text-target="chkSaveProject" value="Salvar antes | de organizar">
+            </div>
+            <div class="st-field">
+              <label>Toggle 2 (Excluir Vazias)</label>
+              <input type="text" class="st-input" data-text-panel="main" data-text-target="chkDeleteEmptyFolders" value="Excluir pastas | vazias">
+            </div>
+            <div class="st-field">
+              <label>Toggle 3 (Pasta de Origem)</label>
+              <input type="text" class="st-input" data-text-panel="main" data-text-target="chkGroupBySourceFolder" value="Agrupar pela | pasta de origem">
+            </div>
+            <div class="st-field">
+              <label>Botão Rollback (Desorganizar)</label>
+              <input type="text" class="st-input" data-text-panel="main" data-text-target="btnRollback" value="Desorganizar | Projeto">
+            </div>
+            <div class="st-field">
+              <label>Aviso de Seleção Superior</label>
+              <input type="text" class="st-input" data-text-panel="main" data-text-target="noticeText" value="Selecione as composições no painel Project antes de organizar.">
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="editor">
+            <h3 class="st-card-title">3. Textos — Preset Builder</h3>
+            <p class="st-help">Edite os rótulos do editor de regras e árvore. Dê <strong>duplo clique</strong> no elemento dentro do iframe para editar in-place!</p>
+
+            <div class="st-field">
+              <label>Título da Toolbar da Árvore</label>
+              <input type="text" class="st-input" data-text-panel="editor" data-text-target="treeToolbarTitle" value="Estrutura da Árvore de Pastas • Clique nas regras para filtrar">
+            </div>
+            <div class="st-field">
+              <label>Botão Adicionar Pasta</label>
+              <input type="text" class="st-input" data-text-panel="editor" data-text-target="btnAddTopFolder" value="+ Add pasta">
+            </div>
+            <div class="st-field">
+              <label>Toggle Numeração Sequencial</label>
+              <input type="text" class="st-input" data-text-panel="editor" data-text-target="chkUsePrefixNumbering" value="Numeração Sequencial">
+            </div>
+            <div class="st-field">
+              <label>Toggle Categorias de Áudio (ESP)</label>
+              <input type="text" class="st-input" data-text-panel="editor" data-text-target="chkSeparateAudioCategories" value="Categorias de Áudio (ESP)">
+            </div>
+            <div class="st-field">
+              <label>Toggle Numerar ESP</label>
+              <input type="text" class="st-input" data-text-panel="editor" data-text-target="chkNumberAudioCategories" value="Numerar ESP">
+            </div>
+            <div class="st-field">
+              <label>Botão Salvar (Rodapé)</label>
+              <input type="text" class="st-input" data-text-panel="editor" data-text-target="btnFooterSave" value="Salvar">
+            </div>
+            <div class="st-field">
+              <label>Botão Fechar (Rodapé)</label>
+              <input type="text" class="st-input" data-text-panel="editor" data-text-target="btnCloseModal" value="Fechar">
+            </div>
+            <div class="st-field">
+              <label>Status Inicial do Rodapé</label>
+              <input type="text" class="st-input" data-text-panel="editor" data-text-target="editorStatus" value="Configure as pastas e regras do preset.">
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="collect">
+            <h3 class="st-card-title">3. Textos — Collect Files</h3>
+            <p class="st-help">Edite os rótulos do Project Manager / Collect Files. Dê <strong>duplo clique</strong> no elemento dentro do preview para editar in-place!</p>
+
+            <div class="st-field">
+              <label>Título dos Alvos (Sequências/Comps)</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="lblTargetTitle" value="Sequências">
+            </div>
+            <div class="st-field">
+              <label>Opção: Excluir não usados e reduzir</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkExcludeUnused" value="Excluir clipes não usados e reduzir projeto">
+            </div>
+            <div class="st-field">
+              <label>Opção: Áudio Conform (PPro)</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkAudioConform" value="Incluir arquivos de conformidade de áudio">
+            </div>
+            <div class="st-field">
+              <label>Opção: Preview Files (PPro)</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkPreviewFiles" value="Incluir arquivos de Preview">
+            </div>
+            <div class="st-field">
+              <label>Opção: Renomear arquivos para nome do clipe</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkRenameClipNames" value="Renomear arquivos de mídia para o nome do clipe">
+            </div>
+            <div class="st-field">
+              <label>Opção: Obedecer proxy (AE)</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkObeyProxy" value="Obedecer configurações de proxy">
+            </div>
+            <div class="st-field">
+              <label>Opção: Gerar apenas relatório</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkReportOnly" value="Gerar apenas relatório">
+            </div>
+            <div class="st-field">
+              <label>Opção: Mostrar projeto no Explorer</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkReveal" value="Mostrar o projeto coletado no Explorer ao terminar">
+            </div>
+            <div class="st-field">
+              <label>Opção: Abrir projeto ao terminar</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkOpenCollected" value="Abrir o projeto coletado ao terminar">
+            </div>
+            <div class="st-field">
+              <label>Botão Comentários</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="btnComments" value="Comentários...">
+            </div>
+            <div class="st-field">
+              <label>Botão OK (Iniciar Collect)</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="btnCollect" value="OK">
+            </div>
+            <div class="st-field">
+              <label>Botão Cancelar</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="btnCancel" value="Cancelar">
+            </div>
+            <div class="st-field">
+              <label>Botão Calcular Tamanho</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="btnCalculate" value="Calcular">
+            </div>
+            <div class="st-field">
+              <label>Botão Procurar Destino</label>
+              <input type="text" class="st-input" data-text-panel="collect" data-text-target="btnBrowseDest" value="Procurar...">
+            </div>
+          </div>
+
+          <!-- 5. Textos: Overlays & Modais -->
+          <div class="st-card" data-panel-card="overlays">
+            <h3 class="st-card-title">4. Textos — Overlays &amp; Modais</h3>
+
+            <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 10px 0 4px; text-transform: uppercase;">↺ Modal: Confirmar Rollback</div>
+            <div class="st-field">
+              <label>Título Rollback</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="rollbackModalTitle" value="Confirmar Rollback">
+            </div>
+            <div class="st-field">
+              <label>Pergunta Principal</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblRollbackText" value="Deseja salvar o projeto antes de continuar?">
+            </div>
+            <div class="st-field">
+              <label>Explicação Rollback</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblRollbackSubtext" value="O projeto será desorganizado de volta para a estrutura em que estava antes de organizar.">
+            </div>
+            <div class="st-field">
+              <label>Botão: Salvar e Continuar</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnRollbackSaveAndContinue" value="Salvar e Continuar">
+            </div>
+            <div class="st-field">
+              <label>Botão: Continuar sem Salvar</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnRollbackContinueWithoutSave" value="Continuar sem Salvar">
+            </div>
+            <div class="st-field">
+              <label>Botão: Cancelar</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnRollbackCancel" value="Cancelar">
+            </div>
+
+            <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 14px 0 4px; text-transform: uppercase;">⚙️ Modal: Regras &amp; Filtros</div>
+            <div class="st-field">
+              <label>Título do Modal</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="rulesModalTitleText" value="Regras e Filtros — Pasta: Solids">
+            </div>
+            <div class="st-field">
+              <label>Botão Cancelar</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnCancelRulesModal" value="Cancelar">
+            </div>
+            <div class="st-field">
+              <label>Botão Aplicar Regras</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnApplyRulesModal" value="Aplicar Regras na Pasta">
+            </div>
+
+            <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 14px 0 4px; text-transform: uppercase;">🗑️ Modal: Remover Pasta</div>
+            <div class="st-field">
+              <label>Título</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblDelFolderTitle" value="Remover Pasta">
+            </div>
+            <div class="st-field">
+              <label>Mensagem de Confirmação</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblDelFolderMsg" value="Deseja remover a pasta 'Solids' da estrutura?">
+            </div>
+
+            <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 14px 0 4px; text-transform: uppercase;">💾 Modal: Salvar Novo Preset</div>
+            <div class="st-field">
+              <label>Título</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblSaveAsTitle" value="Salvar Como Novo Preset">
+            </div>
+            <div class="st-field">
+              <label>Instrução</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblSaveAsInstruction" value="Digite o nome do novo perfil (ex: Motion Design, VFX Pipeline):">
+            </div>
+
+            <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 14px 0 4px; text-transform: uppercase;">❌ Modal: Excluir Preset</div>
+            <div class="st-field">
+              <label>Título</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblDelPresetTitle" value="Excluir Preset">
+            </div>
+            <div class="st-field">
+              <label>Mensagem de Exclusão</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblDelPresetMsg" value="Tem certeza que deseja excluir permanentemente o preset 'Motion Design'?">
+            </div>
+
+            <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 14px 0 4px; text-transform: uppercase;">⚠️ Modal: Alterações Não Salvas</div>
+            <div class="st-field">
+              <label>Título</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblUnsavedTitle" value="Alterações Não Salvas">
+            </div>
+            <div class="st-field">
+              <label>Pergunta</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblUnsavedQuestion" value="Deseja salvar o preset antes de fechar?">
+            </div>
+            <div class="st-field">
+              <label>Explicação</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblUnsavedDesc" value="O preset possui alterações que ainda não foram salvas e serão perdidas.">
+            </div>
+            <div class="st-field">
+              <label>Botão: Salvar e Fechar</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnUnsavedSaveClose" value="Salvar e Fechar">
+            </div>
+            <div class="st-field">
+              <label>Botão: Fechar sem Salvar</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnUnsavedDiscard" value="Fechar sem Salvar">
+            </div>
+            <div class="st-field">
+              <label>Botão: Cancelar</label>
+              <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnUnsavedCancel" value="Cancelar">
+            </div>
+          </div>
+        </section>
+
+        <!-- ==============================================================
+             ABA 2: BOTÕES & CORES (Rest, Hover, Click)
+             ============================================================== -->
+        <section class="st-pane" id="tab-buttons">
+          <div class="st-card">
+            <h3 class="st-card-title">Temas Rápidos (1 Clique — Todos os Painéis)</h3>
+            <div class="st-preset-themes">
+              <button type="button" class="st-theme-chip" data-theme-preset="default">🔵 Electric Blue</button>
+              <button type="button" class="st-theme-chip" data-theme-preset="lime">🟢 Cyber Lime</button>
+              <button type="button" class="st-theme-chip" data-theme-preset="amber">🟠 Editorial Amber</button>
+              <button type="button" class="st-theme-chip" data-theme-preset="violet">🟣 Violet Studio</button>
+              <button type="button" class="st-theme-chip" data-theme-preset="crimson">🔴 Crimson Brutal</button>
+              <button type="button" class="st-theme-chip" data-theme-preset="mono">⚪ Monochrome Pure</button>
+            </div>
+          </div>
+
+          <!-- Cores: Painel Principal -->
+          <div class="st-card" data-panel-card="main">
+            <h3 class="st-card-title">Botão Hero (Organizar Projeto)</h3>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-hero-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-hero-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-hero-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-hero-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Click)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-hero-active">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-hero-active">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Cor do Texto</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-hero-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-hero-text">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="main">
+            <h3 class="st-card-title">Tiles Secundários (Criar Pastas / Mídias / Collect)</h3>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-tile-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-tile-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-tile-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-tile-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Click)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-tile-active">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-tile-active">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Cor do Texto</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-tile-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-tile-text">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="main">
+            <h3 class="st-card-title">Botão Desorganizar (Rollback)</h3>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-danger-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-danger-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-danger-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-danger-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Click)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-danger-active">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-danger-active">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Cor do Texto</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-danger-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-danger-text">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="main">
+            <h3 class="st-card-title">Toggles em Tile (Ligado &amp; Desligado)</h3>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Ligado (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-toggle-on-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-toggle-on-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Ligado (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-toggle-on-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-toggle-on-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Desligado (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-toggle-off-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-toggle-off-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Desligado (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-toggle-off-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-toggle-off-hover">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cores: Preset Builder -->
+          <div class="st-card" data-panel-card="editor">
+            <h3 class="st-card-title">Botão Primário (+ Add pasta / Salvar)</h3>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo Primário</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-primary-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-primary-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Hover Primário</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-primary-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-primary-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Texto Primário</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-primary-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-primary-text">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="editor">
+            <h3 class="st-card-title">Toolbar de Ícones do Topo (Salvar Como, Reset, Import, Export, Pasta)</h3>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-toolbar-icon-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-toolbar-icon-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-toolbar-icon-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-toolbar-icon-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Cor do Ícone / Texto</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-toolbar-icon-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-toolbar-icon-text">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="editor">
+            <h3 class="st-card-title">Botão Fechar (Rodapé do Preset Builder)</h3>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-btn-close-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-btn-close-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-btn-close-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-btn-close-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Cor do Texto</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-btn-close-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-btn-close-text">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="editor">
+            <h3 class="st-card-title">Área da Árvore &amp; Barra Superior</h3>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo da Janela</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-editor-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-editor-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo Topbar</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-editor-topbar-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-editor-topbar-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo da Árvore</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-editor-tree-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-editor-tree-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo da Linha (Pasta)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-editor-row-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-editor-row-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Borda da Linha (Pasta)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-editor-row-border">
+                  <input type="text" class="st-hex" data-hex-for="--tf-editor-row-border">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo Rodapé</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-editor-footer-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-editor-footer-bg">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cores: Collect Files -->
+          <div class="st-card" data-panel-card="collect">
+            <h3 class="st-card-title">Botões do Rodapé (OK / Cancelar / Comentários)</h3>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo Botão OK</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-collect-btn-ok-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-collect-btn-ok-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Hover Botão OK</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-collect-btn-ok-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-collect-btn-ok-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Texto Botão OK</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-collect-btn-ok-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-collect-btn-ok-text">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Borda Cancelar</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-collect-btn-cancel-border">
+                  <input type="text" class="st-hex" data-hex-for="--tf-collect-btn-cancel-border">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="st-card" data-panel-card="collect">
+            <h3 class="st-card-title">Caixas &amp; Fundo do Collect Files</h3>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo da Janela</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-collect-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-collect-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo das Caixas</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-collect-box-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-collect-box-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Borda das Caixas</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-collect-box-border">
+                  <input type="text" class="st-hex" data-hex-for="--tf-collect-box-border">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cores: Overlays & Modais -->
+          <div class="st-card" data-panel-card="overlays">
+            <h3 class="st-card-title">Botões de Ação dos Modais</h3>
+            <p class="st-help">Cores dos botões primários, de confirmação, avisos e cancelamentos de alertas.</p>
+
+            <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 10px 0 4px; text-transform: uppercase;">1. Botão Primário (Salvar / Aplicar Regras)</div>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-primary-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-primary-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-primary-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-primary-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Texto</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-primary-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-primary-text">
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size: 11px; font-weight: 800; color: #f59e0b; margin: 14px 0 4px; text-transform: uppercase;">2. Botão Atenção / Warning (Continuar sem Salvar)</div>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-warning-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-warning-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-warning-hover">
+                  <input type="text" data-token-hex="--tf-neo-warning-hover" data-hex-for="--tf-neo-warning-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Texto</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-warning-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-warning-text">
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size: 11px; font-weight: 800; color: #ef4444; margin: 14px 0 4px; text-transform: uppercase;">3. Botão Destrutivo / Confirmar Exclusão</div>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-danger-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-danger-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-danger-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-danger-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Texto</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-danger-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-danger-text">
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size: 11px; font-weight: 800; color: #a1a1aa; margin: 14px 0 4px; text-transform: uppercase;">4. Botão Secundário / Cancelar</div>
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Fundo (Rest)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-ghost-bg">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-ghost-bg">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Fundo (Hover)</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-ghost-hover">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-ghost-hover">
+                </div>
+              </div>
+              <div class="st-color-item">
+                <label>Texto</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-ghost-text">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-ghost-text">
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==============================================================
+             ABA 3: ANIMAÇÃO & FÍSICA (Estados Rest, Hover, Click)
+             ============================================================== -->
+        <section class="st-pane" id="tab-anim">
+          <div class="st-card">
+            <h3 class="st-card-title">1. Bordas &amp; Cantos Arredondados</h3>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Espessura da Borda Preta</label>
+                <span class="st-val" data-val-for="--tf-neo-border-w">2px</span>
+              </div>
+              <input type="range" min="0" max="6" step="0.5" data-token="--tf-neo-border-w" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Arredondamento (Border Radius)</label>
+                <span class="st-val" data-val-for="--tf-neo-radius">6px</span>
+              </div>
+              <input type="range" min="0" max="24" step="1" data-token="--tf-neo-radius" data-unit="px">
+            </div>
+
+            <div class="st-color-grid">
+              <div class="st-color-item">
+                <label>Cor da Borda</label>
+                <div class="st-color-picker-wrap">
+                  <input type="color" data-token="--tf-neo-border-color">
+                  <input type="text" class="st-hex" data-hex-for="--tf-neo-border-color">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="st-card">
+            <h3 class="st-card-title">2. Estado Rest (Repouso)</h3>
+            <p class="st-help">Escolha se no repouso os botões ficam <strong>Flat (0px)</strong> ou já exibem <strong>Relevo 3D</strong> permanente.</p>
+            <div class="st-preset-themes" style="margin-bottom: 10px;">
+              <button type="button" class="st-theme-chip" id="btnPresetRestFlat">Flat no Repouso (0px)</button>
+              <button type="button" class="st-theme-chip" id="btnPresetRest3D">Relevo 3D no Repouso (4px)</button>
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Sombra Rest — Hero</label>
+                <span class="st-val" id="valRestShadowHero">0px</span>
+              </div>
+              <input type="range" min="0" max="10" step="1" id="rngRestShadowHero" value="0">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Sombra Rest — Tiles &amp; Toggles</label>
+                <span class="st-val" id="valRestShadowTile">0px</span>
+              </div>
+              <input type="range" min="0" max="10" step="1" id="rngRestShadowTile" value="0">
+            </div>
+          </div>
+
+          <div class="st-card">
+            <h3 class="st-card-title">3. Estado Hover (Passar o Mouse)</h3>
+            <p class="st-help">Ative <strong>"🔵 Hover"</strong> na barra superior para enxergar o efeito travado enquanto ajusta.</p>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Elevação no Hover — Hero (Lift)</label>
+                <span class="st-val" data-val-for="--tf-neo-lift-hero">-4px</span>
+              </div>
+              <input type="range" min="-10" max="4" step="1" data-token="--tf-neo-lift-hero" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Sombra Rígida no Hover — Hero</label>
+                <span class="st-val" id="valHoverShadowHero">4px</span>
+              </div>
+              <input type="range" min="0" max="12" step="1" id="rngHoverShadowHero" value="4">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Elevação no Hover — Tiles &amp; Toggles</label>
+                <span class="st-val" data-val-for="--tf-neo-lift-tile">-3px</span>
+              </div>
+              <input type="range" min="-10" max="4" step="1" data-token="--tf-neo-lift-tile" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Sombra Rígida no Hover — Tiles</label>
+                <span class="st-val" id="valHoverShadowTile">3px</span>
+              </div>
+              <input type="range" min="0" max="12" step="1" id="rngHoverShadowTile" value="3">
+            </div>
+          </div>
+
+          <div class="st-card">
+            <h3 class="st-card-title">4. Estado Click / Active (Pressionar)</h3>
+            <p class="st-help">Ative <strong>"🟠 Click"</strong> na barra superior para visualizar o botão pressionado.</p>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Afundamento ao Clicar — Hero</label>
+                <span class="st-val" data-val-for="--tf-active-lift-hero">0px</span>
+              </div>
+              <input type="range" min="-4" max="6" step="1" data-token="--tf-active-lift-hero" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Sombra ao Clicar — Hero</label>
+                <span class="st-val" id="valActiveShadowHero">0px</span>
+              </div>
+              <input type="range" min="0" max="8" step="1" id="rngActiveShadowHero" value="0">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Afundamento ao Clicar — Tiles</label>
+                <span class="st-val" data-val-for="--tf-active-lift-tile">0px</span>
+              </div>
+              <input type="range" min="-4" max="6" step="1" data-token="--tf-active-lift-tile" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Sombra ao Clicar — Tiles</label>
+                <span class="st-val" id="valActiveShadowTile">0px</span>
+              </div>
+              <input type="range" min="0" max="8" step="1" id="rngActiveShadowTile" value="0">
+            </div>
+          </div>
+
+          <div class="st-card">
+            <h3 class="st-card-title">5. Velocidade &amp; Curva de Animação</h3>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Duração da Transição</label>
+                <span class="st-val" data-val-for="--tf-anim-duration">0.12s</span>
+              </div>
+              <input type="range" min="0" max="0.4" step="0.02" data-token="--tf-anim-duration" data-unit="s">
+            </div>
+
+            <div class="st-field">
+              <label>Curva Mecânica (Easing)</label>
+              <select class="st-select" data-token="--tf-anim-easing">
+                <option value="cubic-bezier(0.2, 0, 0, 1)">Mecânico Seco (Padrão Studio)</option>
+                <option value="cubic-bezier(0.34, 1.56, 0.64, 1)">Mola Elástica (Bounce Tátil)</option>
+                <option value="ease-out">Suave (Ease-Out)</option>
+                <option value="linear">Instantâneo / Linear</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==============================================================
+             ABA 4: GERAL, GAPS & POSICIONAMENTO (Grade Magnética por Painel)
+             ============================================================== -->
+        <section class="st-pane" id="tab-layout">
+          <!-- Gaps: Painel Principal -->
+          <div class="st-card" data-panel-card="main">
+            <h3 class="st-card-title">1. Gaps &amp; Alturas — Painel Principal</h3>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Padding Interno da Janela</label>
+                <span class="st-val" data-val-for="--tf-panel-padding">6px</span>
+              </div>
+              <input type="range" min="4" max="28" step="1" data-token="--tf-panel-padding" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Gap entre Seções Principais</label>
+                <span class="st-val" data-val-for="--tf-section-gap">13px</span>
+              </div>
+              <input type="range" min="2" max="28" step="1" data-token="--tf-section-gap" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Gap entre os 3 Botões (Colunas)</label>
+                <span class="st-val" data-val-for="--tf-grid-gap">5px</span>
+              </div>
+              <input type="range" min="2" max="20" step="1" data-token="--tf-grid-gap" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Gap entre os 3 Toggles</label>
+                <span class="st-val" data-val-for="--tf-toggles-gap">5px</span>
+              </div>
+              <input type="range" min="2" max="20" step="1" data-token="--tf-toggles-gap" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Altura — Botão Hero</label>
+                <span class="st-val" data-val-for="--tf-hero-height">84px</span>
+              </div>
+              <input type="range" min="54" max="140" step="2" data-token="--tf-hero-height" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Altura — Tiles Secundários</label>
+                <span class="st-val" data-val-for="--tf-tile-height">70px</span>
+              </div>
+              <input type="range" min="44" max="110" step="2" data-token="--tf-tile-height" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Altura — Botão Desorganizar</label>
+                <span class="st-val" data-val-for="--tf-rollback-height">66px</span>
+              </div>
+              <input type="range" min="44" max="110" step="2" data-token="--tf-rollback-height" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <label>Alinhamento do Rollback</label>
+              <select class="st-select" data-token="--tf-rollback-justify">
+                <option value="flex-start">⬅ Alinhado à Esquerda</option>
+                <option value="center">⬌ Centralizado no Meio</option>
+                <option value="flex-end">➡ Alinhado à Direita</option>
+              </select>
+            </div>
+
+            <div class="st-field">
+              <label>Largura do Rollback</label>
+              <select class="st-select" data-token="--tf-rollback-width">
+                <option value="calc((100% - 16px) / 3)">1/3 (Mesma largura dos Tiles)</option>
+                <option value="50%">50% (Meia largura)</option>
+                <option value="100%">100% (Largura inteira)</option>
+              </select>
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Espaço Acima do Desorganizar</label>
+                <span class="st-val" data-val-for="--tf-rollback-margin-top">12px</span>
+              </div>
+              <input type="range" min="0" max="30" step="1" data-token="--tf-rollback-margin-top" data-unit="px">
+            </div>
+          </div>
+
+          <!-- Gaps: Preset Builder -->
+          <div class="st-card" data-panel-card="editor">
+            <h3 class="st-card-title">1. Gaps &amp; Dimensões — Preset Builder</h3>
+
+            <div class="st-field">
+              <div class="st-label-row"><label>Espaço entre pastas e níveis</label><span class="st-val" data-val-for="--tf-editor-tree-gap">4px</span></div>
+              <input type="range" min="0" max="32" step="1" data-token="--tf-editor-tree-gap" data-unit="px">
+            </div>
+
+            <h3 class="st-card-title">Cores das tags por categoria</h3>
+            <div class="st-inspector-grid-2">
+              <label>Tipo: fundo <input type="color" data-token="--tf-editor-tag-type-bg"></label>
+              <label>Tipo: texto <input type="color" data-token="--tf-editor-tag-type-text"></label>
+              <label>Comportamento: fundo <input type="color" data-token="--tf-editor-tag-ext-bg"></label>
+              <label>Comportamento: texto <input type="color" data-token="--tf-editor-tag-ext-text"></label>
+              <label>Fallback: fundo <input type="color" data-token="--tf-editor-tag-fallback-bg"></label>
+              <label>Fallback: texto <input type="color" data-token="--tf-editor-tag-fallback-text"></label>
+              <label>Nome: fundo <input type="color" data-token="--tf-editor-tag-name-bg"></label>
+              <label>Nome: texto <input type="color" data-token="--tf-editor-tag-name-text"></label>
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Padding da Área da Árvore</label>
+                <span class="st-val" data-val-for="--tf-editor-padding">10px</span>
+              </div>
+              <input type="range" min="4" max="24" step="1" data-token="--tf-editor-padding" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Largura do Dropdown de Presets</label>
+                <span class="st-val" data-val-for="--tf-preset-dropdown-width-editor">180px</span>
+              </div>
+              <input type="range" min="120" max="320" step="5" data-token="--tf-preset-dropdown-width-editor" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Altura do Gatilho do Dropdown</label>
+                <span class="st-val" data-val-for="--tf-preset-dropdown-height">28px</span>
+              </div>
+              <input type="range" min="22" max="38" step="1" data-token="--tf-preset-dropdown-height" data-unit="px">
+            </div>
+          </div>
+
+          <!-- Gaps: Collect Files -->
+          <div class="st-card" data-panel-card="collect">
+            <h3 class="st-card-title">1. Gaps &amp; Dimensões — Collect Files</h3>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Espaçamento Vertical das Opções (Gap Vertical)</label>
+                <span class="st-val" data-val-for="--tf-collect-options-gap-y">10px</span>
+              </div>
+              <input type="range" min="4" max="28" step="1" data-token="--tf-collect-options-gap-y" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Espaçamento Horizontal das Opções (Gap Horizontal)</label>
+                <span class="st-val" data-val-for="--tf-collect-options-gap-x">14px</span>
+              </div>
+              <input type="range" min="6" max="32" step="1" data-token="--tf-collect-options-gap-x" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Gap Geral entre as Caixas</label>
+                <span class="st-val" data-val-for="--tf-collect-gap">10px</span>
+              </div>
+              <input type="range" min="4" max="24" step="1" data-token="--tf-collect-gap" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho do Checkmark (.toggle-slider)</label>
+                <span class="st-val" data-val-for="--tf-checkbox-size">18px</span>
+              </div>
+              <input type="range" min="14" max="26" step="1" data-token="--tf-checkbox-size" data-unit="px">
+            </div>
+
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Arredondamento do Checkmark</label>
+                <span class="st-val" data-val-for="--tf-checkbox-radius">4px</span>
+              </div>
+              <input type="range" min="0" max="12" step="1" data-token="--tf-checkbox-radius" data-unit="px">
+            </div>
+          </div>
+
+          <!-- 2. Grade Magnética Drag-and-Drop (Específica por Painel) -->
+          <div class="st-card">
+            <h3 class="st-card-title">2. Grade Magnética (Ordem &amp; Drag-and-Drop)</h3>
+            <p class="st-help">Ative <strong>"✋ Arrastar Layout"</strong> no topo para arrastar com o mouse direto no preview, ou use as setas abaixo:</p>
+
+            <div id="magneticOrderContainer" class="st-order-section">
+              <!-- Populado dinamicamente para o painel selecionado -->
+            </div>
+          </div>
+
+          <!-- Slider de Gap entre Janelas (Modo Lado a Lado) -->
+          <div class="st-card">
+            <h3 class="st-card-title">3. Espaçamento Entre Janelas (Modo Lado a Lado)</h3>
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Distância entre os painéis</label>
+                <span class="st-val" id="valCanvasGap">24px</span>
+              </div>
+              <input type="range" min="8" max="64" step="2" id="rngCanvasGap" value="24">
+            </div>
+          </div>
+        </section>
+
+        <!-- ==============================================================
+             ABA 5: ÍCONES
+             ============================================================== -->
+        <section class="st-pane" id="tab-icons">
+          <div class="st-card">
+            <h3 class="st-card-title">1. Escala Global dos Ícones</h3>
+            <div class="st-field">
+              <div class="st-label-row">
+                <label>Tamanho dos Ícones</label>
+                <span class="st-val" data-val-for="--tf-icon-size">14px</span>
+              </div>
+              <input type="range" min="10" max="28" step="1" data-token="--tf-icon-size" data-unit="px">
+            </div>
+          </div>
+
+          <div class="st-card">
+            <h3 class="st-card-title">2. Aplicar / Trocar Ícone</h3>
+            <div class="st-field">
+              <label>Escolha o botão do painel selecionado:</label>
+              <select id="selIconTarget" class="st-select">
+                <!-- Populado dinamicamente conforme o painel ativo -->
+              </select>
+            </div>
+
+            <p class="st-help">Clique em um ícone abaixo para aplicá-lo imediatamente ao botão selecionado:</p>
+            <div id="iconCatalogGrid" class="st-icon-grid"></div>
+          </div>
+        </section>
+
+      </div>
+      </div>
+    </aside>
+
+    <nav class="st-screen-gallery" id="screenGallery" aria-label="Galeria de telas">
+      <div class="st-screen-gallery-header">
+        <strong>TELAS</strong>
+        <span>Prévia real · clique para editar</span>
+      </div>
+      <div class="st-screen-gallery-list" id="screenGalleryList"></div>
+    </nav>
+
+    <!-- ÁREA DE PREVIEW CENTRAL -->
+    <main class="st-canvas">
+      <div class="st-canvas-Banner" id="dragBanner" style="display: none;">
+        <span>✋ <strong>MODO ARRASTAR LAYOUT ATIVO:</strong> Clique e arraste qualquer botão, toggle ou seção no painel ativo abaixo para trocar de lugar!</span>
+      </div>
+
+      <div class="st-frames-stage" id="framesStage">
+        <!-- Frame 1: Painel Principal (360 x 440) -->
+        <div class="st-window-wrap active" id="wrapMain" data-window="main">
+          <div class="st-window-header">
+            <div class="st-window-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="st-window-title">TidyFlow — Painel Principal (360 × 440 px)</span>
+            <span class="st-window-tag">index.html</span>
+          </div>
+          <div class="st-window-body" style="width: 360px; height: 440px;">
+            <iframe id="frameMain" src="/index.html?preview=1" title="Painel Principal"></iframe>
+          </div>
+        </div>
+
+        <!-- Frame 2: Preset Builder (740 x 640) -->
+        <div class="st-window-wrap" id="wrapEditor" data-window="editor" style="display: none;">
+          <div class="st-window-header">
+            <div class="st-window-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="st-window-title">TidyFlow — Preset Builder (740 × 640 px)</span>
+            <span class="st-window-tag">tree_editor.html</span>
+          </div>
+          <div class="st-window-body" style="width: 740px; height: 640px;">
+            <iframe id="frameEditor" src="/tree_editor.html?preview=1" title="Preset Builder"></iframe>
+          </div>
+        </div>
+
+        <!-- Frame 3: Collect Files (560 x 700) -->
+        <div class="st-window-wrap" id="wrapCollect" data-window="collect" style="display: none;">
+          <div class="st-window-header">
+            <div class="st-window-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="st-window-title">TidyFlow — Collect Files (560 × 700 px)</span>
+            <span class="st-window-tag">collect.html</span>
+          </div>
+          <div class="st-window-body" style="width: 560px; height: 700px;">
+            <iframe id="frameCollect" src="/collect.html?preview=1" title="Collect Files"></iframe>
+          </div>
+        </div>
+
+        <!-- Frame 4: Overlays & Modais (640 x 580) -->
+        <div class="st-window-wrap" id="wrapOverlays" data-window="overlays" style="display: none;">
+          <div class="st-window-header">
+            <div class="st-window-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="st-window-title">TidyFlow — Overlays &amp; Modais de Alerta</span>
+            <span class="st-window-tag">overlays.html</span>
+          </div>
+          <div class="st-window-body" style="width: 1280px; height: 900px;">
+            <iframe id="frameOverlays" src="/overlays.html?preview=1" title="Overlays &amp; Modais"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dica de Rodapé -->
+      <div class="st-canvas-footer">
+        <span id="canvasHelpTip">💡 Arraste o canto inferior direito da prévia para mudar seu tamanho. No modo Editar, clique em um elemento para inspecioná-lo.</span>
+        <span id="toastFeedback" class="st-toast"></span>
+      </div>
+    </main>
+  </div>
+
+  <script src="/design-model.js"></script>
+  <script src="/studio.js"></script>
+</body>
+
+</html>

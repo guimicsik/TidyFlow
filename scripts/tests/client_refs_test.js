@@ -62,12 +62,59 @@ function checkPair(label, jsFile, htmlFile, htmlIds) {
 var editorHtmlIds = collectHtmlIds(read("client/tree_editor.html"));
 var panelHtmlIds = collectHtmlIds(read("client/index.html"));
 
+test("todos os scripts de client/*.js são sintaticamente válidos", function () {
+  var clientFiles = [
+    "client/OrgLog.js",
+    "client/PresetManager.js",
+    "client/CollectEngine.js",
+    "client/main.js",
+    "client/tree_editor.js",
+    "client/collect.js"
+  ];
+  for (var i = 0; i < clientFiles.length; i++) {
+    var src = read(clientFiles[i]);
+    try {
+      // eslint-disable-next-line no-new-func
+      new Function(src);
+    } catch (e) {
+      throw new Error("Erro de sintaxe em " + clientFiles[i] + ": " + e.message);
+    }
+  }
+});
+
 test("tree_editor.js só usa IDs presentes em tree_editor.html", function () {
   checkPair("Editor de presets", "client/tree_editor.js", "client/tree_editor.html", editorHtmlIds);
 });
 
 test("main.js só usa IDs presentes em index.html", function () {
   checkPair("Painel", "client/main.js", "client/index.html", panelHtmlIds);
+});
+
+test("Design Studio: studio.js é sintaticamente válido e todos os data-token existem em tokens.css", function () {
+  var studioJs = read("tools/studio/studio.js");
+  // eslint-disable-next-line no-new-func
+  new Function(studioJs);
+  assert.includes(studioJs, "cloneNode(false)", "inspetor deve medir cores fora do :hover real do elemento selecionado");
+  assert.includes(studioJs, "getComputedStyle(sample)", "inspetor deve usar a cópia neutra ao comparar repouso, hover e clique");
+
+  var studioHtml = read("tools/studio/studio.html");
+  var tokensCss = read("client/theme/tokens.css");
+  var tokenRe = /data-token="(--tf-[a-zA-Z0-9_-]+)"/g;
+  var m;
+  var missingTokens = [];
+  while ((m = tokenRe.exec(studioHtml)) !== null) {
+    var tok = m[1];
+    if (tokensCss.indexOf(tok + ":") === -1) {
+      missingTokens.push(tok);
+    }
+  }
+  assert.deepEq(missingTokens, [], "studio.html referencia tokens ausentes em client/theme/tokens.css");
+});
+
+test("Design Studio: vite.config.js carrega plugin do Studio sem erros", function () {
+  var cfg = require("../../vite.config.js");
+  assert.ok(cfg && Array.isArray(cfg.plugins) && cfg.plugins.length > 0, "plugin do Studio deve estar registrado no vite.config.js");
+  assert.eq(cfg.plugins[0].name, "tidyflow-design-studio", "nome do plugin do Studio esperado");
 });
 
 test("modal de regras V2 unifica Seção 1 com caixa inline de tags específicas (MANIFESTO §2.1)", function () {
@@ -110,29 +157,18 @@ test("painel principal mantém os controles documentados no manifesto", function
     "btnOrganize",
     "btnCreateStructure",
     "btnMediaOnly",
-    "btnCheckComps",
+    "btnOpenCollect",
     "btnRollback",
-    "chkPrefixNumbering",
     "chkSaveProject",
-    "chkReduceProject",
     "chkDeleteEmptyFolders",
     "chkGroupBySourceFolder"
   ];
   for (var i = 0; i < required.length; i++) {
     assert.ok(panelHtmlIds[required[i]], "index.html deve conter #" + required[i]);
   }
-});
-
-test("modal de confirmação de redução de projeto está presente e configurado", function () {
-  var html = read("client/index.html");
-  var js = read("client/main.js");
-  assert.includes(html, 'id="reduceModalBackdrop"', "reduceModalBackdrop ausente no index.html");
-  assert.includes(html, 'id="reduceModalTitle"', "reduceModalTitle ausente no index.html");
-  assert.includes(html, 'id="reduceModalSubtext"', "reduceModalSubtext ausente no index.html");
-  assert.includes(html, 'id="btnReduceSaveAndContinue"', "btnReduceSaveAndContinue ausente no index.html");
-  assert.includes(html, 'id="btnReduceContinueWithoutSave"', "btnReduceContinueWithoutSave ausente no index.html");
-  assert.includes(html, 'id="btnReduceCancel"', "btnReduceCancel ausente no index.html");
-  assert.includes(js, "openReduceModal()", "btnOrganize deve abrir o modal de redução quando chkReduceProject estiver ativo");
+  assert.ok(!panelHtmlIds.chkPrefixNumbering, "Numeração Sequencial deve ficar apenas no Preset Builder");
+  assert.ok(!panelHtmlIds.chkReduceProject, "Redução de projeto unificada no Collect Files");
+  assert.ok(!panelHtmlIds.btnCheckComps, "Mídias não usadas unificado com Organizar Mídias");
 });
 
 test("P8: fluxos destrutivos de preset pedem confirmação antes de sobrescrever", function () {
@@ -155,7 +191,7 @@ test("P8: fluxos destrutivos de preset pedem confirmação antes de sobrescrever
 });
 
 test("P8: handlers de sincronização respeitam edições não salvas (isDirty)", function () {
-  var js = read("client/tree_editor.js");
+  var js = read("client/tree_editor.js").replace(/\r\n/g, "\n");
 
   // Troca de preset no <select> não pode descartar edições sem confirmar
   assert.includes(
@@ -176,6 +212,137 @@ test("P8: handlers de sincronização respeitam edições não salvas (isDirty)"
     "Não descartar o trabalho em andamento só porque outro painel trocou o preset",
     "presetsUpdated deve proteger edições não salvas"
   );
+});
+
+test("painel principal e tree_editor: HTML mantém estrutura limpa de presetSelect sem wrappers estáticos", function () {
+  var htmlIndex = read("client/index.html");
+  var selectWrapperMatchesIndex = htmlIndex.match(/class=["']tf-select-wrapper["']/g) || [];
+  assert.eq(selectWrapperMatchesIndex.length, 0, "client/index.html não deve conter tf-select-wrapper estático serializado");
+  var modalCommentsIndex = htmlIndex.match(/<!-- Modal de Confirmação de Rollback -->/g) || [];
+  assert.ok(modalCommentsIndex.length <= 1, "client/index.html não deve ter comentários de modal duplicados");
+
+  var htmlEditor = read("client/tree_editor.html");
+  var selectWrapperMatchesEditor = htmlEditor.match(/class=["']tf-select-wrapper["']/g) || [];
+  assert.eq(selectWrapperMatchesEditor.length, 0, "client/tree_editor.html não deve conter tf-select-wrapper estático serializado");
+  var popoverCommentsEditor = htmlEditor.match(/<!-- Popover Flutuante de Seleção de Color Label/g) || [];
+  assert.ok(popoverCommentsEditor.length <= 1, "client/tree_editor.html não deve ter comentários de popover duplicados");
+});
+
+test("Design Studio: serialização de HTML é idempotente e não duplica comentários ou wrappers em múltiplos salvamentos", function () {
+  var cfg = require("../../vite.config.js");
+  var helpers = cfg._helpers;
+  assert.ok(helpers, "helpers de serialização do Studio devem estar expostos");
+
+  var htmlIndex = read("client/index.html");
+  var bodyMatchIndex = htmlIndex.match(/<body[^>]*>([\s\S]*?)<div id="rollbackModalBackdrop"/i);
+  var regionIndex = bodyMatchIndex ? bodyMatchIndex[1].trim() : "";
+
+  // Simula múltiplos salvamentos consecutivos do painel principal (incluindo se a região contiver comentários)
+  var currentHtml = htmlIndex;
+  for (var i = 0; i < 5; i++) {
+    currentHtml = helpers.updateMainRegionInIndexHtml(currentHtml, regionIndex + "\n  <!-- Modal de Confirmação de Rollback -->");
+    var count = (currentHtml.match(/<!-- Modal de Confirmação de Rollback -->/g) || []).length;
+    assert.eq(count, 1, "comentário de modal deve aparecer exatamente 1 vez após " + (i + 1) + " salvamentos");
+  }
+
+  // Simula múltiplos salvamentos consecutivos do Preset Builder
+  var htmlEditor = read("client/tree_editor.html");
+  var bodyMatchEditor = htmlEditor.match(/<body[^>]*>([\s\S]*?)<div id="labelPopover"/i);
+  var regionEditor = bodyMatchEditor ? bodyMatchEditor[1].trim() : "";
+
+  var currentEditorHtml = htmlEditor;
+  for (var j = 0; j < 5; j++) {
+    currentEditorHtml = helpers.updateMainRegionInEditorHtml(currentEditorHtml, regionEditor + "\n  <!-- Popover Flutuante de Seleção de Color Label (0 a 16) -->");
+    var countEditor = (currentEditorHtml.match(/<!-- Popover Flutuante de Seleção de Color Label/g) || []).length;
+    assert.eq(countEditor, 1, "comentário de popover deve aparecer exatamente 1 vez após " + (j + 1) + " salvamentos");
+  }
+
+  // Simula múltiplos salvamentos consecutivos do Collect Files
+  var htmlCollect = read("client/collect.html");
+  var bodyMatchCollect = htmlCollect.match(/<body[^>]*>([\s\S]*?)<div id="commentsBackdrop"/i);
+  var regionCollect = bodyMatchCollect ? bodyMatchCollect[1].trim() : "";
+
+  var currentCollectHtml = htmlCollect;
+  for (var k = 0; k < 5; k++) {
+    currentCollectHtml = helpers.updateMainRegionInCollectHtml(currentCollectHtml, regionCollect + "\n  <!-- Modal de Comentários (gravados no Report.txt) -->");
+    var countCollect = (currentCollectHtml.match(/<!-- Modal de Comentários/g) || []).length;
+    assert.eq(countCollect, 1, "comentário de comentários deve aparecer exatamente 1 vez após " + (k + 1) + " salvamentos");
+  }
+});
+
+test("Design Studio: syncOverlaysToClientFiles sincroniza modais de overlays.html para index.html e tree_editor.html", function () {
+  var cfg = require("../../vite.config.js");
+  var helpers = cfg._helpers;
+  assert.ok(helpers.syncOverlaysToClientFiles, "helper syncOverlaysToClientFiles deve estar exposto");
+  assert.ok(helpers.findDivBoundsById, "helper findDivBoundsById deve estar exposto");
+  assert.ok(helpers.findDivBoundsByClass, "helper findDivBoundsByClass deve estar exposto");
+
+  var overlaysHtml = read("tools/studio/overlays.html");
+  // Simula modificação do texto no modal de rollback
+  var modifiedOverlays = overlaysHtml.replace(
+    'id="lblRollbackText">Deseja salvar o projeto antes de continuar?</p>',
+    'id="lblRollbackText">Texto de teste Rollback modificado com sucesso!</p>'
+  );
+
+  var fs = require("fs");
+  var os = require("os");
+  var path = require("path");
+  var tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "tidyflow-overlays-"));
+  var indexPath = path.join(tempDir, "index.html");
+  var editorPath = path.join(tempDir, "tree_editor.html");
+  var indexHtml;
+  var editorHtml;
+  try {
+    fs.writeFileSync(indexPath, read("client/index.html"));
+    fs.writeFileSync(editorPath, read("client/tree_editor.html"));
+    helpers.syncOverlaysToClientFiles(modifiedOverlays, { index: indexPath, editor: editorPath });
+    indexHtml = fs.readFileSync(indexPath, "utf8");
+    editorHtml = fs.readFileSync(editorPath, "utf8");
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+
+  // Verifica persistência da modificação do Rollback em index.html
+  assert.includes(indexHtml, 'id="rollbackModalBackdrop"', "index.html deve conter #rollbackModalBackdrop");
+  assert.includes(indexHtml, 'id="btnRollbackSaveAndContinue"', "index.html deve conter #btnRollbackSaveAndContinue");
+  assert.includes(indexHtml, 'id="btnRollbackContinueWithoutSave"', "index.html deve conter #btnRollbackContinueWithoutSave");
+  assert.includes(indexHtml, 'id="btnRollbackCancel"', "index.html deve conter #btnRollbackCancel");
+  assert.includes(indexHtml, "Texto de teste Rollback modificado com sucesso!", "index.html deve conter o texto modificado do Rollback");
+
+  // Verifica integridade dos modais sincronizados em tree_editor.html
+  assert.includes(editorHtml, 'id="rulesModalBackdrop"', "tree_editor.html deve conter #rulesModalBackdrop");
+  assert.includes(editorHtml, 'id="btnClearAllExts"', "tree_editor.html deve manter #btnClearAllExts");
+  assert.includes(editorHtml, 'id="btnClearAllNameTags"', "tree_editor.html deve manter #btnClearAllNameTags");
+  assert.includes(editorHtml, 'id="saveAsModalBackdrop"', "tree_editor.html deve conter #saveAsModalBackdrop");
+  assert.includes(editorHtml, 'id="unsavedCloseModalBackdrop"', "tree_editor.html deve conter #unsavedCloseModalBackdrop");
+  assert.includes(editorHtml, 'id="btnUnsavedSaveClose"', "tree_editor.html deve manter #btnUnsavedSaveClose");
+  assert.includes(editorHtml, 'id="btnUnsavedDiscard"', "tree_editor.html deve manter #btnUnsavedDiscard");
+  assert.includes(editorHtml, 'id="btnUnsavedCancel"', "tree_editor.html deve manter #btnUnsavedCancel");
+});
+
+test("Studio: estilos individuais preservam estados e rejeitam regras fora do modelo", function () {
+  var model = require('../../tools/studio/design-model.cjs');
+  var designs = {'#btnCollect': {rest: {color:'#ffffff'}, hover: {'box-shadow':'4px 4px 0 #000'}}};
+  var css = model.css(JSON.parse(JSON.stringify(designs)));
+  assert.includes(css, '#btnCollect:hover', 'hover deve ter seletor próprio');
+  assert.includes(css, 'body.tf-force-hover #btnCollect', 'estado simulado deve usar a mesma regra');
+  assert.includes(css, 'color: #ffffff !important', 'cor deve ser preservada');
+  var layoutCss = model.css({'#btnCollect': {rest:{display:'flex','align-items':'center','grid-template-columns':'repeat(2, 1fr)'}}});
+  assert.includes(layoutCss, 'grid-template-columns: repeat(2, 1fr) !important', 'layout avançado deve persistir no CSS');
+  var staticCss = model.css({'[data-tf-design="tag-Teste"]': {hoverMotion:false, hover:{color:'#ff0000'}}});
+  assert.includes(staticCss, 'transition: none !important', 'tag estática deve desligar transição');
+  assert.ok(staticCss.lastIndexOf('transform: none !important') > staticCss.lastIndexOf('color: #ff0000 !important'), 'estado estático deve prevalecer sobre hover');
+  var animatedCss = model.css({'#badgeBuiltIn': {hoverMotion:true}});
+  assert.includes(animatedCss, 'transform: translate(-2px, -2px) !important', 'hover habilitado deve deslocar tag');
+  rejected = false;
+  try { model.css({'#badgeBuiltIn': {hoverMotion:'false'}}); } catch (e) { rejected = true; }
+  assert.ok(rejected, 'controle de hover deve exigir booleano');
+  var rejected = false;
+  try { model.css({'body': {rest:{color:'red'}}}); } catch (e) { rejected = true; }
+  assert.ok(rejected, 'seletor genérico deve ser rejeitado');
+  rejected = false;
+  try { model.css({'#btnCollect': {rest:{color:'red; display:none'}}}); } catch (e) { rejected = true; }
+  assert.ok(rejected, 'declaração injetada deve ser rejeitada');
 });
 
 module.exports = h;

@@ -115,9 +115,25 @@
   var chkUsePrefixNumbering = document.getElementById("chkUsePrefixNumbering");
   var chkSeparateAudioCategories = document.getElementById("chkSeparateAudioCategories");
   var chkNumberAudioCategories = document.getElementById("chkNumberAudioCategories");
+  var lblSeparateAudioCategories = document.getElementById("lblSeparateAudioCategories");
   var lblNumberAudioCategories = document.getElementById("lblNumberAudioCategories");
 
   function syncAudioSubToggleState() {
+    if (!isPPro) {
+      if (chkSeparateAudioCategories) chkSeparateAudioCategories.disabled = true;
+      if (chkNumberAudioCategories) chkNumberAudioCategories.disabled = true;
+      if (lblSeparateAudioCategories) {
+        lblSeparateAudioCategories.classList.add("is-disabled");
+        lblSeparateAudioCategories.title = "Disponível apenas no Premiere Pro (Essential Sound)";
+      }
+      if (lblNumberAudioCategories) {
+        lblNumberAudioCategories.classList.add("is-disabled");
+        lblNumberAudioCategories.title = "Disponível apenas no Premiere Pro (Essential Sound)";
+      }
+      return;
+    }
+    if (chkSeparateAudioCategories) chkSeparateAudioCategories.disabled = false;
+    if (lblSeparateAudioCategories) lblSeparateAudioCategories.classList.remove("is-disabled");
     if (!chkNumberAudioCategories) return;
     var espOn = chkSeparateAudioCategories ? Boolean(chkSeparateAudioCategories.checked) : true;
     chkNumberAudioCategories.disabled = !espOn;
@@ -265,6 +281,157 @@
     return null;
   }
 
+  // Dropdown Customizado Neo-Brutalista (Inspirado em neobrutalism.dev/docs/select)
+  function setupNeoSelect(selectEl) {
+    if (!selectEl) return;
+    if (selectEl.__neoSelect) {
+      selectEl.__neoSelect.update();
+      return;
+    }
+
+    // Se já estiver dentro de um wrapper antigo ou órfão, desenrola e remove elementos mortos
+    var existingWrapper = selectEl.closest ? selectEl.closest(".tf-select-wrapper") : null;
+    if (existingWrapper) {
+      var deadElements = existingWrapper.querySelectorAll(".tf-select-trigger, .tf-select-menu");
+      for (var d = 0; d < deadElements.length; d++) {
+        if (deadElements[d].parentNode) {
+          deadElements[d].parentNode.removeChild(deadElements[d]);
+        }
+      }
+      var parentEl = existingWrapper.parentNode;
+      if (parentEl) {
+        parentEl.insertBefore(selectEl, existingWrapper);
+        parentEl.removeChild(existingWrapper);
+      }
+      selectEl.style.display = "";
+    }
+
+    var wrapper = document.createElement("div");
+    wrapper.className = "tf-select-wrapper";
+    selectEl.parentNode.insertBefore(wrapper, selectEl);
+    wrapper.appendChild(selectEl);
+
+    selectEl.style.display = "none";
+
+    var trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "tf-select-trigger";
+    trigger.setAttribute("data-tf-design", "editor-preset-trigger");
+    trigger.title = selectEl.title || "Selecionar Preset";
+    trigger.innerHTML =
+      '<span class="tf-select-value"></span>' +
+      '<svg class="tf-select-chevron" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M4 6l4 4 4-4"/>' +
+      '</svg>';
+
+    var menu = document.createElement("div");
+    menu.className = "tf-select-menu";
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(menu);
+
+    function updateFromSelect() {
+      if (selectEl.selectedIndex < 0 && selectEl.options.length > 0) {
+        selectEl.selectedIndex = 0;
+      }
+      var selectedOpt = selectEl.options[selectEl.selectedIndex];
+      var valSpan = trigger.querySelector(".tf-select-value");
+      if (valSpan) {
+        valSpan.textContent = selectedOpt ? selectedOpt.textContent : "";
+      }
+      trigger.disabled = !!selectEl.disabled;
+
+      menu.innerHTML = "";
+      for (var i = 0; i < selectEl.options.length; i++) {
+        (function (opt) {
+          var item = document.createElement("div");
+          item.className = "tf-select-item" + (opt.selected ? " is-selected" : "");
+          item.setAttribute("data-tf-design", "editor-preset-option");
+
+          var labelSpan = document.createElement("span");
+          labelSpan.textContent = opt.textContent;
+          item.appendChild(labelSpan);
+
+          if (opt.selected) {
+            var checkSpan = document.createElement("span");
+            checkSpan.className = "tf-select-item-check";
+            checkSpan.textContent = "✓";
+            item.appendChild(checkSpan);
+          }
+
+          item.addEventListener("click", function (e) {
+            e.stopPropagation();
+            closeMenu();
+            if (selectEl.value !== opt.value) {
+              selectEl.value = opt.value;
+              var changeEv;
+              if (typeof Event === "function") {
+                changeEv = new Event("change", { bubbles: true });
+              } else {
+                changeEv = document.createEvent("Event");
+                changeEv.initEvent("change", true, true);
+              }
+              selectEl.dispatchEvent(changeEv);
+            }
+            updateFromSelect();
+          });
+          menu.appendChild(item);
+        })(selectEl.options[i]);
+      }
+    }
+
+    function openMenu() {
+      if (selectEl.disabled) return;
+      var allOpen = document.querySelectorAll(".tf-select-menu.is-open");
+      for (var j = 0; j < allOpen.length; j++) {
+        allOpen[j].classList.remove("is-open");
+      }
+      var allTriggers = document.querySelectorAll(".tf-select-trigger.is-open");
+      for (var k = 0; k < allTriggers.length; k++) {
+        allTriggers[k].classList.remove("is-open");
+      }
+      menu.classList.add("is-open");
+      trigger.classList.add("is-open");
+    }
+
+    function closeMenu() {
+      menu.classList.remove("is-open");
+      trigger.classList.remove("is-open");
+    }
+
+    trigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (selectEl.disabled) return;
+      if (menu.classList.contains("is-open")) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!wrapper.contains(e.target)) {
+        closeMenu();
+      }
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" || e.keyCode === 27) {
+        closeMenu();
+      }
+    });
+
+    if (typeof MutationObserver !== "undefined") {
+      var observer = new MutationObserver(function () {
+        updateFromSelect();
+      });
+      observer.observe(selectEl, { childList: true, subtree: true, attributes: true, attributeFilter: ["disabled"] });
+    }
+
+    updateFromSelect();
+    selectEl.__neoSelect = { update: updateFromSelect, close: closeMenu };
+  }
+
   function refreshPresetSelectDropdown(selectedName) {
     var list = presetManager.listPresets();
     presetSelect.innerHTML = "";
@@ -277,6 +444,7 @@
       }
       presetSelect.appendChild(opt);
     }
+    setupNeoSelect(presetSelect);
   }
 
   function loadSelectedPresetIntoEditor(presetName) {
@@ -441,11 +609,13 @@
 
           var row = document.createElement("div");
           row.className = "tree-row";
+          row.setAttribute("data-tf-design", "folder-row");
           row.setAttribute("data-node-id", node.id);
 
           // 0. Alça de Arraste (Drag Handle)
           var dragHandle = document.createElement("span");
           dragHandle.className = "drag-handle";
+          dragHandle.setAttribute("data-tf-design", "folder-drag-handle");
           dragHandle.textContent = "⋮⋮";
           dragHandle.title = "Clique e arraste para reordenar ou mover esta pasta";
           dragHandle.setAttribute("draggable", "true");
@@ -578,6 +748,7 @@
           var isCollapsed = Boolean(collapsedNodeIds[node.id]);
           var collapseBtn = document.createElement("button");
           collapseBtn.type = "button";
+          collapseBtn.setAttribute("data-tf-design", "folder-collapse");
           collapseBtn.className = "collapse-btn" + (hasChildren ? "" : " empty");
           collapseBtn.textContent = isCollapsed ? "▸" : "▾";
           collapseBtn.title = isCollapsed ? "Expandir subpastas" : "Recolher subpastas";
@@ -591,6 +762,7 @@
           var labelInfo = presetManager.getLabelInfo(node.label);
           var swatchBtn = document.createElement("button");
           swatchBtn.type = "button";
+          swatchBtn.setAttribute("data-tf-design", "folder-label-swatch");
           swatchBtn.className = "label-swatch-btn";
           swatchBtn.style.backgroundColor = labelInfo.color;
           swatchBtn.title = "Cor no " + hostAppName + ": " + labelInfo.ptName;
@@ -604,6 +776,7 @@
           var isNodeNumbered = (node.useNumbering !== false);
           var prefixBadge = document.createElement("button");
           prefixBadge.type = "button";
+          prefixBadge.setAttribute("data-tf-design", "folder-prefix");
           prefixBadge.className = "prefix-preview" + (isNodeNumbered && usePrefix ? "" : " prefix-off");
 
           if (isNodeNumbered) {
@@ -627,6 +800,7 @@
           // 4. Input do Nome da Pasta
           var nameInput = document.createElement("input");
           nameInput.type = "text";
+          nameInput.setAttribute("data-tf-design", "folder-name-input");
           nameInput.className = "folder-name-input";
           nameInput.value = node.name || "";
           nameInput.placeholder = "Nome da pasta";
@@ -639,6 +813,7 @@
           // 5. Botão / Área de Regras e Filtros
           var rulesBtn = document.createElement("button");
           rulesBtn.type = "button";
+          rulesBtn.setAttribute("data-tf-design", "folder-rules-summary");
           rulesBtn.className = "rules-summary-btn";
           rulesBtn.title = "Clique para configurar tipos de arquivo, extensões e filtros desta pasta";
 
@@ -646,6 +821,7 @@
           if (pills.length === 0) {
             var emptyHint = document.createElement("span");
             emptyHint.className = "rule-empty-hint";
+            emptyHint.setAttribute("data-tf-design", "folder-rules-empty");
             emptyHint.textContent = hasChildren
               ? "Pasta contêiner (clique p/ adicionar regras)"
               : "Sem regras (clique p/ configurar filtros)";
@@ -655,6 +831,7 @@
               var pillEl = document.createElement("span");
               pillEl.className = "rule-pill " + (pills[p].cls || "");
               pillEl.textContent = pills[p].text;
+              pillEl.setAttribute("data-tf-design", "tag-" + encodeURIComponent(pills[p].text));
               rulesBtn.appendChild(pillEl);
             }
           }
@@ -670,7 +847,8 @@
 
           var btnUp = document.createElement("button");
           btnUp.type = "button";
-          btnUp.className = "row-btn";
+          btnUp.className = "tf-btn tf-btn--ghost tf-btn--mini row-btn";
+          btnUp.setAttribute("data-tf-design", "folder-up");
           btnUp.textContent = "↑";
           btnUp.title = "Mover pasta para cima";
           btnUp.disabled = (idx === 0);
@@ -687,7 +865,8 @@
 
           var btnDown = document.createElement("button");
           btnDown.type = "button";
-          btnDown.className = "row-btn";
+          btnDown.className = "tf-btn tf-btn--ghost tf-btn--mini row-btn";
+          btnDown.setAttribute("data-tf-design", "folder-down");
           btnDown.textContent = "↓";
           btnDown.title = "Mover pasta para baixo";
           btnDown.disabled = (idx === siblings.length - 1);
@@ -704,7 +883,8 @@
 
           var btnAddChild = document.createElement("button");
           btnAddChild.type = "button";
-          btnAddChild.className = "row-btn add-child";
+          btnAddChild.className = "tf-btn tf-btn--ghost tf-btn--mini row-btn add-child";
+          btnAddChild.setAttribute("data-tf-design", "folder-add");
           btnAddChild.textContent = "+";
           btnAddChild.title = "Adicionar subpasta filha dentro de '" + node.name + "'";
           btnAddChild.addEventListener("click", function () {
@@ -722,7 +902,8 @@
 
           var btnRemove = document.createElement("button");
           btnRemove.type = "button";
-          btnRemove.className = "row-btn remove-node";
+          btnRemove.className = "tf-btn tf-btn--ghost tf-btn--mini row-btn remove-node";
+          btnRemove.setAttribute("data-tf-design", "folder-remove");
           btnRemove.textContent = "−";
           btnRemove.title = "Remover pasta '" + node.name + "'";
           btnRemove.addEventListener("click", function () {

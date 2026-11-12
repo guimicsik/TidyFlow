@@ -1,0 +1,984 @@
+/* ==========================================================================
+   TidyFlow — Theme Compartilhado (Design System Neo-Brutalista)
+   --------------------------------------------------------------------------
+   Fonte única de tokens de cor, tipografia e física mecânica dos botões,
+   toggles, selects customizados e modais de alerta.
+   Carregue SEMPRE antes de index.css / tree_editor.css / collect.css.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('theme/tokens.css');
+
+:root {
+  /* 1. Tipografia & Pesos (Google Fonts: Archivo) */
+  --tf-font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --tf-font-weight-bold: 700;
+  --tf-font-weight-medium: 600;
+  --tf-font-weight-hero: 900;
+  --tf-font-weight-tile: 600;
+  --tf-font-weight-toggle: 600;
+  --tf-font-weight-rollback: 800;
+
+  /* Tamanhos de Fonte */
+  --tf-font-size-hero: 33.5px;
+  --tf-font-size-tile: 14px;
+  --tf-font-size-toggle: 14px;
+  --tf-font-size-rollback: 14px;
+  --tf-font-size-preset-label: 13px;
+  --tf-font-size-preset-select: 13px;
+  --tf-font-size-modal-btn: 12px;
+
+  /* Estilos Tipográficos Extras */
+  --tf-hero-letter-spacing: -0.5px;
+  --tf-tile-letter-spacing: -0.25px;
+  --tf-toggle-letter-spacing: 0px;
+  --tf-tile-line-height: 1.25;
+  --tf-hero-text-transform: none;
+  --tf-tile-text-transform: none;
+  --tf-toggle-text-transform: none;
+  --tf-font-style-hero: normal;
+  --tf-font-style-tile: normal;
+
+  /* 2. Paleta de Cores Neo-Brutalista (Monochrome Editorial + Electric Blue) */
+  --tf-bg-app: #171717;
+  --tf-text-app: #d4d4d4;
+  --tf-notice-color: #9a9a9a;
+
+  --tf-neo-hero-bg: #3B82F6;
+  --tf-neo-hero-text: #FFFFFF;
+  --tf-neo-hero-hover: #60A5FA;
+  --tf-neo-hero-active: #2563EB;
+
+  --tf-neo-tile-bg: #E4E4E7;
+  --tf-neo-tile-text: #000000;
+  --tf-neo-tile-hover: #F4F4F5;
+  --tf-neo-tile-active: #D4D4D8;
+
+  --tf-neo-danger-bg: #EF4444;
+  --tf-neo-danger-text: #000000;
+  --tf-neo-danger-hover: #F87171;
+  --tf-neo-danger-active: #DC2626;
+
+  --tf-neo-primary-bg: #3B82F6;
+  --tf-neo-primary-text: #FFFFFF;
+  --tf-neo-primary-hover: #60A5FA;
+
+  --tf-neo-toggle-off-bg: #262626;
+  --tf-neo-toggle-off-text: #F4F4F5;
+  --tf-neo-toggle-off-hover: #323238;
+
+  --tf-neo-toggle-on-bg: #3B82F6;
+  --tf-neo-toggle-on-text: #FFFFFF;
+  --tf-neo-toggle-on-hover: #60A5FA;
+
+  --tf-neo-toggle-partial-bg: #0EA5E9;
+  --tf-neo-toggle-partial-text: #FFFFFF;
+
+  --tf-neo-ghost-bg: #262626;
+  --tf-neo-ghost-text: #E4E4E7;
+  --tf-neo-ghost-hover: #60A5FA;
+
+  --tf-neo-success-bg: #10B981;
+  --tf-neo-success-text: #000000;
+  --tf-neo-success-hover: #26EBAB;
+  --tf-neo-warning-bg: #F59E0B;
+  --tf-neo-warning-text: #000000;
+  --tf-neo-warning-hover: #FFC060;
+
+  --tf-neo-switch-off-bg: #262626;
+  --tf-neo-switch-on-bg: #3B82F6;
+  --tf-neo-switch-border: #000000;
+  --tf-neo-switch-thumb-bg: #FFFFFF;
+  --tf-neo-switch-thumb-border: #000000;
+  --tf-neo-switch-check-color: #000000;
+  --tf-checkbox-size: 19px;
+  --tf-checkbox-radius: 5px;
+
+  /* 3. Dropdown e Barra de Presets */
+  --tf-preset-dropdown-width-editor: 220px;
+  --tf-preset-dropdown-width-panel: 100%;
+  --tf-preset-dropdown-height: 30px;
+  --tf-preset-bar-bg: #212121;
+  --tf-preset-bar-border: #000000;
+  --tf-preset-dropdown-bg: #3B82F6;
+  --tf-preset-dropdown-text: #000000;
+  --tf-preset-dropdown-hover: #60A5FA;
+  --tf-preset-menu-bg: #DBEAFE;
+  --tf-preset-menu-text: #000000;
+  --tf-preset-menu-hover-bg: #3B82F6;
+  --tf-preset-menu-hover-text: #FFFFFF;
+  --tf-preset-menu-selected-bg: #2563EB;
+
+  /* 4. Modais e Alert Dialog */
+  --tf-modal-bg: #212121;
+  --tf-modal-header-bg: #181818;
+  --tf-modal-border: #000000;
+  --tf-modal-shadow: 6px 6px 0px 0px #000000;
+
+  /* 5. Geometria, Animação & Física dos Estados (Rest, Hover, Click) */
+  --tf-neo-border-color: #000000;
+  --tf-neo-border-w: 2px;
+  --tf-neo-radius: 5px;
+  --tf-neo-radius-sm: 4px;
+
+  /* Estado Rest (Repouso) */
+  --tf-rest-lift-hero: 0px;
+  --tf-rest-shadow-hero: 0px 0px 0px #000000;
+  --tf-rest-lift-tile: 0px;
+  --tf-rest-shadow-tile: 0px 0px 0px #000000;
+
+  /* Estado Hover (Elevação e Sombra Rígida) */
+  --tf-neo-shadow-hero: 4px 4px 0px #000000;
+  --tf-neo-shadow-tile: 3px 3px 0px #000000;
+  --tf-neo-shadow-mini: 2px 2px 0px #000000;
+
+  --tf-neo-lift-hero: -4px;
+  --tf-neo-lift-tile: -3px;
+  --tf-neo-lift-mini: -2px;
+
+  /* Estado Click / Active (Compressão ao Clicar) */
+  --tf-active-lift-hero: 0px;
+  --tf-active-shadow-hero: 0px 0px 0px #000000;
+  --tf-active-lift-tile: 0px;
+  --tf-active-shadow-tile: 0px 0px 0px #000000;
+
+  /* Velocidade e Curva de Animação */
+  --tf-anim-duration: 0.12s;
+  --tf-anim-easing: cubic-bezier(0.2, 0, 0, 1);
+
+  /* 6. Layout, Gaps, Alturas & Posicionamento */
+  --tf-panel-padding: 5px;
+  --tf-section-gap: 10px;
+  --tf-field-group-gap: 4px;
+  --tf-grid-gap: 3px;
+  --tf-toggles-gap: 3px;
+  --tf-options-gap: 3px;
+  --tf-preset-bar-gap: 6px;
+  --tf-preset-bar-padding: 6px 8px;
+
+  --tf-hero-height: 78px;
+  --tf-tile-height: 64px;
+  --tf-toggle-height: 68px;
+  --tf-rollback-height: 68px;
+
+  --tf-rollback-justify: center;
+  --tf-rollback-width: 50%;
+  --tf-rollback-margin-top: 6px;
+  --tf-toggle-check-display: none;
+  --tf-icon-size: 16px;
+
+  /* 7. Preset Builder (Janela Editor) */
+  --tf-editor-bg: #1e1e1e;
+  --tf-editor-topbar-bg: #252525;
+  --tf-editor-tree-bg: #181818;
+  --tf-editor-row-bg: #232323;
+  --tf-editor-row-border: #303030;
+  --tf-editor-footer-bg: #252525;
+  --tf-editor-padding: 6px;
+
+  /* 8. Collect Files (Project Manager) */
+  --tf-collect-bg: #181818;
+  --tf-collect-box-bg: #212121;
+  --tf-collect-box-border: #000000;
+  --tf-collect-box-padding: 8px 12px;
+  --tf-collect-gap: 9px;
+  --tf-collect-options-gap-y: 10px;
+  --tf-collect-options-gap-x: 17px;
+  --tf-collect-btn-ok-bg: #3B82F6;
+  --tf-collect-btn-ok-hover: #60A5FA;
+  --tf-collect-btn-ok-text: #FFFFFF;
+  --tf-collect-btn-cancel-bg: #262626;
+  --tf-collect-btn-cancel-border: #000000;
+  --tf-collect-btn-cancel-text: #E4E4E7;
+
+  /* 9. Aliases de Compatibilidade */
+  --tf-accent: var(--tf-neo-primary-bg, #3B82F6);
+  --tf-accent-hover: var(--tf-neo-primary-hover, #60A5FA);
+  --tf-tile-radius: var(--tf-neo-radius, 6px);
+}
+
+
+/* ==========================================================================
+   1. Base dos Botões (.tf-btn)
+   ========================================================================== */
+.tf-btn {
+  font-family: var(--tf-font-family);
+  font-weight: var(--tf-font-weight-bold);
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: var(--tf-neo-radius);
+  line-height: var(--tf-tile-line-height);
+  text-align: center;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: var(--tf-neo-border-w) solid var(--tf-neo-border-color);
+  outline: none;
+  white-space: nowrap;
+  box-shadow: 0px 0px 0px #000000;
+  transform: translate(0, 0);
+  transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.12s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.12s ease;
+}
+
+.tf-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* ==========================================================================
+   Ícones em Botões (.tf-btn-icon)
+   ========================================================================== */
+.tf-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tf-icon-size, 16px);
+  height: var(--tf-icon-size, 16px);
+  min-width: var(--tf-icon-size, 16px);
+  min-height: var(--tf-icon-size, 16px);
+  flex-shrink: 0;
+  line-height: 1;
+  color: inherit;
+  pointer-events: none;
+}
+
+.tf-btn-icon svg {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* Escala proporcional do ícone no Botão Hero (Organizar Projeto) */
+.tf-btn--hero .tf-btn-icon {
+  width: calc(var(--tf-icon-size, 16px) * 1.5);
+  height: calc(var(--tf-icon-size, 16px) * 1.5);
+  min-width: calc(var(--tf-icon-size, 16px) * 1.5);
+  min-height: calc(var(--tf-icon-size, 16px) * 1.5);
+  margin-bottom: 2px;
+}
+
+/* Escala nos botões compactos / mini */
+.tf-btn--mini .tf-btn-icon,
+.tf-btn--xs .tf-btn-icon {
+  width: calc(var(--tf-icon-size, 16px) * 0.85);
+  height: calc(var(--tf-icon-size, 16px) * 0.85);
+  min-width: calc(var(--tf-icon-size, 16px) * 0.85);
+  min-height: calc(var(--tf-icon-size, 16px) * 0.85);
+}
+
+/* Rótulo interno dos tiles */
+.btn-tile-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  white-space: normal;
+  word-break: normal;
+}
+
+.btn-tile-label>span {
+  display: block;
+}
+
+/* ==========================================================================
+   2. Hero — CTA Principal (Organizar Projeto)
+   ========================================================================== */
+.tf-btn--hero {
+  width: 100%;
+  height: 98px;
+  min-height: 90px;
+  border-radius: var(--tf-neo-radius);
+  background-color: var(--tf-neo-hero-bg);
+  color: var(--tf-neo-hero-text);
+  font-size: var(--tf-font-size-hero);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  border: var(--tf-neo-border-w) solid var(--tf-neo-border-color);
+  box-shadow: 0px 0px 0px #000000;
+  margin-bottom: 4px;
+  flex-direction: column;
+  gap: 4px;
+  transform: translate(0, 0);
+  transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.12s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.12s ease;
+}
+
+.tf-btn--hero:hover:not(:disabled) {
+  background-color: var(--tf-neo-hero-hover);
+  transform: translate(var(--tf-neo-lift-hero), var(--tf-neo-lift-hero));
+  box-shadow: var(--tf-neo-shadow-hero);
+}
+
+.tf-btn--hero:active:not(:disabled) {
+  transform: translate(0, 0);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+/* ==========================================================================
+   3. Tile Secundário — Criar Estrutura / Mídias / Collect Files
+   ========================================================================== */
+.tf-btn--tile {
+  width: 100%;
+  min-height: 64px;
+  height: 68px;
+  border-radius: var(--tf-neo-radius);
+  background-color: var(--tf-neo-tile-bg);
+  color: var(--tf-neo-tile-text);
+  font-size: var(--tf-font-size-tile);
+  font-weight: var(--tf-font-weight-bold);
+  line-height: var(--tf-tile-line-height);
+  border: var(--tf-neo-border-w) solid var(--tf-neo-border-color);
+  box-shadow: 0px 0px 0px #000000;
+  padding: 6px 4px;
+  text-align: center;
+  transform: translate(0, 0);
+  transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.12s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.12s ease;
+}
+
+.tf-btn--tile:hover:not(:disabled) {
+  background-color: var(--tf-neo-tile-hover);
+  transform: translate(var(--tf-neo-lift-tile), var(--tf-neo-lift-tile));
+  box-shadow: var(--tf-neo-shadow-tile);
+}
+
+.tf-btn--tile:active:not(:disabled) {
+  transform: translate(0, 0);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+/* ==========================================================================
+   4. Tile Destrutivo — Desorganizar / Rollback
+   ========================================================================== */
+.tf-btn--tile-danger {
+  width: 100%;
+  min-height: 64px;
+  height: 68px;
+  padding: 6px 4px;
+  border-radius: var(--tf-neo-radius);
+  font-size: var(--tf-font-size-rollback);
+  font-weight: var(--tf-font-weight-bold);
+  line-height: var(--tf-tile-line-height);
+  background-color: var(--tf-neo-danger-bg);
+  color: var(--tf-neo-danger-text);
+  border: var(--tf-neo-border-w) solid var(--tf-neo-border-color);
+  box-shadow: 0px 0px 0px #000000;
+  transform: translate(0, 0);
+  transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.12s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.12s ease;
+}
+
+.tf-btn--tile-danger:hover:not(:disabled) {
+  background-color: var(--tf-neo-danger-hover);
+  transform: translate(var(--tf-neo-lift-tile), var(--tf-neo-lift-tile));
+  box-shadow: var(--tf-neo-shadow-tile);
+}
+
+.tf-btn--tile-danger:active:not(:disabled) {
+  transform: translate(0, 0);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+/* ==========================================================================
+   5. Botões de Barra, Modais e Ações Gerais
+   ========================================================================== */
+.tf-btn--primary,
+.tf-btn--destructive,
+.tf-btn--success,
+.tf-btn--warning,
+.tf-btn--ghost {
+  border: var(--tf-neo-border-w, 2px) solid var(--tf-neo-border-color, #000000);
+  box-shadow: 0px 0px 0px #000000;
+  border-radius: var(--tf-neo-radius-sm, 4px);
+  transform: translate(0, 0);
+  font-family: var(--tf-font-family);
+  font-weight: 800;
+  transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.12s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.12s ease;
+}
+
+.tf-btn--primary {
+  background-color: var(--tf-neo-primary-bg);
+  color: var(--tf-neo-primary-text);
+}
+
+.tf-btn--primary:hover:not(:disabled) {
+  background-color: var(--tf-neo-primary-hover);
+  transform: translate(var(--tf-neo-lift-mini), var(--tf-neo-lift-mini));
+  box-shadow: var(--tf-neo-shadow-mini);
+}
+
+.tf-btn--destructive {
+  background-color: var(--tf-neo-danger-bg);
+  color: var(--tf-neo-danger-text);
+}
+
+.tf-btn--destructive:hover:not(:disabled) {
+  background-color: var(--tf-neo-danger-hover);
+  transform: translate(var(--tf-neo-lift-mini), var(--tf-neo-lift-mini));
+  box-shadow: var(--tf-neo-shadow-mini);
+}
+
+.tf-btn--success {
+  background-color: var(--tf-neo-success-bg);
+  color: var(--tf-neo-success-text);
+}
+
+.tf-btn--success:hover:not(:disabled) {
+  background-color: var(--tf-neo-success-hover, #26EBAB);
+  transform: translate(var(--tf-neo-lift-mini), var(--tf-neo-lift-mini));
+  box-shadow: var(--tf-neo-shadow-mini);
+}
+
+.tf-btn--warning {
+  background-color: var(--tf-neo-warning-bg);
+  color: var(--tf-neo-warning-text);
+}
+
+.tf-btn--warning:hover:not(:disabled) {
+  background-color: var(--tf-neo-warning-hover, #FFC060);
+  transform: translate(var(--tf-neo-lift-mini), var(--tf-neo-lift-mini));
+  box-shadow: var(--tf-neo-shadow-mini);
+}
+
+.tf-btn--ghost {
+  background-color: var(--tf-neo-ghost-bg);
+  color: var(--tf-neo-ghost-text);
+}
+
+.tf-btn--ghost:hover:not(:disabled) {
+  background-color: var(--tf-neo-ghost-hover);
+  transform: translate(var(--tf-neo-lift-mini), var(--tf-neo-lift-mini));
+  box-shadow: var(--tf-neo-shadow-mini);
+}
+
+.tf-btn--primary:active:not(:disabled),
+.tf-btn--destructive:active:not(:disabled),
+.tf-btn--success:active:not(:disabled),
+.tf-btn--warning:active:not(:disabled),
+.tf-btn--ghost:active:not(:disabled) {
+  transform: translate(0, 0);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+/* Modificadores de Tamanho de Botão */
+.tf-btn--sm {
+  height: 32px;
+  min-height: 30px;
+  padding: 0 14px;
+  font-size: 11.5px;
+}
+
+.tf-btn--xs {
+  height: 28px;
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 10.5px;
+}
+
+.tf-btn--mini {
+  height: 24px;
+  min-height: 24px;
+  padding: 0 8px;
+  font-size: 10px;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   6. Toggle em Tile (Salvar antes / Excluir vazias / Pasta de origem)
+   ========================================================================== */
+.tf-toggle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tf-toggle input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.tf-toggle__face {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  min-height: 64px;
+  height: 68px;
+  padding: 6px 4px;
+  border-radius: var(--tf-neo-radius);
+  font-family: var(--tf-font-family);
+  font-size: var(--tf-font-size-toggle);
+  font-weight: var(--tf-font-weight-medium);
+  line-height: var(--tf-tile-line-height);
+  background-color: var(--tf-neo-toggle-off-bg);
+  color: var(--tf-neo-toggle-off-text);
+  border: var(--tf-neo-border-w) solid var(--tf-neo-border-color);
+  box-shadow: 0px 0px 0px #000000;
+  transform: translate(0, 0);
+  transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.12s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.tf-toggle:hover .tf-toggle__face {
+  background-color: var(--tf-neo-toggle-off-hover);
+  transform: translate(var(--tf-neo-lift-tile), var(--tf-neo-lift-tile));
+  box-shadow: var(--tf-neo-shadow-tile);
+}
+
+.tf-toggle:active .tf-toggle__face {
+  transform: translate(0, 0);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+/* Estado Ativado (Ligado) */
+.tf-toggle input[type="checkbox"]:checked+.tf-toggle__face,
+.tf-toggle.active .tf-toggle__face {
+  background-color: var(--tf-neo-toggle-on-bg);
+  color: var(--tf-neo-toggle-on-text);
+}
+
+.tf-toggle:hover input[type="checkbox"]:checked+.tf-toggle__face,
+.tf-toggle.active:hover .tf-toggle__face {
+  background-color: var(--tf-neo-toggle-on-hover);
+}
+
+/* Estado Parcial */
+.tf-toggle.partial .tf-toggle__face,
+.tf-toggle.partial input[type="checkbox"]:checked+.tf-toggle__face {
+  background-color: var(--tf-neo-toggle-partial-bg);
+  color: var(--tf-neo-toggle-partial-text);
+}
+
+.tf-toggle input[type="checkbox"]:disabled+.tf-toggle__face {
+  opacity: 0.5;
+  cursor: default;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* ==========================================================================
+   7. Checkbox e Switch Neo-Brutalista (.tf-checkbox / .toggle-slider)
+   ========================================================================== */
+.tf-checkbox,
+.toggle-slider {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background-color: var(--tf-neo-switch-off-bg, #262626);
+  border: var(--tf-neo-border-w, 2px) solid var(--tf-neo-switch-border, #000000);
+  border-radius: var(--tf-neo-radius-sm, 4px);
+  box-shadow: 0px 0px 0px #000000;
+  box-sizing: border-box;
+  transform: translate(0, 0);
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+    box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+    background-color var(--tf-anim-duration, 0.12s) ease;
+  flex-shrink: 0;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+/* Checkmark em vetor puro (bold stroke) */
+.tf-checkbox::after,
+.toggle-slider::after {
+  content: "";
+  position: absolute;
+  width: 4.5px;
+  height: 9px;
+  border: solid #000000;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) scale(0);
+  top: 1px;
+  left: 5px;
+  box-sizing: border-box;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Feedback mecânico tátil no hover e no clique */
+label:hover .tf-checkbox,
+label:hover .toggle-slider,
+.tf-checkbox:hover,
+.toggle-slider:hover,
+label:hover input[type="checkbox"]:checked+.tf-checkbox,
+label:hover input[type="checkbox"]:checked+.toggle-slider,
+.tf-checkbox.is-checked:hover {
+  transform: translate(var(--tf-neo-lift-mini, -2px), var(--tf-neo-lift-mini, -2px));
+  box-shadow: var(--tf-neo-shadow-mini, 2px 2px 0px #000000);
+}
+
+label:active .tf-checkbox,
+label:active .toggle-slider,
+.tf-checkbox:active,
+.toggle-slider:active,
+label:active input[type="checkbox"]:checked+.tf-checkbox,
+label:active input[type="checkbox"]:checked+.toggle-slider,
+.tf-checkbox.is-checked:active {
+  transform: translate(0, 0);
+  box-shadow: 0px 0px 0px #000000;
+}
+
+/* Estado Marcado (Checked) - Preenchimento em Azul Vibrante (#3B82F6) */
+input[type="checkbox"]:checked+.tf-checkbox,
+input[type="checkbox"]:checked+.toggle-slider,
+.tf-checkbox.is-checked {
+  background-color: var(--tf-neo-switch-on-bg, #3B82F6);
+  border-color: #000000;
+  box-shadow: 0px 0px 0px #000000;
+  transform: translate(0, 0);
+}
+
+input[type="checkbox"]:checked+.tf-checkbox::after,
+input[type="checkbox"]:checked+.toggle-slider::after,
+.tf-checkbox.is-checked::after {
+  transform: rotate(45deg) scale(1);
+}
+
+input[type="checkbox"]:focus-visible+.tf-checkbox,
+input[type="checkbox"]:focus-visible+.toggle-slider {
+  outline: 2px solid var(--tf-neo-primary-bg, #3B82F6);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   8. Dropdown Neo-Brutalista (.tf-select-*)
+   ========================================================================== */
+.tf-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.tf-select-trigger {
+  width: 100%;
+  height: var(--tf-preset-dropdown-height, 28px);
+  min-height: var(--tf-preset-dropdown-height, 28px);
+  background-color: var(--tf-preset-dropdown-bg, #3B82F6);
+  color: var(--tf-preset-dropdown-text, #000000);
+  border: var(--tf-neo-border-w, 2px) solid #000000;
+  border-radius: var(--tf-neo-radius-sm, 4px);
+  box-shadow: 0px 0px 0px #000000;
+  padding: 0 8px;
+  font-family: var(--tf-font-family);
+  font-size: var(--tf-font-size-preset-select, 11.5px);
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  outline: none;
+  box-sizing: border-box;
+  transform: translate(0, 0);
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+    box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+    background-color var(--tf-anim-duration, 0.12s) ease;
+}
+
+.tf-select-trigger:hover {
+  transform: translate(var(--tf-neo-lift-mini, -2px), var(--tf-neo-lift-mini, -2px));
+  box-shadow: var(--tf-neo-shadow-mini, 2px 2px 0px #000000);
+  background-color: var(--tf-preset-dropdown-hover, #60A5FA);
+}
+
+.tf-select-trigger:active,
+.tf-select-trigger.is-open {
+  transform: translate(0, 0);
+  box-shadow: 0px 0px 0px #000000;
+  background-color: var(--tf-preset-dropdown-bg, #3B82F6);
+}
+
+.tf-select-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.tf-select-chevron {
+  flex-shrink: 0;
+  color: var(--tf-preset-dropdown-text, #000000);
+  transition: transform 0.15s ease;
+}
+
+.tf-select-trigger.is-open .tf-select-chevron {
+  transform: rotate(180deg);
+}
+
+/* Card Flutuante do Menu Suspenso */
+.tf-select-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 100%;
+  min-width: 180px;
+  background-color: var(--tf-preset-menu-bg, #DBEAFE);
+  border: var(--tf-neo-border-w, 2px) solid #000000;
+  border-radius: var(--tf-neo-radius-sm, 4px);
+  box-shadow: 4px 4px 0px 0px #000000;
+  padding: 4px;
+  z-index: 9999;
+  max-height: 220px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.tf-select-menu.is-open {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tf-select-item {
+  padding: 6px 10px;
+  border-radius: 3px;
+  font-family: var(--tf-font-family);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--tf-preset-menu-text, #000000);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.1s ease, color 0.1s ease;
+  user-select: none;
+}
+
+.tf-select-item:hover {
+  background-color: var(--tf-preset-menu-hover-bg, #3B82F6);
+  color: var(--tf-preset-menu-hover-text, #FFFFFF);
+}
+
+.tf-select-item.is-selected {
+  background-color: var(--tf-preset-menu-selected-bg, #2563EB);
+  color: #FFFFFF;
+}
+
+.tf-select-item-check {
+  font-weight: 900;
+  font-size: 11px;
+  margin-left: 6px;
+}
+
+/* ==========================================================================
+   9. Badges e Tags Neo-Brutalistas (.tf-badge)
+   ========================================================================== */
+.tf-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--tf-font-family);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 2px 8px;
+  border: var(--tf-neo-border-w, 2px) solid #000000;
+  border-radius: 4px;
+  box-shadow: 0px 0px 0px #000000;
+  transform: translate(0, 0);
+  line-height: 1.2;
+  white-space: nowrap;
+  user-select: none;
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+    box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1));
+}
+
+.tf-badge:hover {
+  transform: translate(var(--tf-neo-lift-mini, -2px), var(--tf-neo-lift-mini, -2px));
+  box-shadow: var(--tf-neo-shadow-mini, 2px 2px 0px #000000);
+}
+
+.tf-badge--primary {
+  background-color: var(--tf-neo-primary-bg, #3B82F6);
+  color: #FFFFFF;
+}
+
+.tf-badge--warning {
+  background-color: var(--tf-neo-warning-bg, #F59E0B);
+  color: #000000;
+}
+
+.tf-badge--neutral {
+  background-color: #E4E4E7;
+  color: #000000;
+}
+
+/* ==========================================================================
+   10. Modais e Alert Dialog (.modal-*)
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal-card {
+  background-color: var(--tf-modal-bg, #212121);
+  border: var(--tf-neo-border-w, 2px) solid var(--tf-modal-border, #000000);
+  border-radius: var(--tf-neo-radius, 6px);
+  box-shadow: var(--tf-modal-shadow, 6px 6px 0px 0px #000000);
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.modal-card.modal-sm {
+  max-width: 340px;
+}
+
+.modal-card.modal-card-unsaved {
+  max-width: 440px;
+}
+
+.modal-header {
+  padding: 11px 14px;
+  background-color: var(--tf-modal-header-bg, #181818);
+  border-bottom: var(--tf-neo-border-w, 2px) solid var(--tf-modal-border, #000000);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-family: var(--tf-font-family);
+  font-size: 13px;
+  font-weight: 800;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(--tf-modal-bg, #212121);
+}
+
+.modal-text {
+  font-family: var(--tf-font-family);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.modal-subtext {
+  font-size: 11.5px;
+  color: #A1A1AA;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.modal-footer {
+  padding: 11px 14px;
+  background-color: var(--tf-modal-header-bg, #181818);
+  border-top: var(--tf-neo-border-w, 2px) solid var(--tf-modal-border, #000000);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-footer--3btns {
+  padding: 10px 8px;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.modal-footer--3btns .tf-btn {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 30px;
+  min-height: 30px;
+  padding: 0 6px;
+  font-size: 10.5px;
+  box-shadow: 0px 0px 0px #000000;
+}
+
+.modal-footer-vertical {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  gap: 8px !important;
+}
+
+.modal-footer-vertical .modal-btn {
+  width: 100% !important;
+  min-height: 32px !important;
+  height: 34px !important;
+  font-size: var(--tf-font-size-modal-btn, 12px) !important;
+  font-weight: 800 !important;
+  font-family: var(--tf-font-family) !important;
+  box-shadow: 0px 0px 0px #000000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transform: translate(0, 0) !important;
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+    box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+    background-color var(--tf-anim-duration, 0.12s) ease !important;
+}
+
+.modal-footer-vertical .modal-btn:hover:not(:disabled) {
+  transform: translate(var(--tf-neo-lift-mini, -2px), var(--tf-neo-lift-mini, -2px)) !important;
+  box-shadow: var(--tf-neo-shadow-mini, 2px 2px 0px #000000) !important;
+}
+
+.modal-footer-vertical .modal-btn:active:not(:disabled) {
+  transform: translate(0, 0) !important;
+  box-shadow: 0px 0px 0px #000000 !important;
+}

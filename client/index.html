@@ -4,155 +4,124 @@
 <head>
   <meta charset="UTF-8">
   <title>TidyFlow</title>
+  <!-- Google Fonts: Archivo (Neo-Brutalism Typography) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
+
   <!-- Design system compartilhado (botões/toggles) — deve vir antes de index.css -->
+  <link rel="stylesheet" href="theme/tokens.css">
   <link rel="stylesheet" href="theme.css">
   <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
-
-
-  <!-- Barra de Seleção de Preset e Abertura do Preset Builder -->
-  <div class="preset-bar">
-    <span class="preset-bar-label">Preset</span>
-    <select id="presetSelect" title="Selecionar Preset de Estrutura de Pastas"></select>
-    <button type="button" id="btnOpenPresetBuilder" class="tf-btn tf-btn--ghost tf-btn--mini"
-      title="Abrir Editor de Estrutura de Pastas, Labels e Filtros">
-      <span>⚙</span>
-      <span>Editar</span>
-    </button>
+<!-- Barra de Seleção de Preset e Abertura do Preset Builder -->
+  <div class="preset-bar" data-tf-design="main-preset-bar">
+    <span class="preset-bar-label st-text-box" data-tf-design="main-preset-label">Preset</span>
+    <select id="presetSelect" title="Selecionar Preset de Estrutura de Pastas" style=""><option value="Default Clean">Default Clean (Default)</option><option value="Motion Design Copy">Motion Design Copy</option></select>
+    <button type="button" id="btnOpenPresetBuilder" class="tf-btn tf-btn--ghost tf-btn--mini" title="Abrir Editor de Estrutura de Pastas, Labels e Filtros" style="font-size: 9px;"><span class="tf-btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> </button>
   </div>
 
-  <div class="field-group">
-    <p id="noticeText" class="notice-text">Selecione as composições no painel Project antes de organizar.</p>
+  <div class="field-group" data-tf-design="main-action-section">
+    <p id="noticeText" class="notice-text st-text-box">Selecione as composições no painel antes de organizar.</p>
 
     <!-- Botão Hero Principal: 100% de largura -->
     <button type="button" id="btnOrganize" class="tf-btn tf-btn--hero">
-      <span class="btn-tile-label">Organizar Projeto</span>
+      <span class="btn-tile-label st-text-box" data-tf-design="main-organize-label">Organizar Projeto</span>
     </button>
 
     <!-- Grade Secundária: 3 botões em colunas iguais (Fixo) -->
-    <div class="actions-grid-secondary">
-      <button type="button" id="btnCreateStructure" class="tf-btn tf-btn--tile"
-        title="Cria a estrutura de pastas vazia do preset selecionado">
-        <span class="btn-tile-label">
-          <span>Criar estrutura</span>
-          <span>de pastas</span>
+    <div class="actions-grid-secondary" data-tf-design="main-action-grid">
+      <button type="button" id="btnCreateStructure" class="tf-btn tf-btn--tile" title="Cria a estrutura de pastas vazia do preset selecionado">
+        <span class="btn-tile-label st-text-box" data-tf-design="main-create-structure-label"><span>Criar estrutura de pasta</span></span>
+      </button><button type="button" id="btnMediaOnly" class="tf-btn tf-btn--tile" title="Organiza todas as mídias do projeto nas pastas do preset selecionado">
+        <span class="btn-tile-label st-text-box" data-tf-design="main-media-only-label">
+          <span>Organizar</span>
+          <span>Mídias</span>
         </span>
       </button>
-      <button type="button" id="btnMediaOnly" class="tf-btn tf-btn--tile">
-        <span class="btn-tile-label">
-          <span>Apenas</span>
-          <span>Midias</span>
-        </span>
-      </button>
-      <button type="button" id="btnCheckComps" class="tf-btn tf-btn--tile">
-        <span id="btnCheckCompsLabel" class="btn-tile-label">
-          <span id="btnCheckCompsWord1">Verificar</span>
-          <span id="btnCheckCompsWord2">composições</span>
+
+      <button type="button" id="btnOpenCollect" class="tf-btn tf-btn--tile" title="Abrir a janela de Collect Files (Project Manager)">
+        <span class="btn-tile-label st-text-box" data-tf-design="main-collect-label">
+          <span>Collect</span>
+          <span>Files</span>
         </span>
       </button>
     </div>
   </div>
 
-  <!-- Toggles: grid 3 colunas (linha 1: toggles 1-3) + 2 colunas (linha 2: toggles 4-5) -->
-  <div class="options-group">
-    <div class="toggles-grid toggles-grid-top">
-      <label class="tf-toggle"
-        title="Adiciona prefixos numéricos sequenciais (01_, 02_...) apenas às pastas da estrutura que tiverem arquivos">
-        <input type="checkbox" id="chkPrefixNumbering" checked>
-        <span class="tf-toggle__face">Numeração<br>Sequencial</span>
+  <!-- Toggles: grid 3 colunas (preferências) + 2 colunas (Reduzir / Rollback) -->
+  <div class="options-group" data-tf-design="main-options-section">
+    <div class="toggles-grid toggles-grid-top st-section-group" data-tf-design="main-toggles-grid">
+
+
+      <label class="tf-toggle" data-tf-design="main-save-toggle" title="Salvar projeto antes de fazer esse ajuste">
+        <input type="checkbox" id="chkSaveProject" checked="">
+        <span class="tf-toggle__face st-text-box" data-tf-design="main-save-toggle-label" style="">Salvar antes<br>de organizar</span>
+      </label><label class="tf-toggle" data-tf-design="main-empty-toggle" title="Deletar pastas que ficarem vazias após a organização">
+        <input type="checkbox" id="chkDeleteEmptyFolders" checked="">
+        <span class="tf-toggle__face st-text-box" data-tf-design="main-empty-toggle-label">Excluir pastas<br>vazias</span>
       </label>
 
-      <label class="tf-toggle" title="Salvar projeto antes de fazer esse ajuste">
-        <input type="checkbox" id="chkSaveProject" checked>
-        <span class="tf-toggle__face">Salvar antes<br>de organizar</span>
-      </label>
-
-      <label class="tf-toggle" title="Reduzir o projeto e deletar arquivos não usados nas composições selecionadas">
-        <input type="checkbox" id="chkReduceProject">
-        <span class="tf-toggle__face">Reduzir<br>Projeto</span>
+      <label class="tf-toggle" data-tf-design="main-source-toggle" title="Cria uma subpasta com o nome da pasta em que o arquivo reside no disco" style="">
+        <input type="checkbox" id="chkGroupBySourceFolder" checked="">
+        <span class="tf-toggle__face st-text-box" data-tf-design="main-source-toggle-label" style=""><span>Pasta <br>de origem</span></span>
       </label>
     </div>
 
-    <div class="toggles-grid toggles-grid-bottom">
-      <label class="tf-toggle" title="Deletar pastas que ficarem vazias após a organização">
-        <input type="checkbox" id="chkDeleteEmptyFolders" checked>
-        <span class="tf-toggle__face">Excluir pastas<br>vazias</span>
-      </label>
-
-      <label class="tf-toggle" title="Cria uma subpasta com o nome da pasta em que o arquivo reside no disco">
-        <input type="checkbox" id="chkGroupBySourceFolder" checked>
-        <span class="tf-toggle__face">Agrupar pela<br>pasta de origem</span>
-      </label>
-
-      <button type="button" id="btnRollback" class="tf-btn tf-btn--tile-danger"
-        title="Desorganiza o projeto de volta como estava antes de apertar o botão de organizar">
-        <span class="btn-tile-label">
+    <div class="rollback-row st-section-group" data-tf-design="main-rollback-row">
+      <button type="button" id="btnRollback" class="tf-btn tf-btn--tile-danger" title="Desorganiza o projeto de volta como estava antes de apertar o botão de organizar" style="letter-spacing: 0px;">
+        <span class="btn-tile-label st-text-box" data-tf-design="main-rollback-label">
           <span>Desorganizar<br>Projeto</span>
         </span>
       </button>
     </div>
-    <div id="groupSourceNote"></div>
-    <div id="reduceProjectAlert" class="reduce-alert">
-      ⚠️ <strong>Atenção:</strong> O projeto será reduzido apenas com as dependências da composição selecionada.
-    </div>
+    <div id="groupSourceNote" style="display: none;" class="st-text-box"></div>
   </div>
   <div id="statusMsg"></div>
-
-  <!-- Collect Files (teste): abre a janela com.tidyflow.collect -->
-  <button type="button" id="btnOpenCollect" class="tf-btn tf-btn--ghost tf-btn--xs collect-test-btn"
-    title="Abrir a janela de Collect Files (em teste)">
-    Collect Files (teste)
-  </button>
 
   <!-- Modal de Confirmação de Rollback -->
   <div id="rollbackModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true"
     aria-labelledby="rollbackModalTitle">
-    <div class="modal-card">
-      <div class="modal-header">
-        <span id="rollbackModalTitle" class="modal-title">⚠️ Confirmar Rollback</span>
+    <div class="modal-card" data-tf-design="main-rollback-modal-card">
+        <div class="modal-header">
+          <span class="modal-title" id="rollbackModalTitle">Confirmar Rollback</span>
+        </div>
+        <div class="modal-body">
+          <p class="modal-text" id="lblRollbackText">Deseja salvar o projeto antes de continuar?</p>
+          <p class="modal-subtext" id="lblRollbackSubtext">O projeto será desorganizado, as pastas novas deletadas e os arquvios espalhados no projeto</p>
+        </div>
+        <div class="modal-footer modal-footer--3btns">
+          <button type="button" id="btnRollbackCancel" class="tf-btn tf-btn--ghost tf-btn--sm"><span>Cancelar</span></button>
+          <button type="button" id="btnRollbackContinueWithoutSave" class="tf-btn tf-btn--warning tf-btn--sm"><span>Continuar sem Salvar</span></button><button type="button" id="btnRollbackSaveAndContinue" class="tf-btn tf-btn--primary tf-btn--sm"><span>Salvar e Continuar</span></button>
+          
+        </div>
       </div>
-      <div class="modal-body">
-        <p class="modal-text">Deseja salvar o projeto antes de continuar?</p>
-        <p class="modal-subtext">O projeto será desorganizado de volta para a estrutura em que estava antes de
-          organizar.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" id="btnRollbackSaveAndContinue" class="tf-btn tf-btn--success modal-btn">
-          Salvar e Continuar
-        </button>
-        <button type="button" id="btnRollbackContinueWithoutSave" class="tf-btn tf-btn--warning modal-btn">
-          Continuar sem Salvar
-        </button>
-        <button type="button" id="btnRollbackCancel" class="tf-btn tf-btn--ghost modal-btn">
-          Cancelar
-        </button>
-      </div>
-    </div>
   </div>
 
   <!-- Modal de Confirmação de Redução de Projeto -->
   <div id="reduceModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true"
     aria-labelledby="reduceModalTitle">
-    <div class="modal-card">
+    <div class="modal-card" data-tf-design="main-reduce-modal-card">
       <div class="modal-header">
         <span id="reduceModalTitle" class="modal-title">⚠️ Confirmar Redução</span>
       </div>
       <div class="modal-body">
-        <p class="modal-text">Deseja salvar o projeto antes de continuar?</p>
+        <p class="modal-text" data-tf-design="main-reduce-question">Deseja salvar o projeto antes de continuar?</p>
         <p id="reduceModalSubtext" class="modal-subtext">O projeto será reduzido apenas com as dependências da
           composição selecionada. Itens não utilizados serão removidos.</p>
       </div>
-      <div class="modal-footer">
-        <button type="button" id="btnReduceSaveAndContinue" class="tf-btn tf-btn--success modal-btn">
-          Salvar e Continuar
+      <div class="modal-footer modal-footer--3btns">
+        <button type="button" id="btnReduceCancel" class="tf-btn tf-btn--ghost modal-btn">
+          Cancelar
         </button>
         <button type="button" id="btnReduceContinueWithoutSave" class="tf-btn tf-btn--warning modal-btn">
           Continuar sem Salvar
         </button>
-        <button type="button" id="btnReduceCancel" class="tf-btn tf-btn--ghost modal-btn">
-          Cancelar
+        <button type="button" id="btnReduceSaveAndContinue" class="tf-btn tf-btn--primary modal-btn">
+          Salvar e Continuar
         </button>
       </div>
     </div>

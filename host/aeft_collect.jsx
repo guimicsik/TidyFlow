@@ -50,19 +50,27 @@
         } catch (e) { return false; }
     }
 
-    // Nomes das pastas do painel Project, da raiz até o item (sem sanitizar;
+    // Nomes e rótulos de cores das pastas do painel Project, da raiz até o item (sem sanitizar;
     // a sanitização para o disco é feita no CollectEngine).
-    function folderChain(item) {
-        var parts = [];
+    function folderChainInfo(item) {
+        var names = [];
+        var labels = [];
         try {
             var rootId = app.project.rootFolder.id;
             var f = item.parentFolder;
             while (f && f.id !== rootId) {
-                parts.unshift(f.name);
+                names.unshift(f.name);
+                var fLbl = 0;
+                try { fLbl = f.label || 0; } catch (eFL) {}
+                labels.unshift(fLbl);
                 f = f.parentFolder;
             }
         } catch (e) {}
-        return parts;
+        return { names: names, labels: labels };
+    }
+
+    function folderChain(item) {
+        return folderChainInfo(item).names;
     }
 
     function collectEffects(layer, effects) {
@@ -147,11 +155,27 @@
             var comps = [];
             var selectedCount = 0;
             if (mode === "selected") {
-                var sel = proj.selection;
-                for (var s = 0; s < sel.length; s++) {
-                    if (sel[s] instanceof CompItem) comps.push(sel[s]);
+                if (opts.compIds && opts.compIds.length > 0) {
+                    for (var cK = 1; cK <= proj.numItems; cK++) {
+                        var itm = proj.item(cK);
+                        if (itm instanceof CompItem) {
+                            var itmId = String(itm.id);
+                            for (var cMatch = 0; cMatch < opts.compIds.length; cMatch++) {
+                                if (itmId === String(opts.compIds[cMatch])) {
+                                    comps.push(itm);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    selectedCount = comps.length;
+                } else {
+                    var sel = proj.selection;
+                    for (var s = 0; s < sel.length; s++) {
+                        if (sel[s] instanceof CompItem) comps.push(sel[s]);
+                    }
+                    selectedCount = comps.length;
                 }
-                selectedCount = comps.length;
             } else if (mode !== "none") {
                 for (var c = 1; c <= proj.numItems; c++) {
                     var ci = proj.item(c);
@@ -163,6 +187,23 @@
                         if (selAll[s2] instanceof CompItem) selectedCount++;
                     }
                 } catch (eSel) {}
+            }
+
+            var allCompsParts = [];
+            for (var aC = 1; aC <= proj.numItems; aC++) {
+                var cCandidate = proj.item(aC);
+                if (cCandidate instanceof CompItem) {
+                    var isCSelected = false;
+                    try { isCSelected = Boolean(cCandidate.selected); } catch (eCSel) {}
+                    var fInfo = folderChainInfo(cCandidate);
+                    var fParts = [];
+                    for (var fc = 0; fc < fInfo.names.length; fc++) {
+                        fParts.push(q(fInfo.names[fc]));
+                    }
+                    var cLabel = 0;
+                    try { cLabel = cCandidate.label || 0; } catch (eCLbl) {}
+                    allCompsParts.push('{"id":' + q(String(cCandidate.id)) + ',"name":' + q(cCandidate.name) + ',"selected":' + (isCSelected ? "true" : "false") + ',"label":' + cLabel + ',"folders":[' + fParts.join(",") + '],"folderLabels":[' + fInfo.labels.join(",") + ']}');
+                }
             }
 
             var visited = {}, used = {};
@@ -209,6 +250,7 @@
                 '"projectPath":' + q(projFile ? projFile.fsName : ""),
                 '"projectSaved":' + (projFile ? "true" : "false"),
                 '"selectedCompCount":' + selectedCount,
+                '"allComps":[' + allCompsParts.join(",") + ']',
                 '"queuedCount":' + queued,
                 '"effectCount":' + effects.list.length,
                 '"effects":[' + fxParts.join(",") + "]",
@@ -342,6 +384,17 @@
                     aepxFile.remove();
                 }
             } catch (eRx) {}
+
+            // Se openCollected === false ("Apenas Exportar"), reabre o projeto original
+            if (opts.openCollected === false && opts.origProjectPath) {
+                try {
+                    var origAepFile = new File(opts.origProjectPath);
+                    if (origAepFile.exists) {
+                        app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+                        app.open(origAepFile);
+                    }
+                } catch (eOrigAe) {}
+            }
 
             return '{"success":true,"finalAepPath":' + q(finalAepFile.fsName) + '}';
         } catch (err) {

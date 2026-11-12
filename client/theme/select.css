@@ -1,0 +1,133 @@
+/* ==========================================================================
+   TidyFlow — Dropdown Neo-Brutalista (.tf-select-*)
+   ========================================================================== */
+
+.tf-select-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.tf-select-trigger {
+  width: 100%;
+  height: var(--tf-preset-dropdown-height, 28px);
+  min-height: var(--tf-preset-dropdown-height, 28px);
+  background-color: var(--tf-preset-dropdown-bg, #3B82F6);
+  color: var(--tf-preset-dropdown-text, #000000);
+  border: var(--tf-neo-border-w, 2px) solid #000000;
+  border-radius: var(--tf-neo-radius-sm, 4px);
+  box-shadow: 0px 0px 0px #000000;
+  padding: 0 8px;
+  font-family: var(--tf-font-family);
+  font-size: var(--tf-font-size-preset-select, 11.5px);
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  outline: none;
+  box-sizing: border-box;
+  transform: translate(0, 0);
+  transition: transform var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              box-shadow var(--tf-anim-duration, 0.12s) var(--tf-anim-easing, cubic-bezier(0.2, 0, 0, 1)),
+              background-color var(--tf-anim-duration, 0.12s) ease;
+}
+
+.tf-select-trigger:hover:not(:disabled) {
+  transform: translate(var(--tf-neo-lift-mini, -2px), var(--tf-neo-lift-mini, -2px));
+  box-shadow: var(--tf-neo-shadow-mini, 2px 2px 0px #000000);
+  background-color: var(--tf-preset-dropdown-hover, #60A5FA);
+}
+
+.tf-select-trigger:disabled {
+  opacity: 0.5;
+  cursor: default;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.tf-select-trigger:active,
+.tf-select-trigger.is-open {
+  transform: translate(0, 0);
+  box-shadow: 0px 0px 0px #000000;
+  background-color: var(--tf-preset-dropdown-bg, #3B82F6);
+}
+
+.tf-select-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.tf-select-chevron {
+  flex-shrink: 0;
+  color: var(--tf-preset-dropdown-text, #000000);
+  transition: transform 0.15s ease;
+}
+
+.tf-select-trigger.is-open .tf-select-chevron {
+  transform: rotate(180deg);
+}
+
+/* Card Flutuante do Menu Suspenso */
+.tf-select-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 100%;
+  min-width: 180px;
+  background-color: var(--tf-preset-menu-bg, #DBEAFE);
+  border: var(--tf-neo-border-w, 2px) solid #000000;
+  border-radius: var(--tf-neo-radius-sm, 4px);
+  box-shadow: 4px 4px 0px 0px #000000;
+  padding: 4px;
+  z-index: 9999;
+  max-height: 220px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.tf-select-menu.is-open {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tf-select-item {
+  padding: 6px 10px;
+  border-radius: 3px;
+  font-family: var(--tf-font-family);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--tf-preset-menu-text, #000000);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.1s ease, color 0.1s ease;
+  user-select: none;
+}
+
+.tf-select-item:hover {
+  background-color: var(--tf-preset-menu-hover-bg, #3B82F6);
+  color: var(--tf-preset-menu-hover-text, #FFFFFF);
+}
+
+.tf-select-item.is-selected {
+  background-color: var(--tf-preset-menu-selected-bg, #2563EB);
+  color: #FFFFFF;
+}
+
+.tf-select-item-check {
+  font-weight: 900;
+  font-size: 11px;
+  margin-left: 6px;
+}
+

@@ -287,6 +287,37 @@ $.global.aeft_checkUnusedComps = function (configJsonString) {
             }
         }
 
+        // Passo 3: Identificar midias (FootageItem) nao utilizadas em nenhuma composicao ativa
+        var unusedMediaCount = 0;
+        for (var fIdx = 1; fIdx <= app.project.numItems; fIdx++) {
+            var fItem = app.project.item(fIdx);
+            if (!(fItem instanceof FootageItem)) {
+                continue;
+            }
+            var mediaAlreadyInUnused = (
+                existingUnusedFolder &&
+                (fItem.parentFolder === existingUnusedFolder || isInsideFolder(fItem, existingUnusedFolder))
+            );
+            if (mediaAlreadyInUnused) {
+                continue;
+            }
+            var usedInActiveComp = false;
+            if (fItem.usedIn && fItem.usedIn.length > 0) {
+                for (var fu = 0; fu < fItem.usedIn.length; fu++) {
+                    var uComp = fItem.usedIn[fu];
+                    if (uComp && !unusedCompMap[uComp.id]) {
+                        usedInActiveComp = true;
+                        break;
+                    }
+                }
+            }
+            if (!usedInActiveComp) {
+                toMove.push(fItem);
+                unusedMediaCount++;
+                notUsedCount++;
+            }
+        }
+
         // Mover itens identificados para a pasta "Nunca Usadas"
         var movedCount = 0;
         if (toMove.length > 0) {
@@ -313,6 +344,8 @@ $.global.aeft_checkUnusedComps = function (configJsonString) {
             emptyCount +
             ', "notUsedCount": ' +
             notUsedCount +
+            ', "unusedMediaCount": ' +
+            unusedMediaCount +
             "}"
         );
     } catch (err) {
