@@ -6,4 +6,4 @@ _backup/
 backups/
 tools/studio/.browser-test/
 tools/studio/preview-test.png
-
+/.tmp-edge-studio-check/

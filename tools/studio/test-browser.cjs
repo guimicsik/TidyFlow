@@ -1,8 +1,8 @@
 /* Verificação local via Edge headless em localhost:9333; não salva alterações. */
 const fs = require('fs');
 (async function () {
-  const pages = await (await fetch('http://localhost:9333/json/list')).json();
-  const ws = new WebSocket(pages.find(p => p.type === 'page').webSocketDebuggerUrl);
+  const target = await (await fetch('http://localhost:9333/json/new?about:blank', {method:'PUT'})).json();
+  const ws = new WebSocket(target.webSocketDebuggerUrl);
   await new Promise(resolve => ws.addEventListener('open', resolve, {once:true}));
   let serial = 0;
   const pending = new Map();
@@ -13,10 +13,29 @@ const fs = require('fs');
     if (pending.has(message.id)) { pending.get(message.id)(message); pending.delete(message.id); }
   });
   function call(method, params = {}) { return new Promise(resolve => {const id=++serial; pending.set(id,resolve); ws.send(JSON.stringify({id,method,params}));}); }
+  try {
+    await verify(call, errors);
+  } finally {
+    ws.close();
+    await fetch('http://localhost:9333/json/close/' + target.id);
+  }
+})().catch(e=>{console.error(e);process.exit(1);});
+
+
+async function verify(call, errors) {
   await call('Runtime.enable');
   await call('Emulation.setDeviceMetricsOverride',{width:1290,height:1000,deviceScaleFactor:1,mobile:false});
-  await call('Page.navigate',{url:'http://localhost:5173/studio'});
-  await new Promise(resolve => setTimeout(resolve,2500));
+  await call('Page.navigate',{url:process.env.STUDIO_TEST_URL || 'http://localhost:5173/studio'});
+  const deadline = Date.now() + 15000;
+  while (true) {
+    const ready = await call('Runtime.evaluate', {expression: `
+      !!document.getElementById('canvasPanel') && ['frameMain','frameEditor','frameCollect','frameOverlays'].every(id =>
+        document.getElementById(id)?.contentDocument?.getElementById('studio-helper-style'))
+    `});
+    if (ready.result?.result.value) break;
+    if (Date.now() >= deadline) throw new Error('O Studio e suas quatro prévias não inicializaram em 15 segundos.');
+    await new Promise(resolve => setTimeout(resolve,100));
+  }
   const check = await call('Runtime.evaluate',{expression:`(async () => {
     document.getElementById('chkAutoSave').checked=false;
     const p=document.getElementById('canvasPanel'); p.value='editor'; p.dispatchEvent(new Event('change'));
@@ -36,10 +55,11 @@ const fs = require('fs');
     rowField.value='#123456'; rowField.dispatchEvent(new Event('change'));
     doc.querySelector('.prefix-preview').click();
     const prefixEditable=!!document.querySelector('#individualDesign .st-individual-colors') && document.querySelector('#individualDesign strong').textContent.includes('01_');
-    await new Promise(resolve=>setTimeout(resolve,250));
+    await Promise.all(Array.from(doc.querySelectorAll('.tree-row')).flatMap(row => {
+      doc.defaultView.getComputedStyle(row).backgroundColor;
+      return row.getAnimations().map(animation => animation.finished.catch(() => {}));
+    }));
     const rowColors=Array.from(doc.querySelectorAll('.tree-row')).map(r=>doc.defaultView.getComputedStyle(r).backgroundColor);
-    const rowRules=Array.from(doc.styleSheets).flatMap(s=>{try{return Array.from(s.cssRules).filter(r=>r.selectorText&&r.selectorText.includes('tree-row')).map(r=>r.cssText)}catch(e){return []}});
-    const oldRules=Array.from(doc.styleSheets).flatMap(s=>{try{return Array.from(s.cssRules).filter(r=>r.cssText.includes('folder-row')).map(r=>r.cssText)}catch(e){return []}});
     const overlays=document.getElementById('frameOverlays').contentDocument;
     const collect=document.getElementById('frameCollect').contentDocument;
     const main=document.getElementById('frameMain').contentDocument;
@@ -105,14 +125,68 @@ const fs = require('fs');
     document.getElementById('canvasPan').click();
     const panWorks=document.getElementById('framesStage').classList.contains('st-canvas-pan-active');
     document.getElementById('canvasPan').click();
-    const action=collect.querySelector('.collect-action-btn');
-    collect.body.classList.add('tf-force-hover');
-    return {width:doc.defaultView.innerWidth,tagColor:doc.defaultView.getComputedStyle(tag).backgroundColor,tagStaticByDefault,tagMotionRule,mainEditable,mainColorApplied,prefixEditable,structureEditable,collectEditable,collectColorApplied,missingIdentity,folderKeys,galleryCards,galleryFits,galleryCardsKeepSize,visibleOverlays,overlayEditable,statePreviewWorks,shadowAxes,effectsStacked,sliderApplied,preciseShadowApplied,preciseOpacityApplied,manualOpens,effectApplied,resetKeepsState,zoomWorks,fitWorks,wheelWorks,panWorks,rowColors:[...new Set(rowColors)],oldRules:oldRules.slice(0,4),rowRules:rowRules.slice(-5),computedRowToken:doc.defaultView.getComputedStyle(firstRow).getPropertyValue('--tf-editor-row-bg'),rootRow:doc.documentElement.style.getPropertyValue('--tf-editor-row-bg'),rowValue:rowField.value,rowRule:doc.getElementById('studio-individual-design').textContent.slice(0,200),rowKey:firstRow.getAttribute('data-tf-design'),rowInline:firstRow.getAttribute('style'),rowMatches:firstRow.matches('html body [data-tf-design="folder-row"]'),cards:overlays.querySelectorAll('.st-overlay-item').length,individual:!!field,collectHover:collect.defaultView.getComputedStyle(action).backgroundColor};
+    return {
+      tagStaticByDefault, tagMotionRule, mainEditable, mainColorApplied, prefixEditable,
+      structureEditable, collectEditable, collectColorApplied, missingIdentity, folderKeys,
+      galleryCards, galleryFits, galleryCardsKeepSize, visibleOverlays, overlayEditable, statePreviewWorks,
+      shadowAxes, effectsStacked, sliderApplied, preciseShadowApplied, preciseOpacityApplied,
+      manualOpens, effectApplied, resetKeepsState, zoomWorks, fitWorks, wheelWorks, panWorks,
+      rowColors: [...new Set(rowColors)]
+    };
   })()`,awaitPromise:true,returnByValue:true});
+  if (check.result.exceptionDetails) throw new Error(check.result.exceptionDetails.exception.description);
   const value = check.result.result && check.result.result.value;
+  const manifest = fs.readFileSync(require('path').join(__dirname, '../../CSXS/manifest.xml'), 'utf8');
+  const actionCheck = await call('Runtime.evaluate',{expression:`(() => {
+    const editButton=document.getElementById('btnToggleEditMode');
+    if (/ON/.test(editButton.textContent)) editButton.click();
+    const main=document.getElementById('frameMain').contentDocument;
+    main.getElementById('btnOrganize').click();
+    const rollback=main.getElementById('btnRollback');
+    const label=rollback.querySelector('.btn-tile-label');
+    const panel=document.getElementById('canvasPanel');
+    panel.value='main';
+    panel.dispatchEvent(new Event('change'));
+    const width=document.getElementById('canvasWidth');
+    const xml = new DOMParser().parseFromString(${JSON.stringify(manifest)}, 'application/xml');
+    width.value=xml.querySelector('DispatchInfoList > Extension[Id="com.tidyflow"] Geometry > Size > Width').textContent;
+    width.dispatchEvent(new Event('change'));
+    function measureRollback() {
+      const button=rollback.getBoundingClientRect();
+      const range=main.createRange();
+      range.selectNodeContents(label);
+      const text=range.getBoundingClientRect();
+      return {left:button.left, fits:text.width>0 && text.left>=button.left-0.5 && text.right<=button.right+0.5};
+    }
+    const rest=measureRollback();
+    main.body.classList.add('tf-force-active');
+    const active=measureRollback();
+    main.body.classList.remove('tf-force-active');
+    return {status:main.getElementById('statusMsg').textContent.trim(),disabled:main.getElementById('btnOrganize').disabled,rollbackShift:Math.abs(active.left-rest.left),rollbackOverflow:!rest.fits || !active.fits};
+  })()`,returnByValue:true});
+  const actionValue = actionCheck.result.result && actionCheck.result.result.value;
+  if (!actionValue || actionValue.status || actionValue.disabled || actionValue.rollbackShift > 0.5 || actionValue.rollbackOverflow) throw new Error('Ação operacional ou rollback inválido no preview: ' + JSON.stringify(actionValue));
   if (!value || value.rowColors.length !== 1 || value.rowColors[0] !== 'rgb(18, 52, 86)' || !value.tagStaticByDefault || !value.tagMotionRule || !value.mainEditable || !value.mainColorApplied || !value.prefixEditable || !value.structureEditable || !value.collectEditable || !value.collectColorApplied || Object.values(value.missingIdentity).some(items=>items.length) || value.folderKeys.some(key=>!key) || value.galleryCards !== 10 || !value.galleryFits || !value.galleryCardsKeepSize || JSON.stringify(value.visibleOverlays) !== '["ov-reduce"]' || !value.overlayEditable || !value.statePreviewWorks || !value.shadowAxes || !value.effectsStacked || !value.sliderApplied || !value.preciseShadowApplied || !value.preciseOpacityApplied || !value.manualOpens || !value.effectApplied || !value.resetKeepsState || !value.zoomWorks || !value.fitWorks || !value.wheelWorks || !value.panWorks || errors.length) throw new Error('Prévia visual não corresponde ao esperado: ' + JSON.stringify({value,errors}));
   console.log(JSON.stringify({check:value,errors},null,2));
   const shot=await call('Page.captureScreenshot',{format:'png'});
-  fs.writeFileSync('tools/studio/preview-test.png',Buffer.from(shot.result.data,'base64'));
-  ws.close();
-})().catch(e=>{console.error(e);process.exitCode=1;});
+  fs.writeFileSync(require('path').join(__dirname, 'preview-test.png'),Buffer.from(shot.result.data,'base64'));
+  const multi = await call('Runtime.evaluate', {returnByValue:true, expression:`(() => {
+    document.getElementById('chkAutoSave').checked=false;
+    const edit=document.getElementById('btnToggleEditMode');
+    if (!/ON/.test(edit.textContent)) edit.click();
+    const main=document.getElementById('frameMain').contentDocument;
+    const first=main.getElementById('btnOrganize'), second=main.getElementById('btnRollback');
+    first.click();
+    second.dispatchEvent(new main.defaultView.MouseEvent('click',{bubbles:true,shiftKey:true}));
+    const chips=document.querySelectorAll('.st-multi-target-chip');
+    const palette=document.querySelector('.st-color-preset-chip');
+    palette.click();
+    const css=main.getElementById('studio-individual-design').sheet;
+    const color=document.querySelector('.st-individual-colors input[type="color"]').value;
+    const picker=document.createElement('span');
+    picker.style.backgroundColor=color;
+    return chips.length===2 && [first,second].every(button=>Array.from(css.cssRules).some(rule=>
+      rule.selectorText && button.matches(rule.selectorText) && rule.style.backgroundColor===picker.style.backgroundColor));
+  })()`});
+  if (multi.result.result.value !== true) throw new Error('Paleta na seleção múltipla: ' + JSON.stringify(multi.result));
+}

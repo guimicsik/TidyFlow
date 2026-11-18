@@ -22,7 +22,7 @@
   var btnMediaOnly = document.getElementById("btnMediaOnly");
   var chkSaveProject = document.getElementById("chkSaveProject");
   var chkDeleteEmptyFolders = document.getElementById("chkDeleteEmptyFolders");
-  var chkGroupBySourceFolder = document.getElementById("chkGroupBySourceFolder");
+  var btnCheckUnused = document.getElementById("btnCheckUnused");
   var btnRollback = document.getElementById("btnRollback");
   var rollbackModalBackdrop = document.getElementById("rollbackModalBackdrop");
   var btnRollbackSaveAndContinue = document.getElementById("btnRollbackSaveAndContinue");
@@ -85,7 +85,7 @@
     if (btnOpenPresetBuilder) btnOpenPresetBuilder.disabled = isBusy;
     if (chkSaveProject) chkSaveProject.disabled = isBusy;
     if (chkDeleteEmptyFolders) chkDeleteEmptyFolders.disabled = isBusy;
-    if (chkGroupBySourceFolder) chkGroupBySourceFolder.disabled = isBusy;
+    if (btnCheckUnused) btnCheckUnused.disabled = isBusy;
     if (btnRollback) btnRollback.disabled = isBusy;
   }
 
@@ -293,57 +293,7 @@
       if (chkSaveProject) {
         chkSaveProject.checked = savedSave !== null ? (savedSave === "true") : (s.saveProjectBefore !== false);
       }
-      if (chkGroupBySourceFolder) {
-        // Reflete o estado real das pastas (fonte única: regras do preset)
-        var anyOn = false, anyOff = false;
-        (function scan(nodes) {
-          for (var i = 0; i < (nodes || []).length; i++) {
-            if (nodes[i].rules && nodes[i].rules.groupBySourceFolder === false) anyOff = true;
-            else anyOn = true;
-            scan(nodes[i].children);
-          }
-        })(activePreset.tree);
-        chkGroupBySourceFolder.checked = (anyOn || anyOff) ? anyOn : (s.groupBySourceFolder !== false);
-      }
     } catch (e) { }
-
-    updateGroupSourceIndicator();
-  }
-
-  // Sinaliza quando alguma pasta do preset tem "Pasta de Origem" desativada nas Regras e Filtros
-  function updateGroupSourceIndicator() {
-    if (!chkGroupBySourceFolder) return;
-    var tile = chkGroupBySourceFolder.parentNode;
-    var note = document.getElementById("groupSourceNote");
-    var missing = [];
-    var total = 0;
-    function walk(nodes) {
-      for (var i = 0; i < (nodes || []).length; i++) {
-        var n = nodes[i];
-        total++;
-        if (n.rules && n.rules.groupBySourceFolder === false) missing.push(n.name);
-        walk(n.children);
-      }
-    }
-    if (activePreset) walk(activePreset.tree);
-
-    // Nenhuma pasta com a tag: desliga. Todas ou algumas: ligado (verde / amarelo)
-    if (total > 0) chkGroupBySourceFolder.checked = (missing.length < total);
-
-    if (missing.length && missing.length < total) {
-      tile.classList.add("partial");
-      if (note) {
-        note.style.display = "block";
-        note.textContent = "Atenção: " + (missing.length === 1 ? "a pasta " : "as pastas ") +
-          missing.join(", ") + " não usa(m) 'Pasta de Origem' nas Regras e Filtros.";
-      }
-    } else {
-      tile.classList.remove("partial");
-      if (note) {
-        note.style.display = "none";
-        note.textContent = "";
-      }
-    }
   }
 
   function persistTogglesToActivePreset() {
@@ -362,18 +312,6 @@
         localStorage.setItem(KEYS.deleteEmpty, chkDeleteEmptyFolders.checked ? "true" : "false");
       } catch (e) { }
     }
-    if (chkGroupBySourceFolder) {
-      activePreset.settings.groupBySourceFolder = chkGroupBySourceFolder.checked;
-      // O toggle global controla todas as pastas (regras por pasta têm prioridade no organizador)
-      var gv = chkGroupBySourceFolder.checked;
-      (function applyAll(nodes) {
-        for (var i = 0; i < (nodes || []).length; i++) {
-          if (!nodes[i].rules) nodes[i].rules = {};
-          nodes[i].rules.groupBySourceFolder = gv;
-          applyAll(nodes[i].children);
-        }
-      })(activePreset.tree);
-    }
 
     presetManager.savePreset(activePreset);
     // A árvore do Default é protegida: se o salvamento descartou estrutura,
@@ -382,7 +320,6 @@
       var saveWarning = presetManager.consumeSaveWarning();
       if (saveWarning) setStatus(saveWarning, "warning");
     }
-    updateGroupSourceIndicator();
     // savePreset() ja dispara notifyPresetsUpdated (invalida cache e avisa o editor);
     // chamar de novo aqui duplicava o evento com.tidyflow.presetsUpdated.
   }
@@ -403,9 +340,6 @@
   }
   if (chkDeleteEmptyFolders) {
     chkDeleteEmptyFolders.addEventListener("change", persistTogglesToActivePreset);
-  }
-  if (chkGroupBySourceFolder) {
-    chkGroupBySourceFolder.addEventListener("change", persistTogglesToActivePreset);
   }
 
   // Abrir o Preset Builder SEMPRE em uma Janela Separada Flutuante
@@ -640,7 +574,6 @@
       activePreset.settings.saveProjectBefore = chkSaveProject ? chkSaveProject.checked : true;
     }
     activePreset.settings.deleteEmptyFolders = chkDeleteEmptyFolders ? chkDeleteEmptyFolders.checked : true;
-    activePreset.settings.groupBySourceFolder = chkGroupBySourceFolder ? chkGroupBySourceFolder.checked : true;
 
     loadOrReloadHostScripts(function () {
       csInterface.evalScript(
@@ -785,6 +718,61 @@
   btnMediaOnly.addEventListener("click", function () {
     runOrganizer('"media_only"', "Organizando mídias...");
   });
+
+  if (btnCheckUnused) {
+    btnCheckUnused.addEventListener("click", function () {
+      setBusy(true);
+      setStatus("Verificando mídias e " + compWordLowerPlural + " não usadas...", "");
+
+      activePreset = presetManager.getActivePreset();
+      if (!activePreset.settings) activePreset.settings = {};
+
+      loadOrReloadHostScripts(function () {
+        csInterface.evalScript(
+          "$.global.checkUnusedComps(" +
+          JSON.stringify(JSON.stringify(activePreset)) +
+          ")",
+          function (result) {
+            setBusy(false);
+
+            if (!result || result === "EvalScript error.") {
+              setStatus("Erro ao executar verificação no " + hostAppName + ".", "error");
+              return;
+            }
+
+            try {
+              var response = JSON.parse(result);
+              if (response && response.success) {
+                var moved = response.movedCount || 0;
+                var empty = response.emptyCount || 0;
+                var unusedMedia = response.unusedMediaCount || 0;
+                var unusedComps = Math.max(0, moved - empty - unusedMedia);
+
+                if (moved === 0) {
+                  setStatus("Nenhuma mídia ou " + compWordSingular + " não usada encontrada.", "success");
+                } else {
+                  var parts = [];
+                  if (unusedComps > 0) parts.push(compWordLowerPlural + " não usadas: " + unusedComps);
+                  if (empty > 0) parts.push("vazias: " + empty);
+                  if (unusedMedia > 0) parts.push("mídias: " + unusedMedia);
+                  setStatus(
+                    "Movidos para 'Nunca Usadas': " + moved + (parts.length ? " (" + parts.join(", ") + ")" : ""),
+                    "success"
+                  );
+                  syncRollbackSnapshotToLocalStorage();
+                }
+              } else {
+                var errMsg = (response && response.error) || "Falha desconhecida.";
+                setStatus("Erro: " + errMsg, "error");
+              }
+            } catch (e) {
+              setStatus("Resposta inválida do " + hostAppName + ".", "error");
+            }
+          }
+        );
+      });
+    });
+  }
 
   function openRollbackModal() {
     if (rollbackModalBackdrop) {

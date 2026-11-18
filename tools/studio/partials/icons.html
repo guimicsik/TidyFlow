@@ -1,0 +1,28 @@
+<!-- ==============================================================
+     ABA 5: ÍCONES
+     ============================================================== -->
+<section class="st-pane" id="tab-icons">
+  <div class="st-card">
+    <h3 class="st-card-title">1. Escala Global dos Ícones</h3>
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho dos Ícones</label>
+        <span class="st-val" data-val-for="--tf-icon-size">14px</span>
+      </div>
+      <input type="range" min="10" max="28" step="1" data-token="--tf-icon-size" data-unit="px">
+    </div>
+  </div>
+
+  <div class="st-card">
+    <h3 class="st-card-title">2. Aplicar / Trocar Ícone</h3>
+    <div class="st-field">
+      <label>Escolha o botão do painel selecionado:</label>
+      <select id="selIconTarget" class="st-select">
+        <!-- Populado dinamicamente conforme o painel ativo -->
+      </select>
+    </div>
+
+    <p class="st-help">Clique em um ícone abaixo para aplicá-lo imediatamente ao botão selecionado:</p>
+    <div id="iconCatalogGrid" class="st-icon-grid"></div>
+  </div>
+</section>

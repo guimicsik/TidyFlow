@@ -271,6 +271,7 @@
   function createSvgIcon(type) {
     var span = document.createElement("span");
     span.className = "collect-tree-icon collect-tree-icon--" + type;
+    span.setAttribute("data-tf-design", type === "folder" ? "collect-tree-folder-icon" : "collect-tree-comp-icon");
     if (type === "folder") {
       span.innerHTML = '<svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">' +
         '<path d="M1.5 4A1.5 1.5 0 0 1 3 2.5h3.2l1.6 1.8H13A1.5 1.5 0 0 1 14.5 5.8v6.7a1.5 1.5 0 0 1-1.5 1.5H3a1.5 1.5 0 0 1-1.5-1.5V4z" fill="rgba(255,255,255,0.06)"/>' +
@@ -288,6 +289,7 @@
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "collect-tree-chevron-btn";
+    btn.setAttribute("data-tf-design", "collect-tree-chevron");
     btn.title = isCollapsed ? "Expandir pasta" : "Recolher pasta";
     btn.setAttribute("aria-label", isCollapsed ? "Expandir pasta" : "Recolher pasta");
     btn.innerHTML = '<svg class="collect-chevron-icon' + (isCollapsed ? ' is-collapsed' : '') + '" viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
@@ -314,6 +316,7 @@
 
       var folderRow = document.createElement("div");
       folderRow.className = "collect-tree-row collect-tree-row--folder";
+      folderRow.setAttribute("data-tf-design", "collect-tree-folder-row");
       folderRow.style.paddingLeft = (6 + level * 18) + "px";
       folderRow.title = folderNode.name + " (" + counts.selected + "/" + counts.total + " selecionadas)";
 
@@ -325,6 +328,7 @@
       var folderChk = document.createElement("input");
       folderChk.type = "checkbox";
       folderChk.className = "collect-tree-check";
+      folderChk.setAttribute("data-tf-design", "collect-tree-checkbox");
       if (counts.selected === counts.total && counts.total > 0) {
         folderChk.checked = true;
         folderChk.indeterminate = false;
@@ -364,12 +368,14 @@
       // Nome da pasta
       var nameSpan = document.createElement("span");
       nameSpan.className = "collect-tree-name";
+      nameSpan.setAttribute("data-tf-design", "collect-tree-folder-name");
       nameSpan.textContent = folderNode.name;
       folderRow.appendChild(nameSpan);
 
       // Badge de contagem
       var countBadge = document.createElement("span");
       countBadge.className = "collect-tree-count";
+      countBadge.setAttribute("data-tf-design", "collect-tree-count");
       countBadge.textContent = (counts.selected === counts.total) ? ("(" + counts.total + ")") : ("(" + counts.selected + "/" + counts.total + ")");
       folderRow.appendChild(countBadge);
 
@@ -406,6 +412,7 @@
       var target = node.items[i];
       var itemRow = document.createElement("label");
       itemRow.className = "collect-tree-row collect-tree-row--item";
+      itemRow.setAttribute("data-tf-design", "collect-tree-item-row");
       itemRow.style.paddingLeft = (6 + level * 18) + "px";
       itemRow.title = target.name || (compWord + " " + target.id);
 
@@ -418,6 +425,7 @@
       var itemChk = document.createElement("input");
       itemChk.type = "checkbox";
       itemChk.className = "collect-tree-check";
+      itemChk.setAttribute("data-tf-design", "collect-tree-checkbox");
       itemChk.checked = !!target.selected;
 
       (function (tObj, iChk) {
@@ -443,6 +451,7 @@
       // Nome
       var compName = document.createElement("span");
       compName.className = "collect-tree-name";
+      compName.setAttribute("data-tf-design", "collect-tree-comp-name");
       compName.textContent = target.name || (compWord + " " + target.id);
       itemRow.appendChild(compName);
 

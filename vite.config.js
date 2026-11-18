@@ -2,6 +2,8 @@ const { defineConfig } = require('vite');
 const fs = require('node:fs');
 const path = require('node:path');
 
+const { renderStudioHtml } = require('./tools/studio/render-html.cjs');
+
 const REPO_ROOT = __dirname;
 const TOKENS_PATH = path.join(REPO_ROOT, 'client', 'theme', 'tokens.css');
 const THEME_CSS_PATH = path.join(REPO_ROOT, 'client', 'theme.css');
@@ -9,6 +11,12 @@ const INDEX_HTML_PATH = path.join(REPO_ROOT, 'client', 'index.html');
 const EDITOR_HTML_PATH = path.join(REPO_ROOT, 'client', 'tree_editor.html');
 const COLLECT_HTML_PATH = path.join(REPO_ROOT, 'client', 'collect.html');
 const STUDIO_DIR = path.join(REPO_ROOT, 'tools', 'studio');
+
+const studioEntries = new Map([
+  ['/studio', 'studio.html'], ['/studio/', 'studio.html'], ['/studio.html', 'studio.html'],
+  ['/studio.js', 'studio.js'], ['/studio.css', 'studio.css'],
+  ['/design-model.js', 'design-model.cjs'], ['/overlays.html', 'overlays.html']
+]);
 
 const REQUIRED_PANEL_IDS = [
   'presetSelect',
@@ -20,9 +28,8 @@ const REQUIRED_PANEL_IDS = [
   'btnOpenCollect',
   'chkSaveProject',
   'chkDeleteEmptyFolders',
-  'chkGroupBySourceFolder',
+  'btnCheckUnused',
   'btnRollback',
-  'groupSourceNote',
   'statusMsg'
 ];
 
@@ -38,6 +45,7 @@ const REQUIRED_EDITOR_IDS = [
   'btnOpenPresetsFolder',
   'btnAddTopFolder',
   'chkUsePrefixNumbering',
+  'chkGroupBySourceFolder',
   'chkSeparateAudioCategories',
   'chkNumberAudioCategories',
   'treeRootList',
@@ -430,36 +438,22 @@ function tidyflowStudioPlugin() {
           return;
         }
 
-        // Serve os arquivos estáticos de tools/studio/
-        if (
-          pathname === '/studio' ||
-          pathname === '/studio/' ||
-          pathname === '/studio.html' ||
-          pathname === '/studio.css' ||
-          pathname === '/studio.js' ||
-          pathname === '/design-model.js' ||
-          pathname === '/overlays.html'
-        ) {
-          let fileName = 'studio.html';
-          let contentType = 'text/html; charset=utf-8';
-          if (pathname === '/overlays.html') {
-            fileName = 'overlays.html';
-            contentType = 'text/html; charset=utf-8';
-          } else if (pathname.endsWith('.css')) {
-            fileName = 'studio.css';
-            contentType = 'text/css; charset=utf-8';
-          } else if (pathname.endsWith('.js')) {
-            fileName = pathname === '/design-model.js' ? 'design-model.cjs' : 'studio.js';
-            contentType = 'application/javascript; charset=utf-8';
-          }
-          const filePath = path.join(STUDIO_DIR, fileName);
-          if (fs.existsSync(filePath)) {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', contentType);
-            res.setHeader('Cache-Control', 'no-store');
-            res.end(fs.readFileSync(filePath, 'utf8'));
+        // Somente entradas públicas e módulos de apresentação do Studio.
+        const studioAsset = /^\/studio\/(modules\/[a-z-]+\.js|styles\/[a-z-]+\.css)$/.exec(pathname);
+        const studioFile = studioAsset ? studioAsset[1] : studioEntries.get(pathname);
+        if (studioFile) {
+          const filePath = path.join(STUDIO_DIR, studioFile);
+          if (!fs.existsSync(filePath)) {
+            res.statusCode = 404;
+            res.end();
             return;
           }
+          const mime = studioFile.endsWith('.html') ? 'text/html'
+            : studioFile.endsWith('.css') ? 'text/css' : 'application/javascript';
+          res.setHeader('Content-Type', mime + '; charset=utf-8');
+          res.setHeader('Cache-Control', 'no-store');
+          res.end(studioFile === 'studio.html' ? renderStudioHtml(STUDIO_DIR) : fs.readFileSync(filePath));
+          return;
         }
 
         if (pathname === '/api/studio/window-size' && req.method === 'POST') {
@@ -510,13 +504,10 @@ function tidyflowStudioPlugin() {
             const body = await readJsonBody(req);
             const designPath = path.join(REPO_ROOT, 'client/theme/studio-design.json');
             const designs = body.designs || JSON.parse(fs.readFileSync(designPath, 'utf8'));
-            const designCss = require('./tools/studio/design-model.cjs').css(designs);
+            const model = require('./tools/studio/design-model.cjs');
+            const designCss = model.css(designs);
             if (body.tokens && typeof body.tokens === 'object') {
-              const shadowRules = Object.keys(body.tokens).filter(key => /^--tf-studio-shadow-[A-Za-z][A-Za-z0-9_-]*$/.test(key)).map(key => {
-                const id = key.slice('--tf-studio-shadow-'.length);
-                return `#${id}:hover, body.tf-force-hover #${id} { box-shadow: var(${key}) !important; }`;
-              });
-              fs.writeFileSync(path.join(REPO_ROOT, 'client', 'theme', 'studio-overrides.css'), '/* Design Studio: regras individuais. */\n' + shadowRules.join('\n') + '\n' + designCss + '\n', 'utf8');
+              fs.writeFileSync(path.join(REPO_ROOT, 'client', 'theme', 'studio-overrides.css'), '/* Design Studio: regras individuais. */\n' + model.shadowCss(body.tokens) + '\n' + designCss + '\n', 'utf8');
               fs.writeFileSync(designPath, JSON.stringify(designs, null, 2) + '\n', 'utf8');
               const currentCss = fs.readFileSync(TOKENS_PATH, 'utf8');
               const nextCss = updateTokensInCss(currentCss, body.tokens);

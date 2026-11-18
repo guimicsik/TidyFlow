@@ -266,7 +266,7 @@ body.tf-force-active .collect-action-btn {
 }
 
 .collect-tree-check:indeterminate {
-  background-color: var(--tf-neo-primary-bg, #3B82F6);
+  background-color: #FB923C;
   border-color: #000000;
 }
 
@@ -528,7 +528,7 @@ body.tf-force-active .collect-action-btn {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  cursor: pointer;
+  cursor: default;
   min-height: 18px;
   min-width: 0;
   color: #dedede;
@@ -538,10 +538,6 @@ body.tf-force-active .collect-action-btn {
   white-space: normal;
   word-break: normal;
   user-select: none;
-}
-
-.collect-check:hover:not(.is-disabled) {
-  color: #ffffff;
 }
 
 .collect-check span:not(.toggle-slider) {

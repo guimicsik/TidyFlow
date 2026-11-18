@@ -14,19 +14,19 @@
   /* 1. Tipografia & Pesos (Google Fonts: Archivo) */
   --tf-font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --tf-font-weight-bold: 700;
-  --tf-font-weight-medium: 600;
+  --tf-font-weight-medium: 700;
   --tf-font-weight-hero: 900;
   --tf-font-weight-tile: 600;
   --tf-font-weight-toggle: 600;
   --tf-font-weight-rollback: 800;
 
   /* Tamanhos de Fonte */
-  --tf-font-size-hero: 33.5px;
+  --tf-font-size-hero: 33px;
   --tf-font-size-tile: 14px;
   --tf-font-size-toggle: 14px;
-  --tf-font-size-rollback: 14px;
-  --tf-font-size-preset-label: 13px;
-  --tf-font-size-preset-select: 13px;
+  --tf-font-size-rollback: 16.5px;
+  --tf-font-size-preset-label: 12.5px;
+  --tf-font-size-preset-select: 12.5px;
   --tf-font-size-modal-btn: 12px;
 
   /* Estilos Tipográficos Extras */
@@ -57,16 +57,16 @@
 
   --tf-neo-danger-bg: #EF4444;
   --tf-neo-danger-text: #000000;
-  --tf-neo-danger-hover: #F87171;
+  --tf-neo-danger-hover: #DC2626;
   --tf-neo-danger-active: #DC2626;
 
   --tf-neo-primary-bg: #3B82F6;
   --tf-neo-primary-text: #FFFFFF;
   --tf-neo-primary-hover: #60A5FA;
 
-  --tf-neo-toggle-off-bg: #262626;
+  --tf-neo-toggle-off-bg: #27272A;
   --tf-neo-toggle-off-text: #F4F4F5;
-  --tf-neo-toggle-off-hover: #323238;
+  --tf-neo-toggle-off-hover: #3F3F46;
 
   --tf-neo-toggle-on-bg: #3B82F6;
   --tf-neo-toggle-on-text: #FFFFFF;
@@ -77,7 +77,7 @@
 
   --tf-neo-ghost-bg: #262626;
   --tf-neo-ghost-text: #E4E4E7;
-  --tf-neo-ghost-hover: #3E84F6;
+  --tf-neo-ghost-hover: #60A5FA;
 
   --tf-neo-success-bg: #10B981;
   --tf-neo-success-text: #000000;
@@ -92,13 +92,13 @@
   --tf-neo-switch-thumb-bg: #FFFFFF;
   --tf-neo-switch-thumb-border: #000000;
   --tf-neo-switch-check-color: #000000;
-  --tf-checkbox-size: 19px;
-  --tf-checkbox-radius: 5px;
+  --tf-checkbox-size: 18px;
+  --tf-checkbox-radius: 4px;
 
   /* 3. Dropdown e Barra de Presets */
-  --tf-preset-dropdown-width-editor: 220px;
+  --tf-preset-dropdown-width-editor: 180px;
   --tf-preset-dropdown-width-panel: 100%;
-  --tf-preset-dropdown-height: 30px;
+  --tf-preset-dropdown-height: 28px;
   --tf-preset-bar-bg: #212121;
   --tf-preset-bar-border: #000000;
   --tf-preset-dropdown-bg: #3B82F6;
@@ -119,7 +119,7 @@
   /* 5. Geometria, Animação & Física dos Estados (Rest, Hover, Click) */
   --tf-neo-border-color: #000000;
   --tf-neo-border-w: 2px;
-  --tf-neo-radius: 5px;
+  --tf-neo-radius: 6px;
   --tf-neo-radius-sm: 4px;
 
   /* Estado Rest (Repouso) */
@@ -130,7 +130,7 @@
 
   /* Estado Hover (Elevação e Sombra Rígida) */
   --tf-neo-shadow-hero: 4px 4px 0px #000000;
-  --tf-neo-shadow-tile: 2px 2px 0px #000000;
+  --tf-neo-shadow-tile: 3px 3px 0px #000000;
   --tf-neo-shadow-mini: 2px 2px 0px #000000;
 
   --tf-neo-lift-hero: -4px;
@@ -148,51 +148,71 @@
   --tf-anim-easing: cubic-bezier(0.2, 0, 0, 1);
 
   /* 6. Layout, Gaps, Alturas & Posicionamento */
-  --tf-panel-padding: 7px;
+  --tf-panel-padding: 14px;
   --tf-section-gap: 11px;
-  --tf-field-group-gap: 4px;
-  --tf-grid-gap: 2px;
-  --tf-toggles-gap: 2px;
-  --tf-options-gap: 3px;
+  --tf-field-group-gap: 6px;
+  --tf-grid-gap: 8px;
+  --tf-toggles-gap: 8px;
+  --tf-options-gap: 8px;
   --tf-preset-bar-gap: 6px;
   --tf-preset-bar-padding: 6px 8px;
 
-  --tf-hero-height: 80px;
-  --tf-tile-height: 62px;
+  --tf-hero-height: 98px;
+  --tf-tile-height: 68px;
   --tf-toggle-height: 68px;
-  --tf-rollback-height: 56px;
+  --tf-rollback-height: 68px;
 
   --tf-rollback-justify: center;
-  --tf-rollback-width: 50%;
+  --tf-rollback-width: calc((100% - 16px) / 3);
   --tf-rollback-margin-top: 4px;
   --tf-toggle-check-display: none;
-  --tf-icon-size: 18px;
+  --tf-icon-size: 15px;
 
   /* 7. Preset Builder (Janela Editor) */
   --tf-editor-bg: #1e1e1e;
   --tf-editor-topbar-bg: #252525;
   --tf-editor-tree-bg: #181818;
-  --tf-editor-row-bg: #212121;
+  --tf-editor-row-bg: #121214;
   --tf-editor-row-border: #303030;
   --tf-editor-footer-bg: #252525;
-  --tf-editor-padding: 6px;
+  --tf-editor-padding: 10px;
 
   /* Preset Builder: Toolbar de Ícones do Topo (Totalmente Desacoplada do Rodapé) */
   --tf-toolbar-icon-bg: #262626;
-  --tf-toolbar-icon-hover: #EF4444;
+  --tf-toolbar-icon-hover: #3E84F6;
   --tf-toolbar-icon-active: #1e1e1e;
   --tf-toolbar-icon-text: #E4E4E7;
 
   /* Preset Builder: Botão Fechar do Rodapé */
-  --tf-btn-close-bg: #262626;
-  --tf-btn-close-hover: #EF4444;
+  --tf-btn-close-bg: #EF4444;
+  --tf-btn-close-hover: #DC2626;
   --tf-btn-close-active: #B91C1C;
   --tf-btn-close-text: #FFFFFF;
 
+  /* Preset Builder: Botões Independentes de Numeração por Pasta (01_ / OFF) */
+  --tf-editor-prefix-on-bg: #1D4ED8;
+  --tf-editor-prefix-on-hover: #2152E5;
+  --tf-editor-prefix-on-active: #1E40AF;
+  --tf-editor-prefix-on-text: #FFFFFF;
+  --tf-editor-prefix-on-border: #000000;
+
+  --tf-editor-prefix-off-bg: #27272A;
+  --tf-editor-prefix-off-hover: #3F3F46;
+  --tf-editor-prefix-off-active: #18181B;
+  --tf-editor-prefix-off-text: #F4F4F5;
+  --tf-editor-prefix-off-border: #52525B;
+
+  /* Preset Builder: Botões Independentes das Pastas (↑ ↓ + −) */
+  --tf-editor-row-btn-bg: #262626;
+  --tf-editor-row-btn-hover: #225CFF;
+  --tf-editor-row-btn-active: #1E1E1E;
+  --tf-editor-row-btn-text: #E4E4E7;
+  --tf-editor-row-btn-border: #000000;
+
   /* 8. Collect Files (Project Manager) */
-  --tf-collect-bg: #181818;
-  --tf-collect-box-bg: #212121;
-  --tf-collect-box-border: #000000;
+  --tf-collect-bg: #202020;
+  --tf-collect-box-bg: #242424;
+  --tf-collect-box-border: #363636;
   --tf-collect-box-padding: 8px 12px;
   --tf-collect-gap: 9px;
   --tf-collect-options-gap-y: 10px;
@@ -200,9 +220,9 @@
   --tf-collect-btn-ok-bg: #3B82F6;
   --tf-collect-btn-ok-hover: #60A5FA;
   --tf-collect-btn-ok-text: #000000;
-  --tf-collect-btn-cancel-bg: #262626;
-  --tf-collect-btn-cancel-border: #000000;
-  --tf-collect-btn-cancel-text: #E4E4E7;
+  --tf-collect-btn-cancel-bg: transparent;
+  --tf-collect-btn-cancel-border: #555555;
+  --tf-collect-btn-cancel-text: #d4d4d4;
 
   /* 9. Aliases de Compatibilidade */
   --tf-accent: var(--tf-neo-primary-bg, #3B82F6);
@@ -211,14 +231,14 @@
 
   /* Tokens Adicionados via Design Studio */
   --tf-editor-tree-gap: 4px;
-  --tf-editor-tag-type-bg: #2f353d;
-  --tf-editor-tag-type-text: #b8d4f2;
-  --tf-editor-tag-ext-bg: #2b332c;
-  --tf-editor-tag-ext-text: #9cd6a4;
-  --tf-editor-tag-fallback-bg: #3d3122;
-  --tf-editor-tag-fallback-text: #f0bc74;
-  --tf-editor-tag-name-bg: #382a3d;
-  --tf-editor-tag-name-text: #dda5f0;
+  --tf-editor-tag-type-bg: #0000ff;
+  --tf-editor-tag-type-text: #ffffff;
+  --tf-editor-tag-ext-bg: #ffffff;
+  --tf-editor-tag-ext-text: #000000;
+  --tf-editor-tag-fallback-bg: #000080;
+  --tf-editor-tag-fallback-text: #ffffff;
+  --tf-editor-tag-name-bg: #ffffff;
+  --tf-editor-tag-name-text: #000000;
 }
 
 
@@ -258,6 +278,45 @@
 /* ==========================================================================
    Ícones em Botões (.tf-btn-icon)
    ========================================================================== */
+/* Layout salvo pelo Studio; o rótulo continua disponível para acessibilidade. */
+button[data-tf-icon-size] > .tf-btn-icon,
+button[data-tf-icon-size] > svg {
+  width: var(--tf-button-icon-size) !important;
+  height: var(--tf-button-icon-size) !important;
+  min-width: var(--tf-button-icon-size) !important;
+  min-height: var(--tf-button-icon-size) !important;
+  max-width: none !important;
+  max-height: none !important;
+  flex-shrink: 0;
+}
+button[data-tf-icon-mode], button[data-tf-icon-position] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+button[data-tf-icon-position="left"] { flex-direction: row !important; }
+button[data-tf-icon-position="right"] { flex-direction: row-reverse !important; }
+button[data-tf-icon-position="top"] { flex-direction: column !important; }
+button[data-tf-icon-position="bottom"] { flex-direction: column-reverse !important; }
+button[data-tf-icon-mode="text"] > .tf-btn-icon,
+button[data-tf-icon-mode="text"] > svg { display: none !important; }
+button[data-tf-icon-mode="only"] { gap: 0 !important; }
+button[data-tf-icon-mode="only"] > .tf-btn-label {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+}
+button[data-tf-icon-mode] > .tf-btn-icon,
+button[data-tf-icon-position] > .tf-btn-icon {
+  position: static !important;
+  margin: 0 !important;
+  transform: none !important;
+}
 .tf-btn-icon {
   display: inline-flex;
   align-items: center;
@@ -638,11 +697,19 @@ body.tf-force-hover .tf-toggle.active .tf-toggle__face {
   color: var(--tf-neo-toggle-partial-text);
 }
 
-.tf-toggle input[type="checkbox"]:disabled+.tf-toggle__face {
+.tf-toggle input[type="checkbox"]:disabled+.tf-toggle__face,
+.tf-toggle.is-disabled .tf-toggle__face {
+  background-color: var(--tf-neo-toggle-off-bg);
+  color: var(--tf-neo-toggle-off-text);
   opacity: 0.5;
   cursor: default;
   box-shadow: none !important;
   transform: none !important;
+}
+
+.tf-toggle input[type="checkbox"]:disabled+.tf-toggle__face::after,
+.tf-toggle.is-disabled .tf-toggle__face::after {
+  display: none !important;
 }
 
 /* ==========================================================================

@@ -1,0 +1,204 @@
+<!-- ==============================================================
+     ABA 4: GERAL, GAPS & POSICIONAMENTO (Grade Magnética por Painel)
+     ============================================================== -->
+<section class="st-pane" id="tab-layout">
+  <!-- Gaps: Painel Principal -->
+  <div class="st-card" data-panel-card="main">
+    <h3 class="st-card-title">1. Gaps &amp; Alturas — Painel Principal</h3>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Padding Interno da Janela</label>
+        <span class="st-val" data-val-for="--tf-panel-padding">6px</span>
+      </div>
+      <input type="range" min="4" max="28" step="1" data-token="--tf-panel-padding" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Gap entre Seções Principais</label>
+        <span class="st-val" data-val-for="--tf-section-gap">13px</span>
+      </div>
+      <input type="range" min="2" max="28" step="1" data-token="--tf-section-gap" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Gap entre os 3 Botões (Colunas)</label>
+        <span class="st-val" data-val-for="--tf-grid-gap">5px</span>
+      </div>
+      <input type="range" min="2" max="20" step="1" data-token="--tf-grid-gap" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Gap entre os 3 Toggles</label>
+        <span class="st-val" data-val-for="--tf-toggles-gap">5px</span>
+      </div>
+      <input type="range" min="2" max="20" step="1" data-token="--tf-toggles-gap" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Altura — Botão Hero</label>
+        <span class="st-val" data-val-for="--tf-hero-height">84px</span>
+      </div>
+      <input type="range" min="54" max="140" step="2" data-token="--tf-hero-height" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Altura — Tiles Secundários</label>
+        <span class="st-val" data-val-for="--tf-tile-height">70px</span>
+      </div>
+      <input type="range" min="44" max="110" step="2" data-token="--tf-tile-height" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Altura — Botão Desorganizar</label>
+        <span class="st-val" data-val-for="--tf-rollback-height">66px</span>
+      </div>
+      <input type="range" min="44" max="110" step="2" data-token="--tf-rollback-height" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <label>Alinhamento do Rollback</label>
+      <select class="st-select" data-token="--tf-rollback-justify">
+        <option value="flex-start">⬅ Alinhado à Esquerda</option>
+        <option value="center">⬌ Centralizado no Meio</option>
+        <option value="flex-end">➡ Alinhado à Direita</option>
+      </select>
+    </div>
+
+    <div class="st-field">
+      <label>Largura do Rollback</label>
+      <select class="st-select" data-token="--tf-rollback-width">
+        <option value="calc((100% - 16px) / 3)">1/3 (Mesma largura dos Tiles)</option>
+        <option value="50%">50% (Meia largura)</option>
+        <option value="100%">100% (Largura inteira)</option>
+      </select>
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Espaço Acima do Desorganizar</label>
+        <span class="st-val" data-val-for="--tf-rollback-margin-top">12px</span>
+      </div>
+      <input type="range" min="0" max="30" step="1" data-token="--tf-rollback-margin-top" data-unit="px">
+    </div>
+  </div>
+
+  <!-- Gaps: Preset Builder -->
+  <div class="st-card" data-panel-card="editor">
+    <h3 class="st-card-title">1. Gaps &amp; Dimensões — Preset Builder</h3>
+
+    <div class="st-field">
+      <div class="st-label-row"><label>Espaço entre pastas e níveis</label><span class="st-val" data-val-for="--tf-editor-tree-gap">4px</span></div>
+      <input type="range" min="0" max="32" step="1" data-token="--tf-editor-tree-gap" data-unit="px">
+    </div>
+
+    <h3 class="st-card-title">Cores das tags por categoria</h3>
+    <div class="st-inspector-grid-2">
+      <label>Tipo: fundo <input type="color" data-token="--tf-editor-tag-type-bg"></label>
+      <label>Tipo: texto <input type="color" data-token="--tf-editor-tag-type-text"></label>
+      <label>Comportamento: fundo <input type="color" data-token="--tf-editor-tag-ext-bg"></label>
+      <label>Comportamento: texto <input type="color" data-token="--tf-editor-tag-ext-text"></label>
+      <label>Fallback: fundo <input type="color" data-token="--tf-editor-tag-fallback-bg"></label>
+      <label>Fallback: texto <input type="color" data-token="--tf-editor-tag-fallback-text"></label>
+      <label>Nome: fundo <input type="color" data-token="--tf-editor-tag-name-bg"></label>
+      <label>Nome: texto <input type="color" data-token="--tf-editor-tag-name-text"></label>
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Padding da Área da Árvore</label>
+        <span class="st-val" data-val-for="--tf-editor-padding">10px</span>
+      </div>
+      <input type="range" min="4" max="24" step="1" data-token="--tf-editor-padding" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Largura do Dropdown de Presets</label>
+        <span class="st-val" data-val-for="--tf-preset-dropdown-width-editor">180px</span>
+      </div>
+      <input type="range" min="120" max="320" step="5" data-token="--tf-preset-dropdown-width-editor" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Altura do Gatilho do Dropdown</label>
+        <span class="st-val" data-val-for="--tf-preset-dropdown-height">28px</span>
+      </div>
+      <input type="range" min="22" max="38" step="1" data-token="--tf-preset-dropdown-height" data-unit="px">
+    </div>
+  </div>
+
+  <!-- Gaps: Collect Files -->
+  <div class="st-card" data-panel-card="collect">
+    <h3 class="st-card-title">1. Gaps &amp; Dimensões — Collect Files</h3>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Espaçamento Vertical das Opções (Gap Vertical)</label>
+        <span class="st-val" data-val-for="--tf-collect-options-gap-y">10px</span>
+      </div>
+      <input type="range" min="4" max="28" step="1" data-token="--tf-collect-options-gap-y" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Espaçamento Horizontal das Opções (Gap Horizontal)</label>
+        <span class="st-val" data-val-for="--tf-collect-options-gap-x">14px</span>
+      </div>
+      <input type="range" min="6" max="32" step="1" data-token="--tf-collect-options-gap-x" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Gap Geral entre as Caixas</label>
+        <span class="st-val" data-val-for="--tf-collect-gap">10px</span>
+      </div>
+      <input type="range" min="4" max="24" step="1" data-token="--tf-collect-gap" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho do Checkmark (.toggle-slider)</label>
+        <span class="st-val" data-val-for="--tf-checkbox-size">18px</span>
+      </div>
+      <input type="range" min="14" max="26" step="1" data-token="--tf-checkbox-size" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Arredondamento do Checkmark</label>
+        <span class="st-val" data-val-for="--tf-checkbox-radius">4px</span>
+      </div>
+      <input type="range" min="0" max="12" step="1" data-token="--tf-checkbox-radius" data-unit="px">
+    </div>
+  </div>
+
+  <!-- 2. Grade Magnética Drag-and-Drop (Específica por Painel) -->
+  <div class="st-card">
+    <h3 class="st-card-title">2. Grade Magnética (Ordem &amp; Drag-and-Drop)</h3>
+    <p class="st-help">Ative <strong>"✋ Arrastar Layout"</strong> no topo para arrastar com o mouse direto no preview, ou use as setas abaixo:</p>
+
+    <div id="magneticOrderContainer" class="st-order-section">
+      <!-- Populado dinamicamente para o painel selecionado -->
+    </div>
+  </div>
+
+  <!-- Slider de Gap entre Janelas (Modo Lado a Lado) -->
+  <div class="st-card">
+    <h3 class="st-card-title">3. Espaçamento Entre Janelas (Modo Lado a Lado)</h3>
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Distância entre os painéis</label>
+        <span class="st-val" id="valCanvasGap">24px</span>
+      </div>
+      <input type="range" min="8" max="64" step="2" id="rngCanvasGap" value="24">
+    </div>
+  </div>
+</section>

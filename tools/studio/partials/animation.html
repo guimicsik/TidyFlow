@@ -1,0 +1,155 @@
+<!-- ==============================================================
+     ABA 3: ANIMAÇÃO & FÍSICA (Estados Rest, Hover, Click)
+     ============================================================== -->
+<section class="st-pane" id="tab-anim">
+  <div class="st-card">
+    <h3 class="st-card-title">1. Bordas &amp; Cantos Arredondados</h3>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Espessura da Borda Preta</label>
+        <span class="st-val" data-val-for="--tf-neo-border-w">2px</span>
+      </div>
+      <input type="range" min="0" max="6" step="0.5" data-token="--tf-neo-border-w" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Arredondamento (Border Radius)</label>
+        <span class="st-val" data-val-for="--tf-neo-radius">6px</span>
+      </div>
+      <input type="range" min="0" max="24" step="1" data-token="--tf-neo-radius" data-unit="px">
+    </div>
+
+    <div class="st-color-grid">
+      <div class="st-color-item">
+        <label>Cor da Borda</label>
+        <div class="st-color-picker-wrap">
+          <input type="color" data-token="--tf-neo-border-color">
+          <input type="text" class="st-hex" data-hex-for="--tf-neo-border-color">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="st-card">
+    <h3 class="st-card-title">2. Estado Rest (Repouso)</h3>
+    <p class="st-help">Escolha se no repouso os botões ficam <strong>Flat (0px)</strong> ou já exibem <strong>Relevo 3D</strong> permanente.</p>
+    <div class="st-preset-themes" style="margin-bottom: 10px;">
+      <button type="button" class="st-theme-chip" id="btnPresetRestFlat">Flat no Repouso (0px)</button>
+      <button type="button" class="st-theme-chip" id="btnPresetRest3D">Relevo 3D no Repouso (4px)</button>
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Sombra Rest — Hero</label>
+        <span class="st-val" id="valRestShadowHero">0px</span>
+      </div>
+      <input type="range" min="0" max="10" step="1" id="rngRestShadowHero" value="0">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Sombra Rest — Tiles &amp; Toggles</label>
+        <span class="st-val" id="valRestShadowTile">0px</span>
+      </div>
+      <input type="range" min="0" max="10" step="1" id="rngRestShadowTile" value="0">
+    </div>
+  </div>
+
+  <div class="st-card">
+    <h3 class="st-card-title">3. Estado Hover (Passar o Mouse)</h3>
+    <p class="st-help">Ative <strong>"🔵 Hover"</strong> na barra superior para enxergar o efeito travado enquanto ajusta.</p>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Elevação no Hover — Hero (Lift)</label>
+        <span class="st-val" data-val-for="--tf-neo-lift-hero">-4px</span>
+      </div>
+      <input type="range" min="-10" max="4" step="1" data-token="--tf-neo-lift-hero" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Sombra Rígida no Hover — Hero</label>
+        <span class="st-val" id="valHoverShadowHero">4px</span>
+      </div>
+      <input type="range" min="0" max="12" step="1" id="rngHoverShadowHero" value="4">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Elevação no Hover — Tiles &amp; Toggles</label>
+        <span class="st-val" data-val-for="--tf-neo-lift-tile">-3px</span>
+      </div>
+      <input type="range" min="-10" max="4" step="1" data-token="--tf-neo-lift-tile" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Sombra Rígida no Hover — Tiles</label>
+        <span class="st-val" id="valHoverShadowTile">3px</span>
+      </div>
+      <input type="range" min="0" max="12" step="1" id="rngHoverShadowTile" value="3">
+    </div>
+  </div>
+
+  <div class="st-card">
+    <h3 class="st-card-title">4. Estado Click / Active (Pressionar)</h3>
+    <p class="st-help">Ative <strong>"🟠 Click"</strong> na barra superior para visualizar o botão pressionado.</p>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Afundamento ao Clicar — Hero</label>
+        <span class="st-val" data-val-for="--tf-active-lift-hero">0px</span>
+      </div>
+      <input type="range" min="-4" max="6" step="1" data-token="--tf-active-lift-hero" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Sombra ao Clicar — Hero</label>
+        <span class="st-val" id="valActiveShadowHero">0px</span>
+      </div>
+      <input type="range" min="0" max="8" step="1" id="rngActiveShadowHero" value="0">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Afundamento ao Clicar — Tiles</label>
+        <span class="st-val" data-val-for="--tf-active-lift-tile">0px</span>
+      </div>
+      <input type="range" min="-4" max="6" step="1" data-token="--tf-active-lift-tile" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Sombra ao Clicar — Tiles</label>
+        <span class="st-val" id="valActiveShadowTile">0px</span>
+      </div>
+      <input type="range" min="0" max="8" step="1" id="rngActiveShadowTile" value="0">
+    </div>
+  </div>
+
+  <div class="st-card">
+    <h3 class="st-card-title">5. Velocidade &amp; Curva de Animação</h3>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Duração da Transição</label>
+        <span class="st-val" data-val-for="--tf-anim-duration">0.12s</span>
+      </div>
+      <input type="range" min="0" max="0.4" step="0.02" data-token="--tf-anim-duration" data-unit="s">
+    </div>
+
+    <div class="st-field">
+      <label>Curva Mecânica (Easing)</label>
+      <select class="st-select" data-token="--tf-anim-easing">
+        <option value="cubic-bezier(0.2, 0, 0, 1)">Mecânico Seco (Padrão Studio)</option>
+        <option value="cubic-bezier(0.34, 1.56, 0.64, 1)">Mola Elástica (Bounce Tátil)</option>
+        <option value="ease-out">Suave (Ease-Out)</option>
+        <option value="linear">Instantâneo / Linear</option>
+      </select>
+    </div>
+  </div>
+</section>

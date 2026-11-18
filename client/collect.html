@@ -7,7 +7,8 @@
   <!-- Google Fonts: Archivo (Neo-Brutalism Typography) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
 
   <!-- Design system compartilhado (botões) — deve vir antes de collect.css -->
   <link rel="stylesheet" href="theme/tokens.css">
@@ -16,122 +17,144 @@
 </head>
 
 <body>
-<div class="collect-dialog" data-tf-design="collect-dialog" style="">
+  <div class="collect-dialog" data-tf-design="collect-dialog" style="">
 
     <!-- Topo: Sequências (PPro) / Composições (AE) -->
-    
+
 
     <!-- 2. Meio: Opções em Grade Ampla -->
     <fieldset class="collect-box collect-box--targets" data-tf-design="collect-targets-box">
       <legend class="collect-legend st-text-box" data-tf-design="collect-targets-heading" style="">
         <span id="lblTargetTitle" class="st-text-box" style="">Composições</span>
         <div class="collect-targets-actions">
-          <button type="button" id="btnSelectAllTargets" class="collect-action-btn" title="Marcar todas" aria-label="Marcar todas">
-            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <button type="button" id="btnSelectAllTargets" class="collect-action-btn" title="Marcar todas"
+            aria-label="Marcar todas">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M3.5 8.5l3 3 6-6"></path>
             </svg>
           </button>
-          <button type="button" id="btnSelectNoneTargets" class="collect-action-btn" title="Desmarcar todas" aria-label="Desmarcar todas">
-            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <button type="button" id="btnSelectNoneTargets" class="collect-action-btn" title="Desmarcar todas"
+            aria-label="Desmarcar todas">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M4 4l8 8M12 4l-8 8"></path>
             </svg>
           </button>
-          <button type="button" id="btnExpandAllTargets" class="collect-action-btn" title="Expandir todas as pastas" aria-label="Expandir todas as pastas">
-            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <button type="button" id="btnExpandAllTargets" class="collect-action-btn" title="Expandir todas as pastas"
+            aria-label="Expandir todas as pastas">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M4 6l4 4 4-4"></path>
             </svg>
           </button>
-          <button type="button" id="btnCollapseAllTargets" class="collect-action-btn" title="Recolher todas as pastas" aria-label="Recolher todas as pastas">
-            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <button type="button" id="btnCollapseAllTargets" class="collect-action-btn" title="Recolher todas as pastas"
+            aria-label="Recolher todas as pastas">
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M4 10l4-4 4 4"></path>
             </svg>
           </button>
         </div>
       </legend>
       <div class="collect-target-list-wrapper" data-tf-design="collect-target-list-box">
-        <div id="targetList" class="collect-target-list"><div class="collect-target-empty">Nenhuma composição encontrada no projeto.</div></div>
+        <div id="targetList" class="collect-target-list">
+          <div class="collect-target-empty">Nenhuma composição encontrada no projeto.</div>
+        </div>
       </div>
-    </fieldset><fieldset class="collect-box collect-box--options" data-tf-design="collect-options-box">
+    </fieldset>
+    <fieldset class="collect-box collect-box--options" data-tf-design="collect-options-box">
       <legend class="collect-legend st-text-box" data-tf-design="collect-options-heading" style="">Opções</legend>
       <div class="collect-options-grid st-section-group" data-tf-design="collect-options-grid">
 
-        <label class="collect-check" id="rowExcludeUnused">
+        <div class="collect-check" id="rowExcludeUnused">
           <input type="checkbox" id="chkExcludeUnused" checked="">
-          <span class="toggle-slider"></span>
+          <label class="toggle-slider" for="chkExcludeUnused" data-tf-design="collect-exclude-unused-toggle"></label>
           <span class="st-text-box" data-tf-design="collect-exclude-unused-label">Excluir mídias não usadas</span>
-        </label>
+        </div>
 
         <!-- Exclusivo Premiere Pro: Áudio Conform -->
-        <label class="collect-check is-ppro-only" id="rowAudioConform">
+        <div class="collect-check is-ppro-only" id="rowAudioConform">
           <input type="checkbox" id="chkAudioConform">
-          <span class="toggle-slider"></span>
-          <span class="st-text-box" data-tf-design="collect-audio-conform-label">Incluir arquivos de conformidade de áudio</span>
-        </label>
+          <label class="toggle-slider" for="chkAudioConform" data-tf-design="collect-audio-conform-toggle"></label>
+          <span class="st-text-box" data-tf-design="collect-audio-conform-label">Incluir arquivos de conformidade de
+            áudio</span>
+        </div>
 
         <!-- Exclusivo Premiere Pro: Vídeo Previews -->
-        <label class="collect-check is-ppro-only" id="rowPreviewFiles">
+        <div class="collect-check is-ppro-only" id="rowPreviewFiles">
           <input type="checkbox" id="chkPreviewFiles">
-          <span class="toggle-slider"></span>
+          <label class="toggle-slider" for="chkPreviewFiles" data-tf-design="collect-preview-files-toggle"></label>
           <span class="st-text-box" data-tf-design="collect-preview-files-label">Incluir arquivos de Preview</span>
-        </label>
+        </div>
 
         <!-- Renomear Arquivo no Disco para o Nome do Clipe -->
-        <label class="collect-check" id="rowRenameClipNames">
+        <div class="collect-check" id="rowRenameClipNames">
           <input type="checkbox" id="chkRenameClipNames">
-          <span class="toggle-slider"></span>
+          <label class="toggle-slider" for="chkRenameClipNames" data-tf-design="collect-rename-toggle"></label>
           <span class="st-text-box" data-tf-design="collect-rename-label">Renomear mídias com o nome do clipe</span>
-        </label>
+        </div>
 
         <!-- Exclusivo After Effects: Proxy -->
-        <label class="collect-check is-ae-only" id="rowObeyProxy">
+        <div class="collect-check is-ae-only" id="rowObeyProxy">
           <input type="checkbox" id="chkObeyProxy">
-          <span class="toggle-slider"></span>
+          <label class="toggle-slider" for="chkObeyProxy" data-tf-design="collect-proxy-toggle"></label>
           <span class="st-text-box" data-tf-design="collect-proxy-label">Obedecer configurações de proxy</span>
-        </label>
+        </div>
 
-        <label class="collect-check" id="rowReportOnly">
+        <div class="collect-check" id="rowReportOnly">
           <input type="checkbox" id="chkReportOnly">
-          <span class="toggle-slider"></span>
+          <label class="toggle-slider" for="chkReportOnly" data-tf-design="collect-report-toggle"></label>
           <span class="st-text-box" data-tf-design="collect-report-label">Gerar apenas relatório</span>
-        </label>
+        </div>
 
-        <label class="collect-check" id="rowReveal">
+        <div class="collect-check" id="rowReveal">
           <input type="checkbox" id="chkReveal" checked="">
-          <span class="toggle-slider"></span>
-          <span class="st-text-box" data-tf-design="collect-reveal-label">Mostrar o projeto no Explorer ao terminar</span>
-        </label>
+          <label class="toggle-slider" for="chkReveal" data-tf-design="collect-reveal-toggle"></label>
+          <span class="st-text-box" data-tf-design="collect-reveal-label">Mostrar o projeto no Explorer ao
+            terminar</span>
+        </div>
 
-        <label class="collect-check" id="rowOpenCollected">
+        <div class="collect-check" id="rowOpenCollected">
           <input type="checkbox" id="chkOpenCollected">
-          <span class="toggle-slider"></span>
+          <label class="toggle-slider" for="chkOpenCollected" data-tf-design="collect-open-project-toggle"></label>
           <span class="st-text-box" data-tf-design="collect-open-project-label">Abrir o projeto ao terminar</span>
-        </label>
+        </div>
 
       </div>
     </fieldset>
 
     <!-- 3. Base: Caminho de Destino e Espaço em Disco (Juntos no mesmo bloco) -->
     <fieldset class="collect-box collect-box--dest-disk" data-tf-design="collect-destination-box">
-      <legend class="collect-legend st-text-box" data-tf-design="collect-destination-heading" style="">Destino e Espaço em Disco</legend>
+      <legend class="collect-legend st-text-box" data-tf-design="collect-destination-heading" style="">Destino e Espaço
+        em Disco</legend>
 
       <!-- Caminho de Destino -->
       <div class="collect-dest-row" data-tf-design="collect-destination-row">
-        <input type="text" id="inpDestPath" class="collect-text collect-text--dest" readonly="" placeholder="Selecione a pasta de destino...">
-        <button type="button" id="btnBrowseDest" class="collect-btn-browse"><span class="tf-btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span> </button>
+        <input type="text" id="inpDestPath" class="collect-text collect-text--dest" readonly=""
+          placeholder="Selecione a pasta de destino...">
+        <button type="button" id="btnBrowseDest" class="collect-btn-browse"><span class="tf-btn-icon"><svg
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg></span> </button>
       </div>
 
       <!-- Espaço em Disco -->
       <div class="collect-disk-grid" data-tf-design="collect-disk-grid">
         <div class="collect-disk-row">
-          <span class="collect-disk-lbl st-text-box" data-tf-design="collect-disk-available-label">Espaço em disco disponível:</span>
+          <span class="collect-disk-lbl st-text-box" data-tf-design="collect-disk-available-label">Espaço em disco
+            disponível:</span>
           <span id="valDiskAvailable" class="collect-disk-val">--</span>
         </div>
         <div class="collect-disk-row">
-          <span class="collect-disk-lbl st-text-box" data-tf-design="collect-original-size-label">Tamanho do projeto original:</span>
+          <span class="collect-disk-lbl st-text-box" data-tf-design="collect-original-size-label">Tamanho do projeto
+            original:</span>
           <span id="valOriginalSize" class="collect-disk-val">--</span>
         </div>
         <div class="collect-disk-row collect-disk-row--est">
-          <span class="collect-disk-lbl st-text-box" data-tf-design="collect-result-size-label">Tamanho resultante (estimado):</span>
+          <span class="collect-disk-lbl st-text-box" data-tf-design="collect-result-size-label">Tamanho resultante
+            (estimado):</span>
           <div class="collect-disk-est-val-box">
             <span id="valResultingSize" class="collect-disk-val">--</span>
             <button type="button" id="btnCalculate" class="collect-btn-calc">Calcular</button>
@@ -139,8 +162,6 @@
         </div>
       </div>
     </fieldset>
-
-    <!-- Barra de Progresso e Status -->
     <div class="collect-summary" data-tf-design="collect-summary">
       <div id="collectProgressBox" class="collect-progress-box is-hidden">
         <div class="collect-progress-header">
@@ -151,8 +172,11 @@
           <div id="collectProgressBar" class="collect-progress-bar" style="width: 0%"></div>
         </div>
       </div>
-      <div id="statusLine" class="collect-status is-error">Abra esta janela dentro do After Effects ou Premiere Pro.</div>
+      <div id="statusLine" class="collect-status"></div>
     </div>
+
+    <!-- Barra de Progresso e Status -->
+
 
     <!-- Rodapé estilo Premiere Pro: Pílula azul OK e pílula cinza Cancelar -->
     <div class="collect-footer" data-tf-design="collect-footer">
@@ -160,8 +184,9 @@
         Comentários...
       </button>
       <div class="collect-footer-actions">
-        <button type="button" id="btnCollect" class="collect-btn-ok" disabled="">Collect</button>
-        <button type="button" id="btnCancel" class="collect-btn-cancel">Cancelar</button>
+
+        <button type="button" id="btnCancel" class="collect-btn-cancel">Cancelar</button><button type="button"
+          id="btnCollect" class="collect-btn-ok">Collect</button>
       </div>
     </div>
   </div>
@@ -171,11 +196,12 @@
     aria-labelledby="commentsTitle">
     <div class="collect-modal-card" data-tf-design="collect-comments-modal-card">
       <div id="commentsTitle" class="collect-modal-title">Comentários</div>
-      <p class="collect-modal-text" data-tf-design="collect-comments-description">Os comentários são gravados no Report.txt do Collect.</p>
+      <p class="collect-modal-text" data-tf-design="collect-comments-description">Os comentários são gravados no
+        Report.txt do Collect.</p>
       <textarea id="txtComments" rows="6"></textarea>
       <div class="collect-modal-footer">
-        <button type="button" id="btnCommentsOk" class="collect-btn-ok">OK</button>
         <button type="button" id="btnCommentsCancel" class="collect-btn-cancel">Cancelar</button>
+        <button type="button" id="btnCommentsOk" class="collect-btn-ok">OK</button>
       </div>
     </div>
   </div>

@@ -27,7 +27,10 @@ New-Item -ItemType Directory -Force -Path (Join-Path $BundleDir 'scripts') | Out
 Copy-Item -Path (Join-Path $ProjectRoot 'CSXS\manifest.xml') -Destination (Join-Path $BundleDir 'CSXS\manifest.xml') -Force
 Copy-Item -Path (Join-Path $ProjectRoot 'client\*.html') -Destination (Join-Path $BundleDir 'client') -Force
 Copy-Item -Path (Join-Path $ProjectRoot 'client\*.css') -Destination (Join-Path $BundleDir 'client') -Force
-Copy-Item -Path (Join-Path $ProjectRoot 'client\theme') -Destination (Join-Path $BundleDir 'client') -Recurse -Force
+$bundleTheme = New-Item -ItemType Directory -Force -Path (Join-Path $BundleDir 'client\theme')
+Get-ChildItem -LiteralPath (Join-Path $ProjectRoot 'client\theme') |
+    Where-Object { $_.Name -ne 'studio-design.json' } |
+    Copy-Item -Destination $bundleTheme.FullName -Recurse -Force
 Copy-Item -Path (Join-Path $ProjectRoot 'client\*.js') -Destination (Join-Path $BundleDir 'client') -Force
 Copy-Item -Path (Join-Path $ProjectRoot 'client\presets\default_preset.json') -Destination (Join-Path $BundleDir 'client\presets\default_preset.json') -Force
 Copy-Item -Path (Join-Path $ProjectRoot 'host\*.jsx') -Destination (Join-Path $BundleDir 'host') -Force

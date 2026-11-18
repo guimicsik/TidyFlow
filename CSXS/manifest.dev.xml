@@ -38,16 +38,16 @@
           <Menu>TidyFlow (dev)</Menu>
           <Geometry>
             <Size>
-              <Height>450</Height>
-              <Width>370</Width>
+              <Height>460</Height>
+              <Width>360</Width>
             </Size>
             <MinSize>
-              <Height>450</Height>
-              <Width>370</Width>
+              <Height>460</Height>
+              <Width>360</Width>
             </MinSize>
             <MaxSize>
-              <Height>450</Height>
-              <Width>370</Width>
+              <Height>460</Height>
+              <Width>360</Width>
             </MaxSize>
           </Geometry>
         </UI>

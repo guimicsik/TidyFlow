@@ -15,8 +15,8 @@
     <div class="preset-selector-group" data-tf-design="editor-preset-selector-group" style="">
       <span class="preset-label st-text-box" data-tf-design="editor-preset-label">Preset:</span>
       <select id="presetSelect" class="select-input" style=""><option value="Default Clean">Default Clean (Default)</option><option value="Motion Design Copy">Motion Design Copy</option></select>
-      <span id="badgeBuiltIn" class="badge-builtin st-text-box" style="display: inline-block;">Padrão</span>
-      <button type="button" id="btnDeletePreset" class="tf-btn tf-btn--ghost tf-btn--xs preset-icon-btn" title="Excluir este preset de usuário" aria-label="Excluir preset" disabled=""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"></path></svg></button>
+      <span id="badgeBuiltIn" class="badge-builtin st-text-box" style="display: none;">Padrão</span>
+      <button type="button" id="btnDeletePreset" class="tf-btn tf-btn--ghost tf-btn--xs preset-icon-btn" title="Excluir este preset de usuário" aria-label="Excluir preset"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"></path></svg></button>
       <span id="badgeUnsaved" class="badge-unsaved st-text-box" style="display: none;">Não salvo*</span>
     </div>
 
@@ -42,20 +42,21 @@
       <!-- Configurações do Preset (dentro da estrutura, acima da primeira pasta) -->
       <div class="settings-bar" data-tf-design="editor-settings-bar">
         <div class="settings-toggles" data-tf-design="editor-settings-toggles">
-          <label class="toggle-container" data-tf-design="editor-numbering-toggle" title="Adiciona automaticamente 01_, 02_, 03_ nas pastas da árvore que possuírem arquivos, pulando categorias vazias">
+          <label class="tf-toggle editor-setting-toggle" data-tf-design="editor-numbering-toggle" title="Adiciona automaticamente 01_, 02_, 03_ nas pastas da árvore que possuírem arquivos, pulando categorias vazias">
             <input type="checkbox" id="chkUsePrefixNumbering" checked="">
-            <span class="toggle-slider"></span>
-            <span class="st-text-box" data-tf-design="editor-numbering-label">Numeração Sequencial</span>
+            <span class="tf-toggle__face st-text-box" data-tf-design="editor-numbering-label">Numeração Sequencial</span>
           </label>
-          <label id="lblSeparateAudioCategories" class="toggle-container is-disabled" title="Disponível apenas no Premiere Pro (Essential Sound)">
-            <input type="checkbox" id="chkSeparateAudioCategories" checked="" disabled="">
-            <span class="toggle-slider"></span>
-            <span class="st-text-box" data-tf-design="editor-audio-categories-label">Categorias de Áudio (ESP)</span>
+          <label id="lblGroupBySourceFolder" class="tf-toggle editor-setting-toggle" data-tf-design="editor-source-toggle" title="Cria uma subpasta com o nome da pasta em que o arquivo reside no disco">
+            <input type="checkbox" id="chkGroupBySourceFolder" checked="">
+            <span class="tf-toggle__face st-text-box" data-tf-design="editor-source-toggle-label">Pasta de origem</span>
           </label>
-          <label id="lblNumberAudioCategories" class="toggle-container is-disabled" title="Disponível apenas no Premiere Pro (Essential Sound)">
-            <input type="checkbox" id="chkNumberAudioCategories" checked="" disabled="">
-            <span class="toggle-slider"></span>
-            <span class="st-text-box" data-tf-design="editor-number-audio-label">Numerar ESP</span>
+          <label id="lblSeparateAudioCategories" class="tf-toggle editor-setting-toggle" title="Disponível apenas no Premiere Pro (Essential Sound)">
+            <input type="checkbox" id="chkSeparateAudioCategories" checked="">
+            <span class="tf-toggle__face st-text-box" data-tf-design="editor-audio-categories-label">Categorias de Áudio (ESP)</span>
+          </label>
+          <label id="lblNumberAudioCategories" class="tf-toggle editor-setting-toggle" title="Disponível apenas no Premiere Pro (Essential Sound)">
+            <input type="checkbox" id="chkNumberAudioCategories" checked="">
+            <span class="tf-toggle__face st-text-box" data-tf-design="editor-number-audio-label">Numerar ESP</span>
           </label>
         </div>
       </div>
@@ -66,10 +67,10 @@
 
   <!-- Barra Inferior: Status e Ações Finais -->
   <div class="footer-bar">
-    <div id="editorStatus" class="warning st-text-box">Pasta 'Assets' removida.</div>
+    <div id="editorStatus" class="st-text-box">Pasta de origem atualizada. Use Salvar para gravar no preset.</div>
     <div class="footer-actions">
-      <button type="button" id="btnFooterSave" class="tf-btn tf-btn--primary btn-footer-action" title="Salvar alterações no preset atual">Salvar</button>
-      <button type="button" id="btnCloseModal" class="tf-btn tf-btn--ghost btn-footer-action">Fechar</button>
+      
+      <button type="button" id="btnCloseModal" class="tf-btn tf-btn--ghost btn-footer-action">Fechar</button><button type="button" id="btnFooterSave" class="tf-btn tf-btn--primary btn-footer-action" title="Salvar alterações no preset atual"><span class="tf-btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>Salvar</button>
     </div>
   </div>
 

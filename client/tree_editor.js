@@ -113,13 +113,50 @@
 
   // Elementos DOM - Barra de Configurações
   var chkUsePrefixNumbering = document.getElementById("chkUsePrefixNumbering");
+  var chkGroupBySourceFolder = document.getElementById("chkGroupBySourceFolder");
+  var lblGroupBySourceFolder = document.getElementById("lblGroupBySourceFolder");
   var chkSeparateAudioCategories = document.getElementById("chkSeparateAudioCategories");
   var chkNumberAudioCategories = document.getElementById("chkNumberAudioCategories");
   var lblSeparateAudioCategories = document.getElementById("lblSeparateAudioCategories");
   var lblNumberAudioCategories = document.getElementById("lblNumberAudioCategories");
 
+  function syncGroupBySourceToggleState() {
+    if (!chkGroupBySourceFolder) return;
+    var missing = [];
+    var total = 0;
+    function walk(nodes) {
+      for (var i = 0; i < (nodes || []).length; i++) {
+        var n = nodes[i];
+        total++;
+        if (n.rules && n.rules.groupBySourceFolder === false) missing.push(n.name);
+        walk(n.children);
+      }
+    }
+    if (currentPreset) walk(currentPreset.tree);
+
+    if (total > 0) {
+      chkGroupBySourceFolder.checked = (missing.length < total);
+    } else {
+      var s = (currentPreset && currentPreset.settings) || {};
+      chkGroupBySourceFolder.checked = (s.groupBySourceFolder !== false);
+    }
+
+    if (lblGroupBySourceFolder) {
+      if (missing.length && missing.length < total) {
+        lblGroupBySourceFolder.classList.add("partial");
+        lblGroupBySourceFolder.title =
+          "Parcial: " + missing.join(", ") + " não usa(m) 'Pasta de origem'. Clique para aplicar a todas.";
+      } else {
+        lblGroupBySourceFolder.classList.remove("partial");
+        lblGroupBySourceFolder.title =
+          "Cria uma subpasta com o nome da pasta em que o arquivo reside no disco";
+      }
+    }
+  }
+
   function syncAudioSubToggleState() {
-    if (!isPPro) {
+    var isStudioPreview = !window.__adobe_cep__ && window.parent !== window;
+    if (!isPPro && !isStudioPreview) {
       if (chkSeparateAudioCategories) chkSeparateAudioCategories.disabled = true;
       if (chkNumberAudioCategories) chkNumberAudioCategories.disabled = true;
       if (lblSeparateAudioCategories) {
@@ -135,6 +172,11 @@
     if (chkSeparateAudioCategories) chkSeparateAudioCategories.disabled = false;
     if (lblSeparateAudioCategories) lblSeparateAudioCategories.classList.remove("is-disabled");
     if (!chkNumberAudioCategories) return;
+    if (isStudioPreview) {
+      chkNumberAudioCategories.disabled = false;
+      if (lblNumberAudioCategories) lblNumberAudioCategories.classList.remove("is-disabled");
+      return;
+    }
     var espOn = chkSeparateAudioCategories ? Boolean(chkSeparateAudioCategories.checked) : true;
     chkNumberAudioCategories.disabled = !espOn;
     if (lblNumberAudioCategories) {
@@ -466,6 +508,7 @@
     if (chkNumberAudioCategories) {
       chkNumberAudioCategories.checked = (currentPreset.settings.numberAudioCategories !== false);
     }
+    syncGroupBySourceToggleState();
     syncAudioSubToggleState();
 
     setDirty(false);
@@ -772,20 +815,21 @@
           });
           row.appendChild(swatchBtn);
 
-          // 3. Badge e Controle de Numeração Individual (# / 01_)
+          // 3. Badge e Controle de Numeração Individual (01_ / OFF)
           var isNodeNumbered = (node.useNumbering !== false);
+          var isPrefixActive = Boolean(isNodeNumbered && usePrefix);
           var prefixBadge = document.createElement("button");
           prefixBadge.type = "button";
-          prefixBadge.setAttribute("data-tf-design", "folder-prefix");
-          prefixBadge.className = "prefix-preview" + (isNodeNumbered && usePrefix ? "" : " prefix-off");
+          prefixBadge.setAttribute("data-tf-design", isPrefixActive ? "folder-prefix" : "folder-prefix-off");
+          prefixBadge.className = "prefix-preview" + (isPrefixActive ? "" : " prefix-off");
 
           if (isNodeNumbered) {
             var mySeq = nodeSeqMap[node.id] || (idx + 1);
             var numStr = mySeq < 10 ? "0" + mySeq : String(mySeq);
-            prefixBadge.textContent = usePrefix ? (numStr + "_") : "# ON";
+            prefixBadge.textContent = usePrefix ? (numStr + "_") : "OFF";
             prefixBadge.title = "Numeração: ATIVADA para esta pasta (" + (usePrefix ? numStr + "_" : "01_") + "). Clique para desativar a numeração desta pasta.";
           } else {
-            prefixBadge.textContent = "# OFF";
+            prefixBadge.textContent = "OFF";
             prefixBadge.title = "Numeração: DESATIVADA para esta pasta (nome puro, sem prefixo). Clique para ativar a numeração.";
           }
 
@@ -1385,6 +1429,7 @@
     };
 
     closeRulesModal();
+    syncGroupBySourceToggleState();
     setDirty(true);
     renderTree();
     setStatus("Regras aplicadas à pasta '" + found.node.name + "'.", "success");
@@ -1523,6 +1568,26 @@
     setDirty(true);
     setStatus("Numeração atualizada. Use Salvar para gravar no preset.", "");
   });
+
+  if (chkGroupBySourceFolder) {
+    chkGroupBySourceFolder.addEventListener("change", function () {
+      if (!currentPreset) return;
+      if (!currentPreset.settings) currentPreset.settings = {};
+      var gv = chkGroupBySourceFolder.checked;
+      currentPreset.settings.groupBySourceFolder = gv;
+      (function applyAll(nodes) {
+        for (var i = 0; i < (nodes || []).length; i++) {
+          if (!nodes[i].rules) nodes[i].rules = {};
+          nodes[i].rules.groupBySourceFolder = gv;
+          applyAll(nodes[i].children);
+        }
+      })(currentPreset.tree);
+      syncGroupBySourceToggleState();
+      renderTree();
+      setDirty(true);
+      setStatus("Pasta de origem atualizada. Use Salvar para gravar no preset.", "");
+    });
+  }
 
   if (chkSeparateAudioCategories) {
     chkSeparateAudioCategories.addEventListener("change", function () {
@@ -1892,7 +1957,10 @@
               mirror(nodes[i].children);
             }
           })(stored.tree);
-          if (changed) renderTree();
+          if (changed) {
+            syncGroupBySourceToggleState();
+            renderTree();
+          }
           return;
         }
         if (isDirty) {
@@ -1958,7 +2026,10 @@
             mirror(nodes[i].children);
           }
         })(stored.tree);
-        if (changed) renderTree();
+        if (changed) {
+          syncGroupBySourceToggleState();
+          renderTree();
+        }
       }
     } catch (eFocus) { }
   });

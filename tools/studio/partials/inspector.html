@@ -1,0 +1,55 @@
+<!-- PAINEL LATERAL DIREITO: INSPECTOR ISOLADO DO NÚCLEO SELECIONADO -->
+<aside id="stInspectorPanel" class="st-inspector-panel st-inspector-right" style="display: none;" aria-label="Propriedades do Núcleo Selecionado">
+  <div class="st-inspector-header">
+    <div class="st-inspector-header-info">
+      <span class="st-inspector-tag" id="inspTag">NÚCLEO SELECIONADO</span>
+      <span class="st-inspector-title" id="inspTitle">Organizar Projeto</span>
+      <span class="st-inspector-id" id="inspId">#btnOrganize</span>
+    </div>
+    <button type="button" id="btnCloseInspector" class="st-btn st-btn--ghost st-btn--xs" title="Fechar painel do núcleo">✕ Fechar</button>
+  </div>
+
+  <div class="st-inspector-body">
+    <!-- Container principal renderizado dinamicamente por modules/individual-design.js -->
+    <div id="individualDesign" class="st-inspector-section"></div>
+
+    <!-- Seção Oculta de Compatibilidade para ContentEditable (#inspSecText) -->
+    <div class="st-inspector-section" id="inspSecText" style="display: none;">
+      <div class="st-inspector-section-title">
+        <span>🔤 Texto do Núcleo</span>
+      </div>
+      <div class="st-field">
+        <label for="inspInputText">Conteúdo do Texto (Enter = nova linha)</label>
+        <textarea id="inspInputText" class="st-input st-inspector-textarea" rows="2" placeholder="Digite o texto; use Enter para quebrar a linha"></textarea>
+      </div>
+    </div>
+
+    <!-- Seção de Ícone do Botão -->
+    <div class="st-inspector-section" id="inspSecIcon">
+      <div class="st-inspector-section-title">
+        <span>✨ Ícone do Botão</span>
+      </div>
+      <p class="st-help" style="margin: 0;">Clique para aplicar ou remover o ícone deste botão:</p>
+      <label for="inspIconSize">Tamanho do ícone (px)</label>
+      <div class="st-design-property-row">
+        <input id="inspIconSize" type="range" min="8" max="128" step="1" value="16" class="st-design-slider" aria-label="Tamanho do ícone">
+        <input id="inspIconSizeValue" type="number" min="8" max="128" step="1" value="16" class="st-design-value" aria-label="Tamanho do ícone em pixels">
+        <button id="inspIconSizeReset" type="button" class="st-design-property-clear" title="Restaurar tamanho padrão do ícone">×</button>
+      </div>
+      <label for="inspIconMode">Conteúdo</label>
+      <select id="inspIconMode" class="st-input">
+        <option value="both">Texto e ícone</option>
+        <option value="only">Só ícone (centralizado)</option>
+        <option value="text">Só texto</option>
+      </select>
+      <label for="inspIconPosition">Posição do ícone</label>
+      <select id="inspIconPosition" class="st-input">
+        <option value="left">À esquerda</option>
+        <option value="right">À direita</option>
+        <option value="top">Acima</option>
+        <option value="bottom">Abaixo</option>
+      </select>
+      <div id="inspIconCatalogGrid" class="st-icon-grid" style="grid-template-columns: repeat(4, 1fr); margin-top: 4px;"></div>
+    </div>
+  </div>
+</aside>

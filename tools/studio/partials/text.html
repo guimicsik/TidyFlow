@@ -1,0 +1,469 @@
+<!-- ==============================================================
+     ABA 1: TEXTO (Peso, Conteúdo, Tamanho e Estilos)
+     ============================================================== -->
+<section class="st-pane active" id="tab-text">
+  <!-- 1. Global: Família da Fonte & Estilos -->
+  <div class="st-card">
+    <h3 class="st-card-title">1. Fonte &amp; Estilos Globais</h3>
+
+    <div class="st-field">
+      <label>Família da Fonte</label>
+      <select id="selFontFamily" class="st-select">
+        <option value='"Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'>Archivo (Neo-Brutalista Padrão)</option>
+        <option value='"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'>Inter (Clean UI)</option>
+        <option value='"Space Grotesk", sans-serif'>Space Grotesk (Tech Editorial)</option>
+        <option value='"Plus Jakarta Sans", sans-serif'>Plus Jakarta Sans (Geométrica)</option>
+        <option value='"Rubik", sans-serif'>Rubik (Arredondada Forte)</option>
+        <option value='"Syne", sans-serif'>Syne (Display Brutalista)</option>
+        <option value='"JetBrains Mono", monospace'>JetBrains Mono (Industrial Dev)</option>
+        <option value='"Segoe UI", system-ui, sans-serif'>Segoe UI (Nativa Windows)</option>
+      </select>
+    </div>
+
+    <div class="st-grid-2">
+      <div class="st-field">
+        <label>Caixa do Hero</label>
+        <select class="st-select" data-token="--tf-hero-text-transform">
+          <option value="none">Normal (Aa)</option>
+          <option value="uppercase">MAIÚSCULAS (AA)</option>
+          <option value="capitalize">Capitalizado</option>
+          <option value="lowercase">minúsculas (aa)</option>
+        </select>
+      </div>
+      <div class="st-field">
+        <label>Caixa dos Botões</label>
+        <select class="st-select" data-token="--tf-tile-text-transform">
+          <option value="none">Normal (Aa)</option>
+          <option value="uppercase">MAIÚSCULAS (AA)</option>
+          <option value="capitalize">Capitalizado</option>
+          <option value="lowercase">minúsculas (aa)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="st-grid-2">
+      <div class="st-field">
+        <label>Caixa dos Toggles</label>
+        <select class="st-select" data-token="--tf-toggle-text-transform">
+          <option value="none">Normal (Aa)</option>
+          <option value="uppercase">MAIÚSCULAS (AA)</option>
+          <option value="capitalize">Capitalizado</option>
+          <option value="lowercase">minúsculas (aa)</option>
+        </select>
+      </div>
+      <div class="st-field">
+        <label>Estilo (Itálico)</label>
+        <select class="st-select" data-token="--tf-font-style-hero">
+          <option value="normal">Normal (Reto)</option>
+          <option value="italic">Itálico (Inclinado)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Pesos & Tamanhos (Adaptáveis por Painel) -->
+  <div class="st-card" data-panel-card="main">
+    <h3 class="st-card-title">2. Peso &amp; Tamanho — Painel Principal</h3>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Peso — Botão Hero (Organizar)</label>
+        <span class="st-val" data-val-for="--tf-font-weight-hero">900</span>
+      </div>
+      <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-hero" data-unit="">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho — Botão Hero</label>
+        <span class="st-val" data-val-for="--tf-font-size-hero">32px</span>
+      </div>
+      <input type="range" min="14" max="44" step="0.5" data-token="--tf-font-size-hero" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Peso — Tiles Secundários</label>
+        <span class="st-val" data-val-for="--tf-font-weight-tile">800</span>
+      </div>
+      <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-tile" data-unit="">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho — Tiles Secundários</label>
+        <span class="st-val" data-val-for="--tf-font-size-tile">14px</span>
+      </div>
+      <input type="range" min="9" max="24" step="0.5" data-token="--tf-font-size-tile" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Peso — Toggles de Preferências</label>
+        <span class="st-val" data-val-for="--tf-font-weight-toggle">600</span>
+      </div>
+      <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-toggle" data-unit="">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho — Toggles</label>
+        <span class="st-val" data-val-for="--tf-font-size-toggle">11px</span>
+      </div>
+      <input type="range" min="8" max="20" step="0.5" data-token="--tf-font-size-toggle" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Peso — Botão Desorganizar (Rollback)</label>
+        <span class="st-val" data-val-for="--tf-font-weight-rollback">800</span>
+      </div>
+      <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-rollback" data-unit="">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho — Botão Desorganizar</label>
+        <span class="st-val" data-val-for="--tf-font-size-rollback">11.5px</span>
+      </div>
+      <input type="range" min="8" max="22" step="0.5" data-token="--tf-font-size-rollback" data-unit="px">
+    </div>
+  </div>
+
+  <div class="st-card" data-panel-card="editor">
+    <h3 class="st-card-title">2. Peso &amp; Tamanho — Preset Builder</h3>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Peso — Botões Gerais (.tf-btn)</label>
+        <span class="st-val" data-val-for="--tf-font-weight-bold">800</span>
+      </div>
+      <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-bold" data-unit="">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Peso — Rótulos &amp; Toggles da Árvore</label>
+        <span class="st-val" data-val-for="--tf-font-weight-medium">600</span>
+      </div>
+      <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-medium" data-unit="">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho — Rótulo 'PRESET'</label>
+        <span class="st-val" data-val-for="--tf-font-size-preset-label">10px</span>
+      </div>
+      <input type="range" min="8" max="16" step="0.5" data-token="--tf-font-size-preset-label" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho — Seletor de Presets</label>
+        <span class="st-val" data-val-for="--tf-font-size-preset-select">13px</span>
+      </div>
+      <input type="range" min="9" max="18" step="0.5" data-token="--tf-font-size-preset-select" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho — Botões de Confirmação/Modal</label>
+        <span class="st-val" data-val-for="--tf-font-size-modal-btn">12px</span>
+      </div>
+      <input type="range" min="8" max="18" step="0.5" data-token="--tf-font-size-modal-btn" data-unit="px">
+    </div>
+  </div>
+
+  <div class="st-card" data-panel-card="collect">
+    <h3 class="st-card-title">2. Peso &amp; Tamanho — Collect Files</h3>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Peso — Botão OK (.collect-btn-ok)</label>
+        <span class="st-val" data-val-for="--tf-font-weight-bold">800</span>
+      </div>
+      <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-bold" data-unit="">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Peso — Opções &amp; Checkboxes</label>
+        <span class="st-val" data-val-for="--tf-font-weight-medium">600</span>
+      </div>
+      <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-medium" data-unit="">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho do Checkmark</label>
+        <span class="st-val" data-val-for="--tf-checkbox-size">18px</span>
+      </div>
+      <input type="range" min="14" max="26" step="1" data-token="--tf-checkbox-size" data-unit="px">
+    </div>
+  </div>
+
+  <!-- 2. Peso & Tamanho: Overlays & Modais -->
+  <div class="st-card" data-panel-card="overlays">
+    <h3 class="st-card-title">2. Peso &amp; Tamanho — Overlays &amp; Modais</h3>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Tamanho da Fonte dos Botões de Modal</label>
+        <span class="st-val" data-val-for="--tf-font-size-modal-btn">12px</span>
+      </div>
+      <input type="range" min="9" max="20" step="0.5" data-token="--tf-font-size-modal-btn" data-unit="px">
+    </div>
+
+    <div class="st-field">
+      <div class="st-label-row">
+        <label>Peso das Fontes de Alerta / Modal</label>
+        <span class="st-val" data-val-for="--tf-font-weight-bold">700</span>
+      </div>
+      <input type="range" min="300" max="900" step="100" data-token="--tf-font-weight-bold" data-unit="">
+    </div>
+  </div>
+
+  <!-- 3. Conteúdo dos Textos (Específico por Painel) -->
+  <div class="st-card" data-panel-card="main">
+    <h3 class="st-card-title">3. Textos — Painel Principal</h3>
+    <p class="st-help">Dica: Use <code>|</code> para separar linhas nos botões, ou dê <strong>duplo clique</strong> no botão direto no preview!</p>
+
+    <div class="st-field">
+      <label>Botão Principal (Hero)</label>
+      <input type="text" class="st-input" data-text-panel="main" data-text-target="btnOrganize" value="Organizar Projeto">
+    </div>
+    <div class="st-field">
+      <label>Tile 1 (Criar Estrutura)</label>
+      <input type="text" class="st-input" data-text-panel="main" data-text-target="btnCreateStructure" value="Criar estrutura | de pastas">
+    </div>
+    <div class="st-field">
+      <label>Tile 2 (Organizar Mídias)</label>
+      <input type="text" class="st-input" data-text-panel="main" data-text-target="btnMediaOnly" value="Organizar | Mídias">
+    </div>
+    <div class="st-field">
+      <label>Tile 3 (Collect Files)</label>
+      <input type="text" class="st-input" data-text-panel="main" data-text-target="btnOpenCollect" value="Collect | Files">
+    </div>
+    <div class="st-field">
+      <label>Toggle 1 (Salvar)</label>
+      <input type="text" class="st-input" data-text-panel="main" data-text-target="chkSaveProject" value="Salvar antes | de organizar">
+    </div>
+    <div class="st-field">
+      <label>Toggle 2 (Excluir Vazias)</label>
+      <input type="text" class="st-input" data-text-panel="main" data-text-target="chkDeleteEmptyFolders" value="Excluir pastas | vazias">
+    </div>
+    <div class="st-field">
+      <label>Botão 3 (Verificar Mídias/Comps)</label>
+      <input type="text" class="st-input" data-text-panel="main" data-text-target="btnCheckUnused" value="Verificar | Mídias/Comps">
+    </div>
+    <div class="st-field">
+      <label>Botão Rollback (Desorganizar)</label>
+      <input type="text" class="st-input" data-text-panel="main" data-text-target="btnRollback" value="Desorganizar | Projeto">
+    </div>
+    <div class="st-field">
+      <label>Aviso de Seleção Superior</label>
+      <input type="text" class="st-input" data-text-panel="main" data-text-target="noticeText" value="Selecione as composições no painel Project antes de organizar.">
+    </div>
+  </div>
+
+  <div class="st-card" data-panel-card="editor">
+    <h3 class="st-card-title">3. Textos — Preset Builder</h3>
+    <p class="st-help">Edite os rótulos do editor de regras e árvore. Dê <strong>duplo clique</strong> no elemento dentro do iframe para editar in-place!</p>
+
+    <div class="st-field">
+      <label>Título da Toolbar da Árvore</label>
+      <input type="text" class="st-input" data-text-panel="editor" data-text-target="treeToolbarTitle" value="Estrutura da Árvore de Pastas • Clique nas regras para filtrar">
+    </div>
+    <div class="st-field">
+      <label>Botão Adicionar Pasta</label>
+      <input type="text" class="st-input" data-text-panel="editor" data-text-target="btnAddTopFolder" value="+ Add pasta">
+    </div>
+    <div class="st-field">
+      <label>Toggle Numeração Sequencial</label>
+      <input type="text" class="st-input" data-text-panel="editor" data-text-target="chkUsePrefixNumbering" value="Numeração Sequencial">
+    </div>
+    <div class="st-field">
+      <label>Toggle Categorias de Áudio (ESP)</label>
+      <input type="text" class="st-input" data-text-panel="editor" data-text-target="chkSeparateAudioCategories" value="Categorias de Áudio (ESP)">
+    </div>
+    <div class="st-field">
+      <label>Toggle Numerar ESP</label>
+      <input type="text" class="st-input" data-text-panel="editor" data-text-target="chkNumberAudioCategories" value="Numerar ESP">
+    </div>
+    <div class="st-field">
+      <label>Botão Salvar (Rodapé)</label>
+      <input type="text" class="st-input" data-text-panel="editor" data-text-target="btnFooterSave" value="Salvar">
+    </div>
+    <div class="st-field">
+      <label>Botão Fechar (Rodapé)</label>
+      <input type="text" class="st-input" data-text-panel="editor" data-text-target="btnCloseModal" value="Fechar">
+    </div>
+    <div class="st-field">
+      <label>Status Inicial do Rodapé</label>
+      <input type="text" class="st-input" data-text-panel="editor" data-text-target="editorStatus" value="Configure as pastas e regras do preset.">
+    </div>
+  </div>
+
+  <div class="st-card" data-panel-card="collect">
+    <h3 class="st-card-title">3. Textos — Collect Files</h3>
+    <p class="st-help">Edite os rótulos do Project Manager / Collect Files. Dê <strong>duplo clique</strong> no elemento dentro do preview para editar in-place!</p>
+
+    <div class="st-field">
+      <label>Título dos Alvos (Sequências/Comps)</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="lblTargetTitle" value="Sequências">
+    </div>
+    <div class="st-field">
+      <label>Opção: Excluir não usados e reduzir</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkExcludeUnused" value="Excluir clipes não usados e reduzir projeto">
+    </div>
+    <div class="st-field">
+      <label>Opção: Áudio Conform (PPro)</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkAudioConform" value="Incluir arquivos de conformidade de áudio">
+    </div>
+    <div class="st-field">
+      <label>Opção: Preview Files (PPro)</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkPreviewFiles" value="Incluir arquivos de Preview">
+    </div>
+    <div class="st-field">
+      <label>Opção: Renomear arquivos para nome do clipe</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkRenameClipNames" value="Renomear arquivos de mídia para o nome do clipe">
+    </div>
+    <div class="st-field">
+      <label>Opção: Obedecer proxy (AE)</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkObeyProxy" value="Obedecer configurações de proxy">
+    </div>
+    <div class="st-field">
+      <label>Opção: Gerar apenas relatório</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkReportOnly" value="Gerar apenas relatório">
+    </div>
+    <div class="st-field">
+      <label>Opção: Mostrar projeto no Explorer</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkReveal" value="Mostrar o projeto coletado no Explorer ao terminar">
+    </div>
+    <div class="st-field">
+      <label>Opção: Abrir projeto ao terminar</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="chkOpenCollected" value="Abrir o projeto coletado ao terminar">
+    </div>
+    <div class="st-field">
+      <label>Botão Comentários</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="btnComments" value="Comentários...">
+    </div>
+    <div class="st-field">
+      <label>Botão OK (Iniciar Collect)</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="btnCollect" value="OK">
+    </div>
+    <div class="st-field">
+      <label>Botão Cancelar</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="btnCancel" value="Cancelar">
+    </div>
+    <div class="st-field">
+      <label>Botão Calcular Tamanho</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="btnCalculate" value="Calcular">
+    </div>
+    <div class="st-field">
+      <label>Botão Procurar Destino</label>
+      <input type="text" class="st-input" data-text-panel="collect" data-text-target="btnBrowseDest" value="Procurar...">
+    </div>
+  </div>
+
+  <!-- 5. Textos: Overlays & Modais -->
+  <div class="st-card" data-panel-card="overlays">
+    <h3 class="st-card-title">4. Textos — Overlays &amp; Modais</h3>
+
+    <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 10px 0 4px; text-transform: uppercase;">↺ Modal: Confirmar Rollback</div>
+    <div class="st-field">
+      <label>Título Rollback</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="rollbackModalTitle" value="Confirmar Rollback">
+    </div>
+    <div class="st-field">
+      <label>Pergunta Principal</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblRollbackText" value="Deseja salvar o projeto antes de continuar?">
+    </div>
+    <div class="st-field">
+      <label>Explicação Rollback</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblRollbackSubtext" value="O projeto será desorganizado de volta para a estrutura em que estava antes de organizar.">
+    </div>
+    <div class="st-field">
+      <label>Botão: Salvar e Continuar</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnRollbackSaveAndContinue" value="Salvar e Continuar">
+    </div>
+    <div class="st-field">
+      <label>Botão: Continuar sem Salvar</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnRollbackContinueWithoutSave" value="Continuar sem Salvar">
+    </div>
+    <div class="st-field">
+      <label>Botão: Cancelar</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnRollbackCancel" value="Cancelar">
+    </div>
+
+    <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 14px 0 4px; text-transform: uppercase;">⚙️ Modal: Regras &amp; Filtros</div>
+    <div class="st-field">
+      <label>Título do Modal</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="rulesModalTitleText" value="Regras e Filtros — Pasta: Solids">
+    </div>
+    <div class="st-field">
+      <label>Botão Cancelar</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnCancelRulesModal" value="Cancelar">
+    </div>
+    <div class="st-field">
+      <label>Botão Aplicar Regras</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnApplyRulesModal" value="Aplicar Regras na Pasta">
+    </div>
+
+    <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 14px 0 4px; text-transform: uppercase;">🗑️ Modal: Remover Pasta</div>
+    <div class="st-field">
+      <label>Título</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblDelFolderTitle" value="Remover Pasta">
+    </div>
+    <div class="st-field">
+      <label>Mensagem de Confirmação</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblDelFolderMsg" value="Deseja remover a pasta 'Solids' da estrutura?">
+    </div>
+
+    <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 14px 0 4px; text-transform: uppercase;">💾 Modal: Salvar Novo Preset</div>
+    <div class="st-field">
+      <label>Título</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblSaveAsTitle" value="Salvar Como Novo Preset">
+    </div>
+    <div class="st-field">
+      <label>Instrução</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblSaveAsInstruction" value="Digite o nome do novo perfil (ex: Motion Design, VFX Pipeline):">
+    </div>
+
+    <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 14px 0 4px; text-transform: uppercase;">❌ Modal: Excluir Preset</div>
+    <div class="st-field">
+      <label>Título</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblDelPresetTitle" value="Excluir Preset">
+    </div>
+    <div class="st-field">
+      <label>Mensagem de Exclusão</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblDelPresetMsg" value="Tem certeza que deseja excluir permanentemente o preset 'Motion Design'?">
+    </div>
+
+    <div style="font-size: 11px; font-weight: 800; color: #60a5fa; margin: 14px 0 4px; text-transform: uppercase;">⚠️ Modal: Alterações Não Salvas</div>
+    <div class="st-field">
+      <label>Título</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblUnsavedTitle" value="Alterações Não Salvas">
+    </div>
+    <div class="st-field">
+      <label>Pergunta</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblUnsavedQuestion" value="Deseja salvar o preset antes de fechar?">
+    </div>
+    <div class="st-field">
+      <label>Explicação</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="lblUnsavedDesc" value="O preset possui alterações que ainda não foram salvas e serão perdidas.">
+    </div>
+    <div class="st-field">
+      <label>Botão: Salvar e Fechar</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnUnsavedSaveClose" value="Salvar e Fechar">
+    </div>
+    <div class="st-field">
+      <label>Botão: Fechar sem Salvar</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnUnsavedDiscard" value="Fechar sem Salvar">
+    </div>
+    <div class="st-field">
+      <label>Botão: Cancelar</label>
+      <input type="text" class="st-input" data-text-panel="overlays" data-text-target="btnUnsavedCancel" value="Cancelar">
+    </div>
+  </div>
+</section>

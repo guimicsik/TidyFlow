@@ -1,0 +1,25 @@
+.st-frames-stage { align-items:flex-start; justify-content:flex-start; }
+
+.st-window-body iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.st-canvas-footer {
+  height: 34px;
+  background-color: #16161a;
+  border-top: 2px solid #000000;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #a1a1aa;
+}
+
+.st-toast {
+  font-weight: 800;
+  color: #10B981;
+}

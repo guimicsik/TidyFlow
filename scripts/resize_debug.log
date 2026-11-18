@@ -2723,3 +2723,1389 @@ CANDIDATE: hwnd=2756370 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82
 CANDIDATE: hwnd=5704610 top=(814,152 390x532) cef=(824,224 370x450) delta=(20,82) cefCount=1 titleMatch=False
 CANDIDATE: hwnd=1314098 top=(1241,153 905x873) cef=(1251,225 885x791) delta=(20,82) cefCount=1 titleMatch=False
 CANDIDATE: hwnd=2756370 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-12 19:01:35 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-12 19:01:36 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-12 19:01:36 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 11:29:15 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=138076 top=(814,152 390x532) cef=(824,224 370x450) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 11:29:15 Target=600x750 AllowResize=False CollectXY=(219,224) ===
+CANDIDATE: hwnd=138066 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=138058 top=(1241,153 905x873) cef=(1251,225 885x791) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=138076 top=(814,152 390x532) cef=(824,224 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=138066 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=138058 top=(1241,153 905x873) cef=(1251,225 885x791) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 11:29:15 Target=600x750 AllowResize=False CollectXY=(219,224) ===
+=== RUN 2026-11-17 11:29:15 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=138076 top=(814,152 390x532) cef=(824,224 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=138066 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=138058 top=(1241,153 905x873) cef=(1251,225 885x791) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 11:29:15 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=138076 top=(814,152 390x532) cef=(824,224 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=138066 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=138076 top=(814,152 390x532) cef=(824,224 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=138058 top=(1241,153 905x873) cef=(1251,225 885x791) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=138066 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=138058 top=(1241,153 905x873) cef=(1251,225 885x791) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 11:29:16 Target=600x750 AllowResize=False CollectXY=(219,224) ===
+UNLOCKED MAIN/OTHER: hwnd=138058 style=96CC0000->96CD0000 restoredSize=False
+ACTION on hwnd=138066 outer=620x832 -> final=620x832 ok=True style=96CC0000->96C80000
+SUCCESS: Resized Collect window (hwnd=138066) to 600x750
+CANDIDATE: hwnd=138076 top=(814,152 390x532) cef=(824,224 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=138066 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=138058 top=(1241,153 905x873) cef=(1251,225 885x791) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=138066 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=138066) to 600x750
+CANDIDATE: hwnd=138076 top=(814,152 390x532) cef=(824,224 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=138066 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=138058 top=(1241,153 905x873) cef=(1251,225 885x791) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=138066 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=138066) to 600x750
+ACTION on hwnd=138066 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=138066) to 600x750
+ACTION on hwnd=138066 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=138066) to 600x750
+=== RUN 2026-11-17 11:29:30 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:29:30 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:29:33 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:29:33 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:29:34 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:30:12 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=203944 top=(209,152 620x832) cef=(209,152 0x0) delta=(620,832) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(918,302 908x583) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 11:30:13 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+UNLOCKED MAIN/OTHER: hwnd=203944 style=96CC0000->96CD0000 restoredSize=False
+UNLOCKED MAIN/OTHER: hwnd=269426 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 11:30:13 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=203944 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(918,302 908x583) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(209,152 620x832) cef=(219,224 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(918,302 908x583) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 11:30:13 Target=600x750 AllowResize=False CollectXY=(219,224) ===
+=== RUN 2026-11-17 11:30:13 Target=600x750 AllowResize=False CollectXY=(219,224) ===
+CANDIDATE: hwnd=203944 top=(256,172 620x832) cef=(272,247 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(918,302 908x583) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 11:30:13 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+ACTION on hwnd=203944 outer=620x832 -> final=620x832 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=203944) to 600x750
+CANDIDATE: hwnd=203944 top=(280,189 620x832) cef=(290,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(918,302 908x583) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=203944 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=203944) to 600x750
+CANDIDATE: hwnd=203944 top=(280,196 620x832) cef=(290,268 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(918,302 908x583) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=203944 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=203944) to 600x750
+ACTION on hwnd=203944 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=203944) to 600x750
+=== RUN 2026-11-17 11:30:14 Target=600x750 AllowResize=False CollectXY=(219,224) ===
+ACTION on hwnd=203944 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=203944) to 600x750
+CANDIDATE: hwnd=203944 top=(298,224 620x832) cef=(308,296 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(918,302 908x583) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=203944 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=203944) to 600x750
+=== RUN 2026-11-17 11:30:24 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=400290 top=(1845,687 359x721) cef=(1855,759 339x639) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(918,302 908x583) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 11:30:25 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(918,302 908x583) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=138084 top=(1931,592 339x639) cef=(1931,592 339x639) delta=(0,0) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 11:30:26 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=269142 top=(1309,534 359x705) cef=(1318,590 339x639) delta=(20,66) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(918,302 908x583) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 11:30:28 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=269426 top=(908,230 928x665) cef=(1375,302 451x583) delta=(477,82) cefCount=2 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:31 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=269426 top=(908,230 865x665) cef=(1344,302 419x583) delta=(446,82) cefCount=2 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:32 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=400538 top=(928,250 440x665) cef=(938,322 420x583) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=269426 top=(908,230 865x665) cef=(918,302 845x583) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:39 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=400538 top=(905,251 371x546) cef=(915,323 351x464) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=269426 top=(908,230 390x532) cef=(918,302 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:40 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=400538 top=(905,251 373x540) cef=(915,323 353x458) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=269426 top=(908,230 390x532) cef=(918,302 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:41 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=400538 top=(905,251 378x541) cef=(915,323 358x459) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=269426 top=(908,230 390x532) cef=(918,302 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:46 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=203666 top=(905,251 378x541) cef=(915,323 358x459) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=269426 top=(908,230 390x532) cef=(918,302 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:46 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+ACTION on hwnd=203944 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=203944) to 600x750
+=== RUN 2026-11-17 11:30:46 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=203666 top=(783,234 378x541) cef=(793,306 358x459) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=269426 top=(908,230 390x532) cef=(918,302 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=203666 top=(783,234 378x541) cef=(793,306 358x459) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=269426 top=(908,230 390x532) cef=(918,302 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:49 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=203666 top=(783,234 405x544) cef=(793,306 385x462) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=269426 top=(929,229 390x532) cef=(939,301 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:50 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=269426 top=(1163,235 390x532) cef=(1173,307 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203666 top=(783,234 390x532) cef=(793,306 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:58 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=400424 top=(877,215 390x532) cef=(888,287 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:30:59 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+UNLOCKED MAIN/OTHER: hwnd=400424 style=96CC0000->96CD0000 restoredSize=False
+=== RUN 2026-11-17 11:30:59 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+ACTION on hwnd=203944 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=203944) to 600x750
+CANDIDATE: hwnd=400424 top=(896,230 390x532) cef=(906,302 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=400424 top=(896,230 390x532) cef=(906,302 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=203944 top=(301,223 620x832) cef=(311,295 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 11:33:49 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:33:49 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:33:54 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:39:10 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:52:58 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:53:01 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:53:03 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:53:04 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:53:07 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:53:07 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:53:08 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:53:12 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:53:13 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:55:48 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:55:52 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:55:54 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:55:57 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:55:59 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:56:14 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:56:14 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:56:17 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:56:20 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 11:56:22 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:30:01 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1970592 top=(998,320 530x716) cef=(998,320 0x0) delta=(530,716) cefCount=0 titleMatch=True
+UNLOCKED MAIN/OTHER: hwnd=1970592 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:30:02 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1970592 top=(998,320 530x716) cef=(1008,376 510x650) delta=(20,66) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 15:30:02 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=1970592 top=(998,320 530x716) cef=(1008,376 510x650) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=1970592 outer=530x716 -> final=620x816 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=1970592) to 600x750
+=== RUN 2026-11-17 15:30:02 Target=600x750 AllowResize=False CollectXY=(1008,376) ===
+=== RUN 2026-11-17 15:30:02 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+ACTION on hwnd=1970592 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1970592) to 600x750
+=== RUN 2026-11-17 15:30:02 Target=600x750 AllowResize=False CollectXY=(1008,376) ===
+CANDIDATE: hwnd=1970592 top=(998,320 620x816) cef=(1008,376 600x750) delta=(20,66) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 15:30:02 Target=600x750 AllowResize=False CollectXY=(1008,376) ===
+CANDIDATE: hwnd=1970592 top=(998,320 620x816) cef=(994,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1970592 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=1970592 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1970592) to 600x750
+ACTION on hwnd=1970592 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1970592) to 600x750
+CANDIDATE: hwnd=1970592 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=1970592 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1970592) to 600x750
+ACTION on hwnd=1970592 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1970592) to 600x750
+=== RUN 2026-11-17 15:30:03 Target=600x750 AllowResize=False CollectXY=(1008,376) ===
+CANDIDATE: hwnd=1970592 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=1970592 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1970592) to 600x750
+=== RUN 2026-11-17 15:31:30 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=662788 top=(978,318 620x816) cef=(978,318 0x0) delta=(620,816) cefCount=0 titleMatch=True
+UNLOCKED MAIN/OTHER: hwnd=662788 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:31:30 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=662788 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 15:31:30 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+ACTION on hwnd=662788 outer=620x816 -> final=620x816 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=662788) to 600x750
+CANDIDATE: hwnd=662788 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 15:31:30 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+ACTION on hwnd=662788 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=662788) to 600x750
+=== RUN 2026-11-17 15:31:30 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+=== RUN 2026-11-17 15:31:30 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=662788 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662788 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662788 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=662788 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=662788) to 600x750
+ACTION on hwnd=662788 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+ACTION on hwnd=662788 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=662788) to 600x750
+SUCCESS: Resized Collect window (hwnd=662788) to 600x750
+=== RUN 2026-11-17 15:31:31 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:31:33 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=793926 top=(978,318 620x816) cef=(978,318 0x0) delta=(620,816) cefCount=0 titleMatch=True
+UNLOCKED MAIN/OTHER: hwnd=793926 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:31:33 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=793926 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 15:31:33 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=793926 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=793926 outer=620x816 -> final=620x816 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=793926) to 600x750
+ACTION on hwnd=793926 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=793926) to 600x750
+=== RUN 2026-11-17 15:31:33 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:31:33 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+=== RUN 2026-11-17 15:31:33 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+WINDOW_NOT_FOUND
+WINDOW_NOT_FOUND
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:31:54 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=990534 top=(978,318 620x816) cef=(978,318 0x0) delta=(620,816) cefCount=0 titleMatch=True
+UNLOCKED MAIN/OTHER: hwnd=990534 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:31:54 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:31:55 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=990534 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=990534 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=990534 outer=620x816 -> final=620x816 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=990534) to 600x750
+=== RUN 2026-11-17 15:31:55 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+=== RUN 2026-11-17 15:31:55 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:31:55 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+ACTION on hwnd=990534 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=990534) to 600x750
+CANDIDATE: hwnd=990534 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=990534 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=990534 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=990534 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=990534) to 600x750
+ACTION on hwnd=990534 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+ACTION on hwnd=990534 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=990534) to 600x750
+SUCCESS: Resized Collect window (hwnd=990534) to 600x750
+=== RUN 2026-11-17 15:31:55 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=990534 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=990534 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=990534) to 600x750
+=== RUN 2026-11-17 15:32:54 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:32:55 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:33:01 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:33:02 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:33:03 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2494772 top=(978,318 620x816) cef=(978,318 0x0) delta=(620,816) cefCount=0 titleMatch=True
+UNLOCKED MAIN/OTHER: hwnd=2494772 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:33:03 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:33:03 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=2494772 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=2494772 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=2494772 outer=620x816 -> final=620x816 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=2494772) to 600x750
+=== RUN 2026-11-17 15:33:03 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+ACTION on hwnd=2494772 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2494772) to 600x750
+=== RUN 2026-11-17 15:33:03 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2494772 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=2494772 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=2494772 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=2494772 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2494772) to 600x750
+ACTION on hwnd=2494772 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+ACTION on hwnd=2494772 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2494772) to 600x750
+SUCCESS: Resized Collect window (hwnd=2494772) to 600x750
+=== RUN 2026-11-17 15:33:04 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=2494772 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=2494772 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2494772) to 600x750
+=== RUN 2026-11-17 15:33:05 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=2494772 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=2494772 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2494772) to 600x750
+=== RUN 2026-11-17 15:33:05 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=2494772 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=2494772 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2494772) to 600x750
+=== RUN 2026-11-17 15:33:05 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=2494772 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=2494772 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2494772) to 600x750
+=== RUN 2026-11-17 15:33:56 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:33:56 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:33:56 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:34:01 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=3477442 top=(978,318 620x816) cef=(978,318 0x0) delta=(620,816) cefCount=0 titleMatch=True
+UNLOCKED MAIN/OTHER: hwnd=3477442 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:34:01 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:34:01 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=3477442 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=3477442 outer=620x816 -> final=620x816 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=3477442) to 600x750
+CANDIDATE: hwnd=3477442 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=3477442 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=3477442) to 600x750
+=== RUN 2026-11-17 15:34:01 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+=== RUN 2026-11-17 15:34:01 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+=== RUN 2026-11-17 15:34:01 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=3477442 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=3477442 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=3477442 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=3477442) to 600x750
+CANDIDATE: hwnd=3477442 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=3477442 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=3477442) to 600x750
+ACTION on hwnd=3477442 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=3477442) to 600x750
+=== RUN 2026-11-17 15:34:02 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=3477442 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=3477442 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=3477442) to 600x750
+=== RUN 2026-11-17 15:34:26 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=334714 top=(978,318 620x816) cef=(978,318 0x0) delta=(620,816) cefCount=0 titleMatch=True
+UNLOCKED MAIN/OTHER: hwnd=334714 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:34:26 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:34:26 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=334714 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=334714 outer=620x816 -> final=620x816 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=334714) to 600x750
+CANDIDATE: hwnd=334714 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 15:34:26 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+ACTION on hwnd=334714 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=334714) to 600x750
+=== RUN 2026-11-17 15:34:26 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+=== RUN 2026-11-17 15:34:27 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=334714 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=334714 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=334714 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=334714) to 600x750
+CANDIDATE: hwnd=334714 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=334714 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=334714) to 600x750
+ACTION on hwnd=334714 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=334714) to 600x750
+=== RUN 2026-11-17 15:34:27 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=334714 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=334714 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=334714) to 600x750
+=== RUN 2026-11-17 15:35:02 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=334714 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=334714 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=334714) to 600x750
+=== RUN 2026-11-17 15:35:02 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=334714 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=334714 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=334714) to 600x750
+=== RUN 2026-11-17 15:35:03 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=334714 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=334714 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=334714) to 600x750
+=== RUN 2026-11-17 15:38:19 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:38:20 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+=== RUN 2026-11-17 15:38:20 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053682 top=(978,318 620x816) cef=(978,318 0x0) delta=(620,816) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+UNLOCKED MAIN/OTHER: hwnd=1053682 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:38:21 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:38:21 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=1053682 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=1053682 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=1053682 outer=620x816 -> final=620x816 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=1053682) to 600x750
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+=== RUN 2026-11-17 15:38:21 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+ACTION on hwnd=1053682 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1053682) to 600x750
+=== RUN 2026-11-17 15:38:21 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+=== RUN 2026-11-17 15:38:21 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053682 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=1053682 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+ACTION on hwnd=1053682 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1053682) to 600x750
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=1053682 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1053682 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1053682) to 600x750
+ACTION on hwnd=1053682 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1053682) to 600x750
+=== RUN 2026-11-17 15:38:21 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=1053682 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1053682 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1053682) to 600x750
+=== RUN 2026-11-17 15:38:27 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=1053682 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1053682 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1053682) to 600x750
+=== RUN 2026-11-17 15:38:27 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=1053682 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1053682 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1053682) to 600x750
+=== RUN 2026-11-17 15:38:28 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=1053682 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1053682 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1053682) to 600x750
+=== RUN 2026-11-17 15:40:46 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1842048 top=(978,318 620x816) cef=(988,374 600x700) delta=(20,116) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1842048 outer=620x816 -> final=620x816 ok=True style=96CC0000->96C80000
+SUCCESS: Resized Collect window (hwnd=1842048) to 600x750
+=== RUN 2026-11-17 15:40:46 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:40:46 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=1842048 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1842048 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1842048) to 600x750
+CANDIDATE: hwnd=1842048 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+=== RUN 2026-11-17 15:40:46 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+ACTION on hwnd=1842048 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1842048) to 600x750
+=== RUN 2026-11-17 15:40:47 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+=== RUN 2026-11-17 15:40:47 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1842048 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1842048 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1842048) to 600x750
+CANDIDATE: hwnd=1842048 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=1842048 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1842048 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1842048) to 600x750
+ACTION on hwnd=1842048 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1842048) to 600x750
+=== RUN 2026-11-17 15:40:47 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=1842048 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1842048 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1842048) to 600x750
+=== RUN 2026-11-17 15:42:26 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=856568 top=(978,318 620x816) cef=(978,318 0x0) delta=(620,816) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+UNLOCKED MAIN/OTHER: hwnd=856568 style=96CC0000->96CD0000 restoredSize=False
+UNLOCKED MAIN/OTHER: hwnd=920026 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:42:26 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:42:27 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=856568 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=856568 outer=620x816 -> final=620x816 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=856568) to 600x750
+CANDIDATE: hwnd=856568 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+=== RUN 2026-11-17 15:42:27 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+ACTION on hwnd=856568 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=856568) to 600x750
+=== RUN 2026-11-17 15:42:27 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+=== RUN 2026-11-17 15:42:27 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=856568 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=856568 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=856568 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=856568) to 600x750
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=856568 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=856568 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=856568) to 600x750
+ACTION on hwnd=856568 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=856568) to 600x750
+=== RUN 2026-11-17 15:42:27 Target=600x750 AllowResize=False CollectXY=(988,374) ===
+CANDIDATE: hwnd=856568 top=(978,318 620x816) cef=(988,374 600x750) delta=(20,66) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=856568 outer=620x816 -> final=620x816 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=856568) to 600x750
+=== RUN 2026-11-17 15:42:28 Target=600x750 AllowResize=False CollectXY=(512,45) ===
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:42:30 Target=600x750 AllowResize=False CollectXY=(512,45) ===
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:42:30 Target=600x750 AllowResize=False CollectXY=(512,45) ===
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:42:30 Target=600x750 AllowResize=False CollectXY=(512,45) ===
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:42:32 Target=600x750 AllowResize=False CollectXY=(512,45) ===
+CANDIDATE: hwnd=4983842 top=(502,-27 1262x1019) cef=(512,45 1242x937) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(772,448 986x937) cef=(782,520 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=4983842 outer=1262x1019 -> final=620x832 ok=True style=96CC0000->96C80000
+SUCCESS: Resized Collect window (hwnd=4983842) to 600x750
+=== RUN 2026-11-17 15:44:31 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1055618 top=(612,182 620x832) cef=(612,182 0x0) delta=(620,832) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=920026 top=(695,329 986x937) cef=(705,401 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+UNLOCKED MAIN/OTHER: hwnd=1055618 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:44:31 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 15:44:31 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+CANDIDATE: hwnd=1055618 top=(612,182 620x832) cef=(622,254 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(695,329 986x937) cef=(705,401 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1055618 outer=620x832 -> final=620x832 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=1055618) to 600x750
+CANDIDATE: hwnd=1055618 top=(612,182 620x832) cef=(622,254 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(695,329 986x937) cef=(705,401 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+=== RUN 2026-11-17 15:44:32 Target=600x750 AllowResize=False CollectXY=(622,254) ===
+ACTION on hwnd=1055618 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1055618) to 600x750
+=== RUN 2026-11-17 15:44:32 Target=600x750 AllowResize=False CollectXY=(622,254) ===
+=== RUN 2026-11-17 15:44:32 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1055618 top=(612,182 620x832) cef=(622,254 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(695,329 986x937) cef=(705,401 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=1055618 top=(612,182 620x832) cef=(622,254 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(695,329 986x937) cef=(705,401 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=1055618 top=(612,182 620x832) cef=(622,254 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(695,329 986x937) cef=(705,401 966x855) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=1055618 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1055618) to 600x750
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1055618 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1055618) to 600x750
+ACTION on hwnd=1055618 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1055618) to 600x750
+=== RUN 2026-11-17 15:44:32 Target=600x750 AllowResize=False CollectXY=(622,254) ===
+CANDIDATE: hwnd=1055618 top=(612,182 620x832) cef=(622,254 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(695,329 986x937) cef=(705,401 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1055618 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1055618) to 600x750
+=== RUN 2026-11-17 15:44:33 Target=600x750 AllowResize=False CollectXY=(622,254) ===
+CANDIDATE: hwnd=1055618 top=(612,182 620x832) cef=(622,254 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(695,329 986x937) cef=(705,401 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1055618 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1055618) to 600x750
+=== RUN 2026-11-17 15:44:34 Target=600x750 AllowResize=False CollectXY=(622,254) ===
+CANDIDATE: hwnd=1055618 top=(612,182 620x832) cef=(622,254 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(695,329 986x937) cef=(705,401 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1055618 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1055618) to 600x750
+=== RUN 2026-11-17 15:44:34 Target=600x750 AllowResize=False CollectXY=(622,254) ===
+CANDIDATE: hwnd=1055618 top=(612,182 620x832) cef=(622,254 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=920026 top=(695,329 986x937) cef=(705,401 966x855) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=1055618 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1055618) to 600x750
+=== RUN 2026-11-17 15:47:40 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=662238 top=(1750,687 363x721) cef=(1760,759 343x639) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(459,204 986x937) cef=(469,276 966x855) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 15:47:40 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=662238 top=(189,242 390x532) cef=(199,314 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(459,204 986x937) cef=(469,276 966x855) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 15:54:29 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1774376 top=(612,182 620x832) cef=(612,182 0x0) delta=(620,832) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=662238 top=(788,194 390x532) cef=(798,266 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,196 947x679) cef=(1171,268 927x597) delta=(20,82) cefCount=1 titleMatch=False
+UNLOCKED MAIN/OTHER: hwnd=1774376 style=96CC0000->96CD0000 restoredSize=False
+UNLOCKED MAIN/OTHER: hwnd=662238 style=96C80000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 15:54:30 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1774376 top=(595,182 620x832) cef=(597,253 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662238 top=(788,194 390x532) cef=(798,266 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,196 947x679) cef=(1171,268 927x597) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 15:54:30 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+ACTION on hwnd=1774376 outer=620x832 -> final=620x832 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=1774376) to 600x750
+CANDIDATE: hwnd=1774376 top=(111,195 620x832) cef=(118,268 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662238 top=(788,194 390x532) cef=(798,266 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,196 947x679) cef=(1171,268 927x597) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 15:54:30 Target=600x750 AllowResize=False CollectXY=(622,254) ===
+=== RUN 2026-11-17 15:54:30 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+ACTION on hwnd=1774376 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1774376) to 600x750
+=== RUN 2026-11-17 15:54:30 Target=600x750 AllowResize=False CollectXY=(622,254) ===
+CANDIDATE: hwnd=1774376 top=(106,190 620x832) cef=(121,261 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662238 top=(788,194 390x532) cef=(798,266 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,196 947x679) cef=(1171,268 927x597) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1774376 top=(120,188 620x832) cef=(130,260 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662238 top=(788,194 390x532) cef=(798,266 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,196 947x679) cef=(1171,268 927x597) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1774376 top=(155,193 620x832) cef=(167,265 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662238 top=(788,194 390x532) cef=(798,266 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,196 947x679) cef=(1171,268 927x597) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=1774376 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1774376) to 600x750
+ACTION on hwnd=1774376 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1774376) to 600x750
+ACTION on hwnd=1774376 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1774376) to 600x750
+=== RUN 2026-11-17 15:54:31 Target=600x750 AllowResize=False CollectXY=(622,254) ===
+CANDIDATE: hwnd=1774376 top=(175,192 620x832) cef=(185,264 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662238 top=(788,194 390x532) cef=(798,266 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,196 947x679) cef=(1171,268 927x597) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=1774376 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1774376) to 600x750
+=== RUN 2026-11-17 15:54:40 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1774376 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662238 top=(788,194 390x532) cef=(798,266 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,196 947x679) cef=(1171,268 927x597) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=1774376 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1774376) to 600x750
+=== RUN 2026-11-17 15:54:40 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1774376 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662238 top=(788,194 390x532) cef=(798,266 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,196 947x679) cef=(1171,268 927x597) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=1774376 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1774376) to 600x750
+=== RUN 2026-11-17 15:54:41 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1774376 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=662238 top=(788,194 390x532) cef=(798,266 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,196 947x679) cef=(1171,268 927x597) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=1774376 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1774376) to 600x750
+=== RUN 2026-11-17 16:07:50 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=920026 top=(1161,190 947x679) cef=(1171,262 927x597) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=662238 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1774376 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=1774376 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=1774376) to 600x750
+=== RUN 2026-11-17 16:07:50 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=920026 top=(1161,190 947x679) cef=(1171,262 927x597) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=662238 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1774376 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-17 16:51:36 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=662238 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:51:36 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=662238 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 16:51:37 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=662238 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:51:38 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=662238 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 16:51:45 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=662238 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:51:46 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=662238 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 16:51:48 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:51:53 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=5771476 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:51:54 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 16:51:54 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=5771476 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=5771476 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 16:53:24 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:53:25 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 16:53:25 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 16:53:25 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:53:26 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 16:53:26 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:53:27 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 16:53:33 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:53:33 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 16:54:11 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:54:11 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 16:57:03 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:57:03 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1313352 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 16:57:09 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 16:57:10 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 16:57:10 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:00:13 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:00:14 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:05:35 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:05:35 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1161,190 947x799) cef=(1171,262 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:56:23 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:56:23 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:56:26 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:56:26 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:56:35 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:56:35 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:56:36 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:56:36 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2039198 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=920026 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:56:42 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=922008 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:56:43 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 17:56:43 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=922008 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=922008 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:56:44 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=922008 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:56:44 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=922008 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:57:39 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2231498 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:57:40 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 17:57:40 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2231498 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2231498 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:57:40 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2231498 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:57:41 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2231498 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:58:43 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2231498 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:58:44 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2231498 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:59:27 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2231498 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:59:27 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2231498 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 17:59:34 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1186628 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 17:59:34 Target=370x450 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1186628 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1186628 top=(787,190 390x532) cef=(797,262 370x450) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 18:00:23 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 390x532) cef=(821,272 370x450) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 18:00:23 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 18:00:23 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 390x532) cef=(821,272 370x450) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(811,200 390x532) cef=(821,272 370x450) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 18:00:24 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 18:01:52 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 18:01:52 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 21:07:43 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 21:07:44 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 21:08:13 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 21:08:13 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 21:41:41 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+UNLOCKED MAIN/OTHER: hwnd=3738902 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 21:41:42 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 22:40:15 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 22:40:15 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 22:45:50 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 22:45:50 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 23:04:38 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 23:04:38 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 23:05:15 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 23:05:15 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 23:17:14 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 23:17:15 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 23:49:07 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 23:49:07 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=3738902 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 23:57:42 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(183,190 0x0) delta=(620,832) cefCount=0 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+UNLOCKED MAIN/OTHER: hwnd=2562948 style=96CC0000->96CD0000 restoredSize=False
+WINDOW_NOT_FOUND
+=== RUN 2026-11-17 23:57:43 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 23:57:43 Target=600x750 AllowResize=False CollectXY=(0,0) ===
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96CD0000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-17 23:57:43 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-17 23:57:43 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-17 23:57:43 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-17 23:57:44 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:03:13 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+UNLOCKED MAIN/OTHER: hwnd=8850416 style=96CC0000->96CD0000 restoredSize=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:03:13 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(811,200 380x542) cef=(821,272 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-18 00:03:14 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1053504 top=(789,186 380x542) cef=(797,258 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:03:14 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1053504 top=(788,187 380x542) cef=(798,259 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:03:14 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1163,183 947x799) cef=(1173,255 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:08:41 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:08:42 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:08:42 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:16:41 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:16:42 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:16:42 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+=== RUN 2026-11-18 00:16:42 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:16:43 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 00:19:57 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:19:58 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 00:19:59 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:19:59 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:20:00 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:20:29 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:20:30 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+=== RUN 2026-11-18 00:20:30 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:20:30 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:20:31 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:26:36 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 00:26:37 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=332430 top=(-8,1432 2576x1096) cef=(-8,1432 0x0) delta=(2576,1096) cefCount=0 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:15:32 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:15:32 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-18 01:15:33 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:15:33 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:15:34 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:29:30 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:29:30 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:29:31 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:29:32 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:29:32 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:33:14 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:33:15 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:33:15 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:35:21 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:35:21 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:35:35 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:35:36 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:35:40 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:35:41 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:36:06 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:36:06 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:39:22 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:39:22 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:43:16 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:43:17 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:48:04 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:48:04 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:48:05 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:48:06 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:48:06 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:48:29 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:48:30 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-18 01:48:30 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:48:31 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-18 01:51:11 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:51:12 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:51:13 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:51:13 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:52:04 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:52:04 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:52:05 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:52:06 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:52:06 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+=== RUN 2026-11-18 01:52:06 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:52:06 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+=== RUN 2026-11-18 01:53:27 Target=600x750 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:53:27 Target=360x460 AllowResize=False CollectXY=(-99999,-99999) ===
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+=== RUN 2026-11-18 01:53:29 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:53:29 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750
+=== RUN 2026-11-18 01:53:30 Target=600x750 AllowResize=False CollectXY=(193,262) ===
+CANDIDATE: hwnd=2562948 top=(183,190 620x832) cef=(193,262 600x750) delta=(20,82) cefCount=1 titleMatch=True
+CANDIDATE: hwnd=8850416 top=(1155,191 947x799) cef=(1165,263 927x717) delta=(20,82) cefCount=1 titleMatch=False
+CANDIDATE: hwnd=1053504 top=(789,190 380x542) cef=(799,262 360x460) delta=(20,82) cefCount=1 titleMatch=False
+ACTION on hwnd=2562948 outer=620x832 -> final=620x832 ok=True style=96C80000->96C80000
+SUCCESS: Resized Collect window (hwnd=2562948) to 600x750

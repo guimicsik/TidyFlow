@@ -1,10 +1,10 @@
 # TIDYFLOW (After Effects & Premiere Pro) — Manifesto Mestre
 
 > **DIRETRIZ PARA AGENTES DE IA (ECONOMIA DE TOKENS):**
-> Este arquivo é o **Índice Mestre e Guia de Contexto Rápido** (~3 KB).
+> Este arquivo é o **Índice Mestre e Guia de Contexto Rápido**.
 > 1. **NUNCA** leia todos os arquivos de `client/`, `host/` ou `docs/` de uma só vez.
 > 2. Consulte a **Tabela de Roteamento (Seção 1)** abaixo e leia **apenas** o documento de `docs/` correspondente à sua tarefa.
-> 3. Use o **Mapa de Funções e Linhas** em `docs/01_ARQUITETURA_E_HOSTS.md` para ler somente o trecho necessário (`StartLine` / `EndLine`) dos arquivos de código.
+> 3. Para o Studio, use o mapa por tarefa em `docs/07_DESIGN_STUDIO.md`. Para o cliente CEP e os hosts, localize a função pelo nome no mapa de `docs/01_ARQUITETURA_E_HOSTS.md` e confirme a posição com `rg -n`.
 
 ---
 
@@ -14,14 +14,14 @@ Leia **exclusivamente** o módulo necessário para a tarefa atual:
 
 | Quando a tarefa envolver... | Leia apenas este arquivo | Conteúdo Principal |
 | :--- | :--- | :--- |
-| **Onde está uma função**, editar `.jsx`/`.js`, APIs de AE vs Premiere, regras ES3 ou **Snapshot/Rollback** | [`docs/01_ARQUITETURA_E_HOSTS.md`](docs/01_ARQUITETURA_E_HOSTS.md) | Mapa de arquivos, funções e linhas (`StartLine`/`EndLine`), equivalência `AEFT` × `PPRO`, armadilhas ES3 e fluxo de Rollback. |
+| **Localizar funções do cliente CEP e dos hosts**, APIs de AE vs Premiere, regras ES3 ou **Snapshot/Rollback** | [`docs/01_ARQUITETURA_E_HOSTS.md`](docs/01_ARQUITETURA_E_HOSTS.md) | Mapa de arquivos, funções e linhas (`StartLine`/`EndLine`), equivalência `AEFT` × `PPRO`, armadilhas ES3 e fluxo de Rollback. |
 | **Presets**, regras de classificação, numeração `01_`, filtro por nome ou **Áudio ESP (Premiere)** | [`docs/02_PRESETS_REGRAS_E_AUDIO.md`](docs/02_PRESETS_REGRAS_E_AUDIO.md) | Taxonomia *Default Clean*, `schema_preset.json`, motor de pontuação `_rules.jsx`, cache `PresetManager` e triagem de áudio ESP/XMP. |
 | **Interface (HTML/CSS)**, botões, toggles, modais ou **Preset Builder** | [`docs/03_UI_DESIGN_SYSTEM.md`](docs/03_UI_DESIGN_SYSTEM.md) | Geometria das 3 janelas CEP, tokens e classes de `theme.css` / `client/theme/*` (`.tf-btn*`, `.tf-toggle*`) e IDs de DOM obrigatórios. |
-| **Design Studio (Localhost)**, alterar cores, pesos, textos, animações, gaps ou drag-and-drop | [`docs/07_DESIGN_STUDIO.md`](docs/07_DESIGN_STUDIO.md) | Arquitetura do editor visual em `tools/studio/`, API `/api/studio/*` no Vite e sincronização bidirecional com `client/theme/tokens.css` e `index.html`. |
+| **Design Studio (Localhost)**, alterar cores, pesos, textos, animações, gaps ou drag-and-drop | [`docs/07_DESIGN_STUDIO.md`](docs/07_DESIGN_STUDIO.md) | Mapa por tarefa dos módulos JS, fragmentos HTML e estilos em `tools/studio/`, API `/api/studio/*` no Vite e sincronização bidirecional com `client/theme/tokens.css` e `index.html`. |
 | **Collect Files** (funcionamento atual, cópia, relink `.aepx` / `.prproj` gzip, proxies, `Report.txt`) | [`docs/04_COLLECT_FILES_SPEC.md`](docs/04_COLLECT_FILES_SPEC.md) | Especificação técnica consolidada do Collect Files (AE + Premiere Pro), sanitização, reescrita XML e matriz de cancelamento. |
 | **Novas features do Collect Files (V2)** (checklist de comps, renomear mídias, espaço em disco, previews) | [`docs/05_ROADMAP_COLLECT_V2.md`](docs/05_ROADMAP_COLLECT_V2.md) | Escopo aprovado do Collect V2, arquitetura de painel adaptativo e checklist de implementação das Fases 1 a 5. |
 | **Avaliação de ideias futuras (Backlog Aprovado)** (ZIP, LUTs e deduplicação de mídias) | [`docs/roadmap_futuro/00_VISAO_GERAL_IMPACTO_E_UX.md`](docs/roadmap_futuro/00_VISAO_GERAL_IMPACTO_E_UX.md) | Matriz de UX/performance e `.md` técnicos individuais (`01_` a `03_`) dos 3 únicos recursos extras aprovados. |
-| **Rodar testes (`npm test`)**, criar testes ou consultar bugs já resolvidos | [`docs/06_HISTORICO_E_TESTES.md`](docs/06_HISTORICO_E_TESTES.md) | Mapa das 9 suítes em `scripts/tests/` (102 testes) e resumo das decisões técnicas e armadilhas corrigidas nas Fases 1 a 9. |
+| **Rodar testes (`npm test`)**, criar testes ou consultar bugs já resolvidos | [`docs/06_HISTORICO_E_TESTES.md`](docs/06_HISTORICO_E_TESTES.md) | Mapa das suítes em `scripts/tests/` e resumo das decisões técnicas e armadilhas corrigidas nas Fases 1 a 9. |
 
 ---
 
@@ -55,7 +55,7 @@ TidyFlow/
 │   ├── OrgLog.js               # Logger (ring buffer 200 RAM / 50 localStorage)
 │   └── presets/default_preset.json
 ├── tools/studio/               # TidyFlow Design Studio (editor visual localhost isolado do pacote CEP)
-│   └── studio.html/.css/.js    # Controles visuais, drag-and-drop e sincronização bidirecional
+│   └── studio.html/.css/.js    # Entradas de partials/, styles/ e modules/ (mapa em docs/07_DESIGN_STUDIO.md)
 ├── host/                       # Camada ExtendScript (ES3 estrito + UTF-8 obrigatório)
 │   ├── _lib.jsx                # Helpers compartilhados ($.global.OrgLib)
 │   ├── _rules.jsx              # Classificador por pontuação ($.global.OrgRules)

@@ -161,23 +161,19 @@ body {
   font-weight: var(--tf-font-weight-toggle, 600);
 }
 
-#chkGroupBySourceFolder+.tf-toggle__face {
+#btnCheckUnused {
+  height: var(--tf-toggle-height, 68px);
+}
+
+#btnCheckUnused .btn-tile-label {
   font-size: var(--tf-font-size-toggle, 11px);
-  font-weight: var(--tf-font-weight-toggle, 600);
+  font-weight: var(--tf-font-weight-tile, 800);
 }
 
 /* 4. Botão Desorganizar Projeto */
 #btnRollback .btn-tile-label {
   font-size: var(--tf-font-size-rollback, 11.5px);
   font-weight: var(--tf-font-weight-rollback, 800);
-}
-
-#groupSourceNote {
-  display: none;
-  font-size: 11px;
-  line-height: 1.4;
-  color: #e5a93c;
-  margin-top: 6px;
 }
 
 #statusMsg {

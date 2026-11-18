@@ -14,6 +14,10 @@ var h = harnessLib.createHarness("Refs de DOM");
 var test = h.test;
 var assert = h.assert;
 
+function studioPage() {
+  return require("../../tools/studio/render-html.cjs").renderStudioHtml(nodePath.join(REPO_ROOT, "tools/studio"));
+}
+
 function read(relPath) {
   return nodeFs.readFileSync(nodePath.join(REPO_ROOT, relPath), "utf8");
 }
@@ -90,14 +94,19 @@ test("main.js só usa IDs presentes em index.html", function () {
   checkPair("Painel", "client/main.js", "client/index.html", panelHtmlIds);
 });
 
-test("Design Studio: studio.js é sintaticamente válido e todos os data-token existem em tokens.css", function () {
-  var studioJs = read("tools/studio/studio.js");
-  // eslint-disable-next-line no-new-func
-  new Function(studioJs);
-  assert.includes(studioJs, "cloneNode(false)", "inspetor deve medir cores fora do :hover real do elemento selecionado");
-  assert.includes(studioJs, "getComputedStyle(sample)", "inspetor deve usar a cópia neutra ao comparar repouso, hover e clique");
+test("Design Studio: módulos são sintaticamente válidos e todos os data-token existem em tokens.css", function () {
+  var dir = "tools/studio/modules/";
+  var modules = nodeFs.readdirSync(nodePath.join(REPO_ROOT, dir)).filter(name => name.endsWith(".js"));
+  for (const file of ["tools/studio/studio.js", ...modules.map(name => dir + name)]) {
+    require("child_process").execFileSync(process.execPath, ["--check", file], { cwd: REPO_ROOT });
+  }
+  assert.includes(read("tools/studio/modules/inspector-colors.js"), "cloneNode(false)", "inspetor deve medir cores fora do :hover real do elemento selecionado");
+  assert.includes(read("tools/studio/modules/inspector-colors.js"), "getComputedStyle(sample)", "inspetor deve usar a cópia neutra ao comparar repouso, hover e clique");
+  assert.includes(read("tools/studio/modules/palettes.js"), "COLOR_STATE_PRESETS", "inspetor deve oferecer presets rápidos de cores por estado");
+  assert.includes(read("tools/studio/modules/selection.js"), "currentSelectedElements", "Modo Editar deve suportar seleção múltipla via Shift+Clique");
+  assert.includes(read("tools/studio/modules/preview.js"), "Boolean(ev.shiftKey)", "clique no Modo Editar deve propagar Shift para seleção múltipla");
 
-  var studioHtml = read("tools/studio/studio.html");
+  var studioHtml = studioPage();
   var tokensCss = read("client/theme/tokens.css");
   var tokenRe = /data-token="(--tf-[a-zA-Z0-9_-]+)"/g;
   var m;
@@ -144,14 +153,17 @@ test("tree_editor.js não referencia controles removidos da UI", function () {
   assert.notIncludes(js, "chkDeleteEmptyFolders", "toggle de excluir vazias vive apenas no painel principal");
 });
 
-test("editor de presets possui os toggles de Categorias de Áudio (ESP) e Numerar ESP ao lado de Numeração Sequencial", function () {
+test("editor de presets possui os toggles clicáveis (.tf-toggle) de Numeração, Pasta de origem e ESP", function () {
   var html = read("client/tree_editor.html");
   assert.includes(html, 'id="chkSeparateAudioCategories"', "chkSeparateAudioCategories deve existir no HTML");
   assert.includes(html, 'id="chkNumberAudioCategories"', "chkNumberAudioCategories deve existir no HTML");
   assert.includes(html, 'id="chkUsePrefixNumbering"', "chkUsePrefixNumbering deve existir no HTML");
+  assert.includes(html, 'id="chkGroupBySourceFolder"', "chkGroupBySourceFolder deve existir no Preset Builder");
+  assert.includes(html, 'class="tf-toggle editor-setting-toggle"', "barra de configurações do Preset Builder deve usar botões clicáveis .tf-toggle");
 });
 
 test("painel principal mantém os controles documentados no manifesto", function () {
+  var panelHtml = read("client/index.html");
   var required = [
     "presetSelect",
     "btnOrganize",
@@ -161,14 +173,19 @@ test("painel principal mantém os controles documentados no manifesto", function
     "btnRollback",
     "chkSaveProject",
     "chkDeleteEmptyFolders",
-    "chkGroupBySourceFolder"
+    "btnCheckUnused"
   ];
   for (var i = 0; i < required.length; i++) {
     assert.ok(panelHtmlIds[required[i]], "index.html deve conter #" + required[i]);
   }
   assert.ok(!panelHtmlIds.chkPrefixNumbering, "Numeração Sequencial deve ficar apenas no Preset Builder");
+  assert.ok(!panelHtmlIds.chkGroupBySourceFolder, "Pasta de origem deve ficar apenas no Preset Builder");
   assert.ok(!panelHtmlIds.chkReduceProject, "Redução de projeto unificada no Collect Files");
-  assert.ok(!panelHtmlIds.btnCheckComps, "Mídias não usadas unificado com Organizar Mídias");
+  assert.notIncludes(panelHtml, "Organizando projeto...", "estado transitório de organização não pode ser salvo no HTML");
+  assert.ok(!/<(?:button|select|input)[^>]+(?:id="(?:presetSelect|btnOpenPresetBuilder|chkSaveProject|chkDeleteEmptyFolders|btnRollback)")[^>]*disabled/i.test(panelHtml), "controles do painel não podem ser salvos no estado busy");
+  assert.includes(read("client/theme/tokens.css"), "--tf-rollback-justify: center;", "botão de rollback deve permanecer centralizado");
+  var studioDesign = JSON.parse(read("client/theme/studio-design.json"));
+  assert.ok(!studioDesign['[data-tf-design="main-rollback-row"]'] || !studioDesign['[data-tf-design="main-rollback-row"]'].active, "linha do rollback não pode mudar de geometria no clique");
 });
 
 test("P8: fluxos destrutivos de preset pedem confirmação antes de sobrescrever", function () {
@@ -322,6 +339,8 @@ test("Design Studio: syncOverlaysToClientFiles sincroniza modais de overlays.htm
 
 test("Studio: estilos individuais preservam estados e rejeitam regras fora do modelo", function () {
   var model = require('../../tools/studio/design-model.cjs');
+  var shadowCss = model.shadowCss({ '--tf-studio-shadow-btnCollect': 'none', '--tf-neo-bg': '#fff' });
+  assert.eq(shadowCss, '#btnCollect:hover, body.tf-force-hover #btnCollect { box-shadow: var(--tf-studio-shadow-btnCollect) !important; }', 'a prévia e o arquivo salvo devem gerar a mesma sombra');
   var designs = {'#btnCollect': {rest: {color:'#ffffff'}, hover: {'box-shadow':'4px 4px 0 #000'}}};
   var css = model.css(JSON.parse(JSON.stringify(designs)));
   assert.includes(css, '#btnCollect:hover', 'hover deve ter seletor próprio');
@@ -334,6 +353,38 @@ test("Studio: estilos individuais preservam estados e rejeitam regras fora do mo
   assert.ok(staticCss.lastIndexOf('transform: none !important') > staticCss.lastIndexOf('color: #ff0000 !important'), 'estado estático deve prevalecer sobre hover');
   var animatedCss = model.css({'#badgeBuiltIn': {hoverMotion:true}});
   assert.includes(animatedCss, 'transform: translate(-2px, -2px) !important', 'hover habilitado deve deslocar tag');
+  var checkedCss = model.css({'[data-tf-design="editor-numbering-toggle"]': {checked:{color:'#00ff00','font-weight':'900'}}});
+  assert.includes(checkedCss, 'input:checked + .tf-toggle__face', 'toggle ativado deve propagar estilos para .tf-toggle__face');
+  assert.includes(checkedCss, 'body.tf-force-checked [data-tf-design="editor-numbering-toggle"]', 'Studio deve simular o estado ativado');
+  assert.includes(checkedCss, 'font-weight: 900 !important', 'tipografia do toggle ativado deve ser preservada');
+  var toggleHoverCss = model.css({
+    '[data-tf-design="main-empty-toggle"]': {
+      rest: { 'background-color': '#27272A' },
+      checked: { 'background-color': '#4ADE80' },
+      hover: { 'background-color': '#FF88FF' },
+      checkedHover: { 'background-color': '#86EFAC' },
+      active: { 'background-color': '#8F8F9A' }
+    }
+  });
+  assert.includes(toggleHoverCss, ':not(.active):not(.is-disabled):hover input[type="checkbox"]:not(:checked):not(:disabled) + .tf-toggle__face', 'hover normal em :hover só deve aplicar quando desativado e habilitado');
+  assert.includes(toggleHoverCss, ':not(.is-disabled) input:checked:not(:disabled) + .tf-toggle__face', 'toggle desabilitado não deve exibir estilo ativado');
+  assert.includes(toggleHoverCss, '.tf-toggle input:disabled + .tf-toggle__face', 'toggle desabilitado deve usar estilo de repouso');
+  assert.includes(toggleHoverCss, 'body.tf-force-hover [data-tf-design="main-empty-toggle"].tf-toggle input[type="checkbox"]:checked + .tf-toggle__face', 'hover simulado deve cobrir toggle marcado');
+  assert.includes(toggleHoverCss, ':hover input[type="checkbox"]:checked:not(:disabled) + .tf-toggle__face', 'hover ativado deve cobrir toggle marcado e habilitado no :hover');
+  assert.includes(toggleHoverCss, 'body.tf-force-checked-hover [data-tf-design="main-empty-toggle"].tf-toggle .tf-toggle__face', 'Studio deve simular o estado Hover Ativado');
+  assert.ok(toggleHoverCss.indexOf('#4ADE80') < toggleHoverCss.indexOf('#FF88FF'), 'hover deve ser emitido após checked');
+  assert.ok(toggleHoverCss.indexOf('#FF88FF') < toggleHoverCss.indexOf('#86EFAC'), 'checkedHover deve ser emitido após hover');
+  assert.ok(toggleHoverCss.indexOf('#86EFAC') < toggleHoverCss.indexOf('#8F8F9A'), 'active deve ser emitido após checkedHover');
+  assert.includes(read('tools/studio/modules/individual-design.js'), "'Hover Ativado'", 'inspetor deve oferecer o estado Hover Ativado para toggles');
+  var studioSource = read('tools/studio/modules/individual-design.js');
+  var studioHtml = studioPage();
+  assert.includes(studioHtml, 'class="st-inspector-panel st-inspector-right"', 'inspetor de núcleo deve abrir como painel no lado direito');
+  assert.includes(studioSource, "'Ativado'", 'inspetor deve oferecer o estado Ativado para toggles');
+  assert.includes(read('tools/studio/modules/effects.js'), 'applyDiagonalShadowAndLift', 'inspetor deve oferecer controle unificado de sombra diagonal e elevação');
+  assert.includes(read('tools/studio/modules/property-config.js'), 'Espaço limite dentro do botão', 'inspetor deve oferecer controle de espaço limite interno na área de texto');
+  assert.includes(read('tools/studio/modules/forced-state.js'), 'tf-force-checked', 'simulador deve aplicar a classe do estado ativado');
+  assert.includes(read('tools/studio/modules/preview.js'), 'Ação bloqueada na prévia do Studio', 'preview deve bloquear ações operacionais fora do Adobe');
+  assert.includes(read('tools/studio/modules/serialize.js'), 'statusClone.textContent = ""', 'serialização deve limpar status transitório do painel');
   rejected = false;
   try { model.css({'#badgeBuiltIn': {hoverMotion:'false'}}); } catch (e) { rejected = true; }
   assert.ok(rejected, 'controle de hover deve exigir booleano');
@@ -343,6 +394,21 @@ test("Studio: estilos individuais preservam estados e rejeitam regras fora do mo
   rejected = false;
   try { model.css({'#btnCollect': {rest:{color:'red; display:none'}}}); } catch (e) { rejected = true; }
   assert.ok(rejected, 'declaração injetada deve ser rejeitada');
+});
+
+test("Preset Builder: botões independentes (01_/OFF e ↑ ↓ + −) não compartilham estilos entre si ou com a barra do topo", function () {
+  var treeJs = read("client/tree_editor.js");
+  var treeCss = read("client/tree_editor.css");
+  var studioHtml = studioPage();
+  var studioDesign = JSON.parse(read("client/theme/studio-design.json"));
+
+  assert.includes(treeJs, 'isPrefixActive ? "folder-prefix" : "folder-prefix-off"', "01_ e OFF devem possuir chaves data-tf-design separadas");
+  assert.includes(treeCss, "--tf-editor-prefix-on-bg", ".prefix-preview ativo deve usar token dedicado");
+  assert.includes(treeCss, "--tf-editor-prefix-off-bg", ".prefix-preview.prefix-off deve usar token dedicado");
+  assert.includes(treeCss, "--tf-editor-row-btn-bg", ".row-btn deve usar token dedicado desacoplado da barra do topo");
+  assert.ok(!studioDesign['[data-tf-design="folder-prefix"]'], "folder-prefix não pode sobrescrever ambos os estados via studio-design.json");
+  assert.includes(studioHtml, 'id="cardEditorIndependentPrefix"', "Studio deve expor seção dedicada para botões independentes de numeração (01_ / OFF)");
+  assert.includes(studioHtml, 'id="cardEditorIndependentRowButtons"', "Studio deve expor seção dedicada para botões independentes das pastas (↑ ↓ + −)");
 });
 
 module.exports = h;

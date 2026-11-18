@@ -1,0 +1,111 @@
+/* ==========================================================================
+   3. Área Central de Simulação (Canvas)
+   ========================================================================== */
+.st-canvas {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  background-color: #0e0e11;
+  background-image: radial-gradient(#27272a 1px, transparent 1px);
+  background-size: 18px 18px;
+  overflow: hidden;
+}
+
+.st-canvas-Banner {
+  background-color: #F59E0B;
+  color: #000000;
+  padding: 7px 16px;
+  font-size: 11.5px;
+  text-align: center;
+  border-bottom: 2px solid #000000;
+  font-weight: 700;
+}
+
+.st-frames-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 24px;
+  overflow: auto;
+}
+
+/* Moldura imitando Painel Adobe CEP */
+.st-window-wrap {
+  background-color: #1c1c1c;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  box-shadow: 8px 8px 0px #000000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.st-window-header {
+  height: 28px;
+  background-color: #262626;
+  border-bottom: 2px solid #000000;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.st-window-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.st-window-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid #000000;
+}
+
+.st-window-dots span:nth-child(1) { background-color: #EF4444; }
+.st-window-dots span:nth-child(2) { background-color: #F59E0B; }
+.st-window-dots span:nth-child(3) { background-color: #10B981; }
+
+.st-window-title {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #d4d4d8;
+}
+
+.st-window-tag {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9.5px;
+  color: #60A5FA;
+  background: #141418;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.st-window-body {
+  background-color: #171717;
+  position: relative;
+  resize: both;
+  overflow: auto;
+  min-width: 280px;
+  min-height: 240px;
+}
+
+.st-canvas-tools { display:flex; flex-wrap:wrap; gap:6px; padding:8px 10px; background:#18181b; color:#eee; align-items:center; }
+.st-canvas-tools label { display:flex; gap:6px; align-items:center; }
+.st-canvas-tools input { width:68px; }
+.st-canvas-tools input, .st-canvas-tools select { background:#27272a; color:#fff; border:1px solid #555; padding:6px; }
+.st-canvas-tools .st-btn { height:29px; padding:0 8px; font-size:10px; }
+.st-canvas-zoom { display:flex; align-items:center; gap:3px; padding:2px; background:#25252b; border:1px solid #09090b; border-radius:5px; }
+.st-canvas-zoom input { width:55px; text-align:right; appearance:textfield; }
+.st-canvas-zoom input::-webkit-inner-spin-button, .st-canvas-zoom input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+.st-canvas-zoom button { height:26px; min-width:25px; background:#303038; color:#fff; border:1px solid #09090b; border-radius:3px; cursor:pointer; }
+#canvasPan.active { background:#f59e0b; color:#000; }
+.st-canvas-pan-active { cursor:grab; }
+.st-canvas-pan-active:active { cursor:grabbing; }
+.st-canvas-pan-active .st-window-body iframe { pointer-events:none; }

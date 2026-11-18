@@ -101,11 +101,19 @@ body.tf-force-hover .tf-toggle input[type="checkbox"]:checked + .tf-toggle__face
   color: var(--tf-neo-toggle-partial-text);
 }
 
-.tf-toggle input[type="checkbox"]:disabled + .tf-toggle__face {
+.tf-toggle input[type="checkbox"]:disabled + .tf-toggle__face,
+.tf-toggle.is-disabled .tf-toggle__face {
+  background-color: var(--tf-neo-toggle-off-bg);
+  color: var(--tf-neo-toggle-off-text);
   opacity: 0.5;
   cursor: default;
   box-shadow: none !important;
   transform: none !important;
+}
+
+.tf-toggle input[type="checkbox"]:disabled + .tf-toggle__face::after,
+.tf-toggle.is-disabled .tf-toggle__face::after {
+  display: none !important;
 }
 
 /* 2. Checkbox e Switch Vetorial (.tf-checkbox / .toggle-slider) */

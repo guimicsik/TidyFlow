@@ -6,6 +6,7 @@
     "dev": "vite",
     "studio": "vite --open /studio",
     "build": "vite build",
+    "test:studio": "node tools/studio/test-browser.cjs",
     "test": "node scripts/tests/run.js",
     "package:v1": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build_v1.ps1"
   },
