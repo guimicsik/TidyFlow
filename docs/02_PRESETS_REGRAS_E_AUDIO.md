@@ -35,7 +35,8 @@ Arquivo base de fábrica: `client/presets/default_preset.json` (único para AE e
 | `settings.deleteEmptyFolders` | `true` | Remove pastas/bins vazias ao fim da organização. |
 | `settings.saveProjectBefore` | `true` | Salva o projeto antes de organizar (forçado `true` se `reduceProject` estiver ativo). |
 | `settings.reduceProject` | `false` | Reduz o projeto às dependências da seleção antes de organizar (abre modal `#reduceModalBackdrop`). |
-| `settings.groupBySourceFolder` | `true` | Fallback global para criar subpasta com o nome da pasta de origem no disco. |
+| `settings.groupBySourceFolder` | `true` | Ativa o agrupamento por pasta de origem (`sourceFolderMode !== "off"`). |
+| `settings.sourceFolderMode` | `"both"` | Modo global de pasta de origem: `"both"` (pasta manual do projeto com fallback para pasta do disco), `"project"` (apenas pastas manuais do projeto), `"disk"` (apenas pasta física do disco) ou `"off"` (desligado). |
 | `settings.unusedFolderName` | `"Nunca Usadas"` | Nome da pasta destino do botão *Verificar Comps/Sequências*. |
 | `settings.separateAudioCategories` | `true` | *(Premiere)* Subdivide áudios por papel ESP (`Dialogue`, `Music`, `SFX`, `Ambience`, `Others`). |
 | `settings.numberAudioCategories` | `true` | *(Premiere)* Numera continuamente (`01_`, `02_`) as subpastas de papel ESP presentes. |
@@ -49,7 +50,8 @@ Cada nó possui `{ id, name, label (0..16), useNumbering, children: [], rules: {
 | `extensions` | Lista efetiva de extensões sem ponto e minúsculas (pacote padrão dos `types` + `customExtensions`). |
 | `customExtensions` | Tags avulsas adicionadas manualmente pelo usuário na caixa inline do modal V2. |
 | `groupSubfoldersByExt` | Cria subpasta em MAIÚSCULAS por extensão (`MP4/`, `PNG/`). |
-| `groupBySourceFolder` | Cria subpasta com o nome da pasta física de origem no disco (granular por nó; no painel exibe estado `.partial` se divergir). |
+| `groupBySourceFolder` | Booleano espelhado de `sourceFolderMode !== "off"` (granular por nó; exibe `.partial` se divergir). |
+| `sourceFolderMode` | Modo por nó (`"both"`, `"project"`, `"disk"` ou `"off"`): define se a subpasta de origem vem das pastas manuais criadas no projeto (AE/Premiere), da pasta física no disco, de ambos ou desligado. |
 | `groupByMainComp` | Agrupa pré-comps/sequências aninhadas pelo nome da Comp/Sequência principal. |
 | `handlePsdBundles` | Mantém intacto o contêiner/pasta nativa de PSD/AI importado em camadas. |
 | `catchOthers` | Cria subpasta `OTHERS/` para itens do mesmo tipo sem extensão listada. |

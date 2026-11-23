@@ -7,3 +7,7 @@ backups/
 tools/studio/.browser-test/
 tools/studio/preview-test.png
 /.tmp-edge-studio-check/
+scripts/resize_debug.log
+scripts/main_panel_rect.json
+scripts/collect_panel_rect.json
+

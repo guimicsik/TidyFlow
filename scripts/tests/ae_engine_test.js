@@ -353,4 +353,200 @@ h.test("filtro por nomenclatura vence a pasta genérica mesmo com lista de exten
   assert.notOk(mock.api.find("02_Footages"), "Footages não deve ser criada quando o filtro por nome casa");
 });
 
+h.test("sourceFolderMode: 'project' agrupa apenas pastas manuais do projeto ('Arquivos Novos') e ignora pasta do disco para arquivos soltos", function () {
+  var mock = newEngine();
+  var userFolder = mock.api.addFolder("Arquivos Novos");
+  var imgInFolder = mock.api.addFootage("foto.png", "C:/Downloads/foto.png", { isStill: true }, userFolder);
+  var vidInFolder = mock.api.addFootage("take.mp4", "C:/Downloads/take.mp4", { isStill: false }, userFolder);
+  var looseImg = mock.api.addFootage("solta.png", "C:/Downloads/solta.png", { isStill: true });
+
+  var preset = {
+    presetName: "Teste Project Mode",
+    settings: {
+      usePrefixNumbering: true,
+      deleteEmptyFolders: true,
+      saveProjectBefore: false,
+      reduceProject: false,
+      groupBySourceFolder: true,
+      sourceFolderMode: "project"
+    },
+    tree: [
+      {
+        id: "n_img",
+        name: "Images",
+        label: 4,
+        rules: {
+          types: ["StillImages"],
+          extensions: ["png"],
+          groupSubfoldersByExt: true,
+          groupBySourceFolder: true,
+          sourceFolderMode: "project"
+        },
+        children: []
+      },
+      {
+        id: "n_vid",
+        name: "Footages",
+        label: 6,
+        rules: {
+          types: ["Videos"],
+          extensions: ["mp4"],
+          groupSubfoldersByExt: true,
+          groupBySourceFolder: true,
+          sourceFolderMode: "project"
+        },
+        children: []
+      }
+    ]
+  };
+
+  var res1 = runOrganize(mock, preset);
+  assert.eq(res1.success, true, JSON.stringify(res1));
+  assert.eq(imgInFolder.parentFolder.name, "Arquivos Novos", "imagem da pasta manual ganha subpasta 'Arquivos Novos'");
+  assert.eq(imgInFolder.parentFolder.parentFolder.name, "PNG", "subpasta 'Arquivos Novos' fica dentro de PNG");
+  assert.eq(vidInFolder.parentFolder.name, "Arquivos Novos", "vídeo da pasta manual ganha subpasta 'Arquivos Novos' em Footages/MP4");
+  assert.eq(vidInFolder.parentFolder.parentFolder.name, "MP4", "subpasta 'Arquivos Novos' fica dentro de MP4");
+  assert.eq(looseImg.parentFolder.name, "PNG", "imagem solta na raiz vai direto para PNG sem criar subpasta 'Downloads'");
+
+  // Segunda execução deve ser 100% idempotente
+  var res2 = runOrganize(mock, preset);
+  assert.eq(res2.success, true, JSON.stringify(res2));
+  assert.eq(imgInFolder.parentFolder.name, "Arquivos Novos", "idempotência: mantém 'Arquivos Novos' na 2ª execução");
+  assert.eq(imgInFolder.parentFolder.parentFolder.name, "PNG", "idempotência: não duplica PNG/PNG");
+  assert.eq(looseImg.parentFolder.name, "PNG", "idempotência: imagem solta continua direto em PNG");
+});
+
+h.test("sourceFolderMode: 'both' prioriza pasta manual do projeto e usa pasta do disco como fallback; 'disk' usa sempre a do disco", function () {
+  var mock = newEngine();
+  var userFolder = mock.api.addFolder("Arquivos Novos");
+  var imgInFolder = mock.api.addFootage("foto.png", "C:/Downloads/foto.png", { isStill: true }, userFolder);
+  var looseImg = mock.api.addFootage("solta.png", "C:/Downloads/solta.png", { isStill: true });
+  var vidInFolder = mock.api.addFootage("take.mp4", "C:/Capturas/take.mp4", { isStill: false }, userFolder);
+
+  var preset = {
+    presetName: "Teste Both vs Disk",
+    settings: {
+      usePrefixNumbering: true,
+      deleteEmptyFolders: true,
+      saveProjectBefore: false,
+      reduceProject: false,
+      groupBySourceFolder: true,
+      sourceFolderMode: "both"
+    },
+    tree: [
+      {
+        id: "n_img",
+        name: "Images",
+        label: 4,
+        rules: {
+          types: ["StillImages"],
+          extensions: ["png"],
+          groupSubfoldersByExt: true,
+          groupBySourceFolder: true,
+          sourceFolderMode: "both"
+        },
+        children: []
+      },
+      {
+        id: "n_vid",
+        name: "Footages",
+        label: 6,
+        rules: {
+          types: ["Videos"],
+          extensions: ["mp4"],
+          groupSubfoldersByExt: true,
+          groupBySourceFolder: true,
+          sourceFolderMode: "disk"
+        },
+        children: []
+      }
+    ]
+  };
+
+  var res = runOrganize(mock, preset);
+  assert.eq(res.success, true, JSON.stringify(res));
+  assert.eq(imgInFolder.parentFolder.name, "Arquivos Novos", "modo 'both': item na pasta manual usa 'Arquivos Novos'");
+  assert.eq(looseImg.parentFolder.name, "Downloads", "modo 'both': item solto na raiz usa pasta do disco 'Downloads'");
+  assert.eq(vidInFolder.parentFolder.name, "Capturas", "modo 'disk': ignora 'Arquivos Novos' e usa a pasta do disco 'Capturas'");
+});
+
+h.test("sourceFolderMode 'project': preserva comps dentro de subpasta 'Cameras' em Output e agrupa camada PSD avulsa pelo arquivo .psd", function () {
+  var mock = newEngine();
+  var outFolder = mock.api.addFolder("01_Output");
+  var camerasFolder = mock.api.addFolder("Cameras", outFolder);
+  var mainComp = mock.api.addComp("11988_Valorant_Achille_SH110_Motion", outFolder);
+  var cam1 = mock.api.addComp("11988_Valorant_Achille_SH045_Camera_01", camerasFolder);
+  var cam2 = mock.api.addComp("11988_Valorant_Achille_SH045_Camera_02", camerasFolder);
+  var psdLayer = mock.api.addFootage(
+    "Background/Valorant_Nightfall_Concept_UI_Motion.psd",
+    "C:/Downloads/Valorant_Nightfall_Concept_UI_Motion.psd",
+    { isStill: true }
+  );
+
+  var preset = {
+    presetName: "Custom Clean",
+    settings: {
+      usePrefixNumbering: true,
+      deleteEmptyFolders: true,
+      saveProjectBefore: false,
+      reduceProject: false,
+      groupBySourceFolder: true,
+      sourceFolderMode: "project"
+    },
+    tree: [
+      {
+        id: "node_output",
+        name: "Output",
+        label: 9,
+        rules: { types: ["MainComp"], extensions: [], groupBySourceFolder: true, sourceFolderMode: "project" },
+        children: []
+      },
+      {
+        id: "node_assets",
+        name: "Assets",
+        label: 0,
+        rules: { types: [], extensions: [] },
+        children: [
+          {
+            id: "node_precomps",
+            name: "PreComps",
+            label: 5,
+            rules: { types: ["PreComps"], extensions: [], groupByMainComp: true, groupBySourceFolder: true, sourceFolderMode: "project" },
+            children: []
+          },
+          {
+            id: "node_images",
+            name: "Images",
+            label: 4,
+            rules: {
+              types: ["StillImages"],
+              extensions: ["psd", "png"],
+              handlePsdBundles: true,
+              groupSubfoldersByExt: true,
+              groupBySourceFolder: true,
+              sourceFolderMode: "project"
+            },
+            children: []
+          }
+        ]
+      }
+    ]
+  };
+
+  // Mesmo selecionando apenas mainComp (ou todas), cam1 e cam2 devem permanecer dentro de 01_Output/Cameras
+  mock.api.select([mainComp, cam1, cam2]);
+  var res = runOrganize(mock, preset, "selection");
+  assert.eq(res.success, true, JSON.stringify(res));
+  assert.eq(mainComp.parentFolder.name, "01_Output", "comp principal fica na raiz de 01_Output");
+  assert.eq(cam1.parentFolder.name, "Cameras", "Camera_01 permanece dentro da pasta Cameras");
+  assert.eq(cam1.parentFolder.parentFolder.name, "01_Output", "pasta Cameras permanece dentro de 01_Output");
+  assert.eq(cam2.parentFolder.name, "Cameras", "Camera_02 permanece dentro da pasta Cameras");
+  assert.eq(
+    psdLayer.parentFolder.name,
+    "Valorant_Nightfall_Concept_UI_Motion.psd",
+    "camada PSD avulsa entra na pasta do documento .psd em vez de ficar solta em PSD/"
+  );
+  assert.eq(psdLayer.parentFolder.parentFolder.name, "PSD", "pasta do documento .psd fica dentro de PSD/");
+});
+
 module.exports = h;

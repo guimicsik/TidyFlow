@@ -318,4 +318,28 @@ h.test("P0-6: salvar um preset de usuário zera o aviso pendente", function () {
   assert.eq(pm.lastSaveWarning, null, "salvamento normal não deixa aviso pendente");
 });
 
+h.test("sourceFolderMode: normaliza e persiste os 4 modos (both, project, disk, off) no preset e overrides do Default", function () {
+  var env = newEnv();
+  var pm = env.newManager();
+
+  var def = pm.getDefaultPresetFromBundle();
+  var assetsNode = def.tree[1];
+  var imagesNode = assetsNode.children[1];
+  var footagesNode = assetsNode.children[2];
+  var audiosNode = assetsNode.children[3];
+
+  imagesNode.rules.sourceFolderMode = "project";
+  footagesNode.rules.sourceFolderMode = "disk";
+  audiosNode.rules.sourceFolderMode = "off";
+  audiosNode.rules.groupBySourceFolder = false;
+  pm.savePreset(def);
+
+  var reloadedDef = env.newManager().getDefaultPreset();
+  assert.eq(reloadedDef.tree[1].children[1].rules.sourceFolderMode, "project", "Images deve persistir modo 'project'");
+  assert.eq(reloadedDef.tree[1].children[1].rules.groupBySourceFolder, true, "Images mantém groupBySourceFolder=true");
+  assert.eq(reloadedDef.tree[1].children[2].rules.sourceFolderMode, "disk", "Footages deve persistir modo 'disk'");
+  assert.eq(reloadedDef.tree[1].children[3].rules.sourceFolderMode, "off", "Audios deve persistir modo 'off'");
+  assert.eq(reloadedDef.tree[1].children[3].rules.groupBySourceFolder, false, "Audios sincroniza groupBySourceFolder=false");
+});
+
 module.exports = h;

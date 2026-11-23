@@ -290,4 +290,64 @@ test("numeração sequencial sem buracos nos dois níveis + toggle numberAudioCa
   assert.eq(mock.pathOf(otherClip), "01_Assets/02_Audios/Others/WAV", "subpasta Others perde o prefixo numérico");
 });
 
+test("sourceFolderMode no Premiere: bin manual 'Arquivos Novos' vira subpasta em Footages e Audios ESP e é idempotente", function () {
+  var mock = pproMockLib.createPProMock();
+  mock.evalEngine();
+
+  var userBin = mock.addBin("Arquivos Novos");
+  var vidInBin = mock.addClip("take_novo.mp4", "D:/Downloads/take_novo.mp4", userBin);
+  var sfxInBin = mock.addClip("Whoosh_Novo.wav", "D:/Downloads/Whoosh_Novo.wav", userBin);
+  var looseVid = mock.addClip("take_solto.mp4", "D:/Downloads/take_solto.mp4");
+
+  var settings = {
+    usePrefixNumbering: true,
+    separateAudioCategories: true,
+    numberAudioCategories: true,
+    deleteEmptyFolders: true,
+    saveProjectBefore: false,
+    groupBySourceFolder: true,
+    sourceFolderMode: "project"
+  };
+
+  var tree = [
+    {
+      id: "node_footages",
+      name: "Footages",
+      useNumbering: true,
+      rules: {
+        types: ["Videos"],
+        extensions: ["mp4"],
+        groupSubfoldersByExt: true,
+        groupBySourceFolder: true,
+        sourceFolderMode: "project"
+      }
+    },
+    {
+      id: "node_audios",
+      name: "Audios",
+      useNumbering: true,
+      rules: {
+        types: ["Audios"],
+        extensions: ["wav"],
+        groupSubfoldersByExt: true,
+        groupBySourceFolder: true,
+        sourceFolderMode: "project"
+      }
+    }
+  ];
+
+  var res1 = JSON.parse(mock.organize(makePreset(settings, tree)));
+  assert.eq(res1.success, true, JSON.stringify(res1));
+  assert.eq(mock.pathOf(vidInBin), "01_Footages/MP4/Arquivos Novos", "vídeo da bin manual vai para MP4/Arquivos Novos");
+  assert.eq(mock.pathOf(sfxInBin), "02_Audios/01_SFX/WAV/Arquivos Novos", "áudio da bin manual vai para 01_SFX/WAV/Arquivos Novos");
+  assert.eq(mock.pathOf(looseVid), "01_Footages/MP4", "vídeo solto na raiz no modo 'project' não cria subpasta 'Downloads'");
+
+  // Segunda execução deve manter exatamente os mesmos caminhos
+  var res2 = JSON.parse(mock.organize(makePreset(settings, tree)));
+  assert.eq(res2.success, true, JSON.stringify(res2));
+  assert.eq(mock.pathOf(vidInBin), "01_Footages/MP4/Arquivos Novos", "idempotente na 2ª execução (vídeo)");
+  assert.eq(mock.pathOf(sfxInBin), "02_Audios/01_SFX/WAV/Arquivos Novos", "idempotente na 2ª execução (áudio ESP)");
+  assert.eq(mock.pathOf(looseVid), "01_Footages/MP4", "idempotente na 2ª execução (vídeo solto)");
+});
+
 module.exports = h;

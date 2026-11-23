@@ -120,7 +120,274 @@
   var lblSeparateAudioCategories = document.getElementById("lblSeparateAudioCategories");
   var lblNumberAudioCategories = document.getElementById("lblNumberAudioCategories");
 
+  var SOURCE_MODE_ORDER = ["both", "project", "disk", "off"];
+  var SOURCE_MODE_LABELS = {
+    both: "Origem: Ambos",
+    project: "Origem: Projeto",
+    disk: "Origem: Disco",
+    off: "Pasta de origem"
+  };
+  var SOURCE_MODE_MODAL_LABELS = {
+    both: "Origem: Ambos",
+    project: "Origem: Projeto",
+    disk: "Origem: Disco",
+    off: "Pasta de Origem: Off"
+  };
+  var SOURCE_MODE_PILL_LABELS = {
+    both: "Origem: Ambos",
+    project: "Origem: Projeto",
+    disk: "Origem: Disco"
+  };
+  var SOURCE_MODE_TOOLTIPS = {
+    both: "Modo Ambos: prioriza a pasta manual criada no projeto (AE/Premiere) e usa a pasta física do disco como fallback. Clique para mudar para 'Só Projeto'.",
+    project: "Modo Projeto: cria subpasta apenas para itens dentro de pastas manuais criadas no projeto (ignora pasta do disco). Clique para mudar para 'Só Disco'.",
+    disk: "Modo Disco: cria subpasta apenas com o nome da pasta física no disco (Windows/Mac). Clique para desligar.",
+    off: "Desligado: não cria subpastas de origem. Clique para ativar 'Ambos (Projeto + Disco)'."
+  };
+
+  function getNodeSourceMode(rules) {
+    if (!rules) return "both";
+    if (typeof PresetManager.normalizeSourceFolderMode === "function") {
+      return PresetManager.normalizeSourceFolderMode(rules.sourceFolderMode, rules.groupBySourceFolder);
+    }
+    if (rules.groupBySourceFolder === false || rules.sourceFolderMode === "off") return "off";
+    return rules.sourceFolderMode || "both";
+  }
+
+  function nextSourceMode(currentMode) {
+    var idx = SOURCE_MODE_ORDER.indexOf(currentMode);
+    if (idx === -1) return "both";
+    return SOURCE_MODE_ORDER[(idx + 1) % SOURCE_MODE_ORDER.length];
+  }
+
+  var SOURCE_DROPDOWN_OPTIONS = [
+    { value: "both", label: "Ambos (Projeto + Disco)" },
+    { value: "project", label: "Só Pastas do Projeto" },
+    { value: "disk", label: "Só Pasta do Disco" }
+  ];
+
+  function ensureSplitSourceToggle(labelEl, chkEl, onSelectActiveMode) {
+    if (!labelEl || !chkEl) return null;
+    var faceEl = labelEl.querySelector(".tf-toggle__face");
+    if (!faceEl) return null;
+
+    if (labelEl.__splitSource && faceEl.querySelector(".tf-split-main")) {
+      return labelEl.__splitSource;
+    }
+
+    labelEl.classList.add("tf-toggle--split");
+    var initialText = (faceEl.textContent || "Origem: Ambos").trim();
+    faceEl.innerHTML = "";
+
+    var mainSpan = document.createElement("span");
+    mainSpan.className = "tf-split-main";
+    mainSpan.textContent = initialText;
+
+    var arrowBtn = document.createElement("span");
+    arrowBtn.className = "tf-split-arrow";
+    arrowBtn.setAttribute("role", "button");
+    arrowBtn.setAttribute("tabindex", "0");
+    arrowBtn.title = "Escolher modo de Pasta de Origem (Ambos / Só Projeto / Só Disco)";
+    arrowBtn.innerHTML =
+      '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M4 6l4 4 4-4"/>' +
+      '</svg>';
+
+    faceEl.appendChild(mainSpan);
+    faceEl.appendChild(arrowBtn);
+
+    var oldMenus = labelEl.querySelectorAll(".tf-split-menu");
+    for (var m = 0; m < oldMenus.length; m++) {
+      if (oldMenus[m].parentNode) oldMenus[m].parentNode.removeChild(oldMenus[m]);
+    }
+
+    var menuEl = document.createElement("div");
+    menuEl.className = "tf-select-menu tf-split-menu";
+    labelEl.appendChild(menuEl);
+
+    function closeMenu() {
+      menuEl.classList.remove("is-open");
+      labelEl.classList.remove("is-menu-open");
+    }
+
+    function renderMenu(activeSubMode, isOff) {
+      menuEl.innerHTML = "";
+      for (var i = 0; i < SOURCE_DROPDOWN_OPTIONS.length; i++) {
+        (function (opt) {
+          var isSelected = (!isOff && activeSubMode === opt.value);
+          var item = document.createElement("div");
+          item.className = "tf-select-item" + (isSelected ? " is-selected" : "");
+
+          var txt = document.createElement("span");
+          txt.textContent = opt.label;
+          item.appendChild(txt);
+
+          if (isSelected) {
+            var chkSpan = document.createElement("span");
+            chkSpan.className = "tf-select-item-check";
+            chkSpan.textContent = "✓";
+            item.appendChild(chkSpan);
+          }
+
+          item.addEventListener("click", function (ev) {
+            ev.preventDefault();
+            ev.stopPropagation();
+            closeMenu();
+            chkEl.setAttribute("data-last-active-mode", opt.value);
+            if (typeof onSelectActiveMode === "function") {
+              onSelectActiveMode(opt.value);
+            }
+          });
+
+          menuEl.appendChild(item);
+        })(SOURCE_DROPDOWN_OPTIONS[i]);
+      }
+    }
+
+    arrowBtn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var isOpen = menuEl.classList.contains("is-open");
+      if (isOpen) {
+        closeMenu();
+      } else {
+        var curMode = chkEl.getAttribute("data-source-mode") || "both";
+        var lastActive = (curMode === "both" || curMode === "project" || curMode === "disk")
+          ? curMode
+          : (chkEl.getAttribute("data-last-active-mode") || "both");
+        renderMenu(lastActive, curMode === "off");
+        menuEl.classList.add("is-open");
+        labelEl.classList.add("is-menu-open");
+      }
+    });
+
+    menuEl.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    });
+
+    document.addEventListener("click", function (ev) {
+      if (!labelEl.contains(ev.target)) {
+        closeMenu();
+      }
+    });
+
+    var api = {
+      setLabel: function (text) {
+        mainSpan.textContent = text;
+      },
+      closeMenu: closeMenu
+    };
+    labelEl.__splitSource = api;
+    return api;
+  }
+
+  function setModalSourceFolderMode(mode) {
+    if (!chkRuleGroupBySourceFolder) return;
+    var norm = (SOURCE_MODE_ORDER.indexOf(mode) !== -1) ? mode : "both";
+    if (norm !== "off") {
+      chkRuleGroupBySourceFolder.setAttribute("data-last-active-mode", norm);
+    }
+    var lastActive = chkRuleGroupBySourceFolder.getAttribute("data-last-active-mode") || "both";
+    var displayMode = (norm === "off") ? lastActive : norm;
+    chkRuleGroupBySourceFolder.setAttribute("data-source-mode", norm);
+    chkRuleGroupBySourceFolder.checked = (norm !== "off");
+    var parentLbl = chkRuleGroupBySourceFolder.parentNode;
+    if (parentLbl) {
+      var splitUi = ensureSplitSourceToggle(parentLbl, chkRuleGroupBySourceFolder, function (chosenMode) {
+        setModalSourceFolderMode(chosenMode);
+      });
+      parentLbl.classList.toggle("active", norm !== "off");
+      parentLbl.setAttribute("data-tooltip", SOURCE_MODE_TOOLTIPS[norm] || "");
+      var labelText = SOURCE_MODE_MODAL_LABELS[displayMode] || "Origem: Ambos";
+      if (splitUi) {
+        splitUi.setLabel(labelText);
+      } else {
+        var faceEl = parentLbl.querySelector(".tf-toggle__face");
+        if (faceEl) faceEl.textContent = labelText;
+      }
+    }
+    if (false && parentLbl) {
+      parentLbl.classList.toggle("active", norm !== "off");
+      parentLbl.setAttribute("data-tooltip", SOURCE_MODE_TOOLTIPS[norm] || "");
+      var faceEl = parentLbl.querySelector(".tf-toggle__face");
+      if (faceEl) {
+        faceEl.textContent = SOURCE_MODE_MODAL_LABELS[norm] || "Pasta de Origem";
+      }
+    }
+  }
+
   function syncGroupBySourceToggleState() {
+    if (!chkGroupBySourceFolder) return;
+    var modesFound = {};
+    var modeList = [];
+    var nodeSummary = [];
+    var total = 0;
+    function walk(nodes) {
+      for (var i = 0; i < (nodes || []).length; i++) {
+        var n = nodes[i];
+        total++;
+        var m = getNodeSourceMode(n.rules);
+        if (!modesFound[m]) {
+          modesFound[m] = true;
+          modeList.push(m);
+        }
+        nodeSummary.push(n.name + " (" + (SOURCE_MODE_LABELS[m] || m) + ")");
+        walk(n.children);
+      }
+    }
+    if (currentPreset) walk(currentPreset.tree);
+
+    var isPartial = modeList.length > 1;
+    var uniformMode = "both";
+    if (total > 0) {
+      uniformMode = isPartial ? "partial" : (modeList[0] || "both");
+    } else {
+      var s = (currentPreset && currentPreset.settings) || {};
+      uniformMode = getNodeSourceMode(s);
+    }
+
+    if (uniformMode === "both" || uniformMode === "project" || uniformMode === "disk") {
+      chkGroupBySourceFolder.setAttribute("data-last-active-mode", uniformMode);
+    }
+    var lastMasterActive = chkGroupBySourceFolder.getAttribute("data-last-active-mode") || "both";
+    chkGroupBySourceFolder.setAttribute("data-source-mode", uniformMode);
+    chkGroupBySourceFolder.checked = (uniformMode !== "off");
+
+    if (lblGroupBySourceFolder) {
+      var masterSplit = ensureSplitSourceToggle(lblGroupBySourceFolder, chkGroupBySourceFolder, function (chosenMode) {
+        applyMasterSourceMode(chosenMode);
+      });
+      var displayMaster = (uniformMode === "off") ? lastMasterActive : uniformMode;
+      var textMaster = isPartial ? "Origem: Parcial" : (SOURCE_MODE_LABELS[displayMaster] || "Origem: Ambos");
+      if (masterSplit) {
+        masterSplit.setLabel(textMaster);
+      }
+      if (isPartial) {
+        lblGroupBySourceFolder.classList.add("partial");
+        lblGroupBySourceFolder.title =
+          "Parcial: " + nodeSummary.join(", ") + ". Clique no botão para desligar ou na seta ▾ para escolher o modo de todas.";
+      } else {
+        lblGroupBySourceFolder.classList.remove("partial");
+        lblGroupBySourceFolder.title = SOURCE_MODE_TOOLTIPS[uniformMode] || "";
+      }
+    }
+    if (false && lblGroupBySourceFolder) {
+      var faceSpan = lblGroupBySourceFolder.querySelector(".tf-toggle__face");
+      if (isPartial) {
+        lblGroupBySourceFolder.classList.add("partial");
+        if (faceSpan) faceSpan.textContent = "Origem: Parcial";
+        lblGroupBySourceFolder.title =
+          "Parcial: " + nodeSummary.join(", ") + ". Clique para unificar todas em 'Origem: Ambos'.";
+      } else {
+        lblGroupBySourceFolder.classList.remove("partial");
+        if (faceSpan) faceSpan.textContent = SOURCE_MODE_LABELS[uniformMode] || "Pasta de origem";
+        lblGroupBySourceFolder.title = SOURCE_MODE_TOOLTIPS[uniformMode] || "";
+      }
+    }
+  }
+
+  function syncGroupBySourceToggleState_UNUSED() {
     if (!chkGroupBySourceFolder) return;
     var missing = [];
     var total = 0;
@@ -208,7 +475,7 @@
   var btnCloseRulesModalX = document.getElementById("btnCloseRulesModalX");
   var ruleTypeCheckboxes = document.querySelectorAll(".rule-type-chk");
   var chkRuleGroupExt = document.getElementById("chkRuleGroupExt");
-  var chkRuleGroupBySourceFolder = document.getElementById("chkRuleGroupBySourceFolder");
+  var chkRuleGroupBySourceFolder = null;
   var chkRuleGroupByMainComp = document.getElementById("chkRuleGroupByMainComp");
   var chkRulePsdBundles = document.getElementById("chkRulePsdBundles");
   var chkRuleCatchOthers = document.getElementById("chkRuleCatchOthers");
@@ -604,7 +871,10 @@
     if (rules.groupSubfoldersByExt) {
       pills.push({ text: "Subpastas: EXT", cls: "pill-ext" });
     }
-    if (rules.groupBySourceFolder) {
+    var nodeSrcMode = "off";
+    if (nodeSrcMode !== "off" && SOURCE_MODE_PILL_LABELS[nodeSrcMode]) {
+      pills.push({ text: SOURCE_MODE_PILL_LABELS[nodeSrcMode], cls: "pill-ext" });
+    } else if (false && rules.groupBySourceFolder) {
       pills.push({ text: "Pasta Origem", cls: "pill-ext" });
     }
 
@@ -1084,6 +1354,12 @@
       var chk = lbl.querySelector('input[type="checkbox"]');
       if (chk) {
         chk.addEventListener("change", function () {
+          if (chk === chkRuleGroupBySourceFolder) {
+            var curM = chkRuleGroupBySourceFolder.getAttribute("data-source-mode") || "both";
+            var lastM = chkRuleGroupBySourceFolder.getAttribute("data-last-active-mode") || "both";
+            setModalSourceFolderMode(curM === "off" ? lastM : "off");
+            return;
+          }
           lbl.classList.toggle("active", Boolean(chk.checked));
         });
       }
@@ -1287,7 +1563,7 @@
 
     chkRuleGroupExt.checked = Boolean(rules.groupSubfoldersByExt);
     if (chkRuleGroupBySourceFolder) {
-      chkRuleGroupBySourceFolder.checked = (rules.groupBySourceFolder !== undefined) ? Boolean(rules.groupBySourceFolder) : true;
+      setModalSourceFolderMode(getNodeSourceMode(rules));
     }
     chkRuleGroupByMainComp.checked = Boolean(rules.groupByMainComp);
     chkRulePsdBundles.checked = Boolean(rules.handlePsdBundles);
@@ -1420,7 +1696,9 @@
       extensions: finalExtensions,
       customExtensions: modalCustomExts.slice(),
       groupSubfoldersByExt: chkRuleGroupExt.checked,
-      groupBySourceFolder: chkRuleGroupBySourceFolder ? chkRuleGroupBySourceFolder.checked : true,
+      groupSubfoldersByExt: chkRuleGroupExt.checked,
+      sourceFolderMode: (currentPreset && currentPreset.settings) ? getNodeSourceMode(currentPreset.settings) : "both",
+      groupBySourceFolder: ((currentPreset && currentPreset.settings) ? getNodeSourceMode(currentPreset.settings) : "both") !== "off",
       groupByMainComp: chkRuleGroupByMainComp.checked,
       handlePsdBundles: chkRulePsdBundles.checked,
       catchOthers: chkRuleCatchOthers.checked,
@@ -1569,15 +1847,56 @@
     setStatus("Numeração atualizada. Use Salvar para gravar no preset.", "");
   });
 
+  function applyMasterSourceMode(targetMode) {
+    if (!currentPreset) return;
+    if (!currentPreset.settings) currentPreset.settings = {};
+    var gv = (targetMode !== "off");
+    if (gv) {
+      chkGroupBySourceFolder.setAttribute("data-last-active-mode", targetMode);
+    }
+    currentPreset.settings.sourceFolderMode = targetMode;
+    currentPreset.settings.groupBySourceFolder = gv;
+    (function applyAll(nodes) {
+      for (var i = 0; i < (nodes || []).length; i++) {
+        if (!nodes[i].rules) nodes[i].rules = {};
+        nodes[i].rules.sourceFolderMode = targetMode;
+        nodes[i].rules.groupBySourceFolder = gv;
+        applyAll(nodes[i].children);
+      }
+    })(currentPreset.tree);
+    var wasCleanBeforeToggle = !isDirty;
+    syncGroupBySourceToggleState();
+    renderTree();
+    if (wasCleanBeforeToggle) {
+      currentPreset = presetManager.savePreset(currentPreset);
+      if (!reportSaveError()) {
+        setDirty(false);
+        setStatus("Pasta de origem (" + (SOURCE_MODE_LABELS[targetMode] || targetMode) + ") aplicada e salva no preset!", "success");
+        return;
+      }
+    }
+    setDirty(true);
+    setStatus("Pasta de origem atualizada (" + (SOURCE_MODE_LABELS[targetMode] || targetMode) + "). Use Salvar para gravar no preset.", "");
+  }
+
   if (chkGroupBySourceFolder) {
     chkGroupBySourceFolder.addEventListener("change", function () {
       if (!currentPreset) return;
+      var prevMasterMode = chkGroupBySourceFolder.getAttribute("data-source-mode") || "both";
+      var lastActive = chkGroupBySourceFolder.getAttribute("data-last-active-mode") || "both";
+      var nextMasterMode = (prevMasterMode === "off") ? lastActive : "off";
+      applyMasterSourceMode(nextMasterMode);
+      return;
       if (!currentPreset.settings) currentPreset.settings = {};
-      var gv = chkGroupBySourceFolder.checked;
+      var prevMasterMode = chkGroupBySourceFolder.getAttribute("data-source-mode") || "both";
+      var nextMasterMode = (prevMasterMode === "partial") ? "both" : nextSourceMode(prevMasterMode);
+      var gv = (nextMasterMode !== "off");
+      currentPreset.settings.sourceFolderMode = nextMasterMode;
       currentPreset.settings.groupBySourceFolder = gv;
       (function applyAll(nodes) {
         for (var i = 0; i < (nodes || []).length; i++) {
           if (!nodes[i].rules) nodes[i].rules = {};
+          nodes[i].rules.sourceFolderMode = nextMasterMode;
           nodes[i].rules.groupBySourceFolder = gv;
           applyAll(nodes[i].children);
         }
@@ -1950,7 +2269,9 @@
             for (var i = 0; i < (nodes || []).length; i++) {
               var f = findNodeAndParentById(currentPreset.tree, nodes[i].id);
               if (f && f.node.rules && nodes[i].rules &&
-                f.node.rules.groupBySourceFolder !== nodes[i].rules.groupBySourceFolder) {
+                (f.node.rules.groupBySourceFolder !== nodes[i].rules.groupBySourceFolder ||
+                  f.node.rules.sourceFolderMode !== nodes[i].rules.sourceFolderMode)) {
+                f.node.rules.sourceFolderMode = nodes[i].rules.sourceFolderMode;
                 f.node.rules.groupBySourceFolder = nodes[i].rules.groupBySourceFolder;
                 changed = true;
               }
@@ -2019,7 +2340,9 @@
           for (var i = 0; i < (nodes || []).length; i++) {
             var f = findNodeAndParentById(currentPreset.tree, nodes[i].id);
             if (f && f.node.rules && nodes[i].rules &&
-              f.node.rules.groupBySourceFolder !== nodes[i].rules.groupBySourceFolder) {
+              (f.node.rules.groupBySourceFolder !== nodes[i].rules.groupBySourceFolder ||
+                f.node.rules.sourceFolderMode !== nodes[i].rules.sourceFolderMode)) {
+              f.node.rules.sourceFolderMode = nodes[i].rules.sourceFolderMode;
               f.node.rules.groupBySourceFolder = nodes[i].rules.groupBySourceFolder;
               changed = true;
             }

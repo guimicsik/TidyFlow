@@ -13,20 +13,20 @@
 :root {
   /* 1. Tipografia & Pesos (Google Fonts: Archivo) */
   --tf-font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --tf-font-weight-bold: 700;
-  --tf-font-weight-medium: 700;
+  --tf-font-weight-bold: 800;
+  --tf-font-weight-medium: 600;
   --tf-font-weight-hero: 900;
-  --tf-font-weight-tile: 600;
+  --tf-font-weight-tile: 800;
   --tf-font-weight-toggle: 600;
   --tf-font-weight-rollback: 800;
 
   /* Tamanhos de Fonte */
-  --tf-font-size-hero: 33px;
+  --tf-font-size-hero: 32px;
   --tf-font-size-tile: 14px;
-  --tf-font-size-toggle: 14px;
-  --tf-font-size-rollback: 16.5px;
-  --tf-font-size-preset-label: 12.5px;
-  --tf-font-size-preset-select: 12.5px;
+  --tf-font-size-toggle: 11px;
+  --tf-font-size-rollback: 11.5px;
+  --tf-font-size-preset-label: 10px;
+  --tf-font-size-preset-select: 13px;
   --tf-font-size-modal-btn: 12px;
 
   /* Estilos Tipográficos Extras */
@@ -57,16 +57,16 @@
 
   --tf-neo-danger-bg: #EF4444;
   --tf-neo-danger-text: #000000;
-  --tf-neo-danger-hover: #DC2626;
+  --tf-neo-danger-hover: #F87171;
   --tf-neo-danger-active: #DC2626;
 
   --tf-neo-primary-bg: #3B82F6;
   --tf-neo-primary-text: #FFFFFF;
   --tf-neo-primary-hover: #60A5FA;
 
-  --tf-neo-toggle-off-bg: #27272A;
+  --tf-neo-toggle-off-bg: #262626;
   --tf-neo-toggle-off-text: #F4F4F5;
-  --tf-neo-toggle-off-hover: #3F3F46;
+  --tf-neo-toggle-off-hover: #323238;
 
   --tf-neo-toggle-on-bg: #3B82F6;
   --tf-neo-toggle-on-text: #FFFFFF;
@@ -166,13 +166,13 @@
   --tf-rollback-width: calc((100% - 16px) / 3);
   --tf-rollback-margin-top: 4px;
   --tf-toggle-check-display: none;
-  --tf-icon-size: 15px;
+  --tf-icon-size: 14px;
 
   /* 7. Preset Builder (Janela Editor) */
   --tf-editor-bg: #1e1e1e;
   --tf-editor-topbar-bg: #252525;
   --tf-editor-tree-bg: #181818;
-  --tf-editor-row-bg: #121214;
+  --tf-editor-row-bg: #232323;
   --tf-editor-row-border: #303030;
   --tf-editor-footer-bg: #252525;
   --tf-editor-padding: 10px;
@@ -219,7 +219,7 @@
   --tf-collect-options-gap-x: 17px;
   --tf-collect-btn-ok-bg: #3B82F6;
   --tf-collect-btn-ok-hover: #60A5FA;
-  --tf-collect-btn-ok-text: #000000;
+  --tf-collect-btn-ok-text: #FFFFFF;
   --tf-collect-btn-cancel-bg: transparent;
   --tf-collect-btn-cancel-border: #555555;
   --tf-collect-btn-cancel-text: #d4d4d4;

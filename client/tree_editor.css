@@ -1077,3 +1077,79 @@ body.tf-force-active .row-btn:not(:disabled) {
     justify-content: flex-end;
   }
 }
+
+/* Split Toggle Button: Pasta de Origem (Toggle On/Off à esquerda + Divisória + Dropdown à direita) */
+.tf-toggle.tf-toggle--split {
+  position: relative;
+}
+
+.tf-toggle.tf-toggle--split .tf-toggle__face {
+  padding: 0 !important;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.tf-split-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 6px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tf-split-arrow {
+  width: 24px;
+  flex: 0 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: var(--tf-neo-border-w, 2px) solid var(--tf-neo-border-color, #000000);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  transition: background-color 0.12s ease;
+}
+
+.tf-split-arrow:hover {
+  background-color: rgba(0, 0, 0, 0.16);
+}
+
+.tf-split-arrow:active {
+  background-color: rgba(0, 0, 0, 0.26);
+}
+
+.tf-split-arrow svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+  pointer-events: none;
+}
+
+.tf-toggle.tf-toggle--split.is-menu-open .tf-split-arrow svg {
+  transform: rotate(180deg);
+}
+
+.tf-toggle.tf-toggle--split .tf-split-menu {
+  right: 0;
+  left: auto;
+  min-width: 185px;
+  background-color: #FCDD61;
+}
+
+.tf-toggle.tf-toggle--split .tf-split-menu .tf-select-item.is-selected,
+.tf-toggle.tf-toggle--split .tf-split-menu .tf-select-item:hover {
+  background-color: #E5A900;
+  color: #000000;
+}

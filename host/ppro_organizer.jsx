@@ -1254,6 +1254,11 @@
         var saveProjectBefore = (settings.saveProjectBefore === true);
         var reduceProject = (settings.reduceProject === true);
         var groupBySourceFolderGlobal = (settings.groupBySourceFolder !== false);
+        var sourceFolderModeGlobal = (settings.groupBySourceFolder === false || settings.sourceFolderMode === "off")
+            ? "off"
+            : ((settings.sourceFolderMode === "project" || settings.sourceFolderMode === "disk" || settings.sourceFolderMode === "both")
+                ? settings.sourceFolderMode
+                : "both");
         var unusedFolderName = settings.unusedFolderName || "Nunca Usadas";
         var separateAudioCategories = (settings.separateAudioCategories !== false);
         var numberAudioCategories = (settings.numberAudioCategories !== false);
@@ -1760,6 +1765,141 @@
                 }
             }
 
+            var origParentBinByNodeId = {};
+            var allSeqNamesLower = {};
+            for (var opKey in parentByNodeId) {
+                if (parentByNodeId.hasOwnProperty(opKey)) {
+                    origParentBinByNodeId[opKey] = parentByNodeId[opKey];
+                }
+            }
+            for (var asn = 0; asn < allNonBinItems.length; asn++) {
+                var asnItem = allNonBinItems[asn];
+                if (asnItem && asnItem.name && isCompoundOrSequenceItem(asnItem)) {
+                    allSeqNamesLower[String(asnItem.name).toLowerCase()] = true;
+                }
+            }
+
+            function isMainCompNodeBinName(binName) {
+                if (!binName) return false;
+                var cleanB = stripNumericPrefix(binName).toLowerCase();
+                for (var i = 0; i < nodeRecords.length; i++) {
+                    var r = nodeRecords[i].node.rules;
+                    if (r && nodeSupportsType(r, "MainComp")) {
+                        var cleanNode = stripNumericPrefix(nodeRecords[i].node.name).toLowerCase();
+                        if (cleanB === cleanNode) return true;
+                    }
+                }
+                return false;
+            }
+
+            function wasOriginallyInsideMainCompBin(targetItem) {
+                if (!targetItem || !targetItem.nodeId) return false;
+                var curBin = origParentBinByNodeId[targetItem.nodeId];
+                var guard = 0;
+                while (curBin && !isSameBin(curBin, rootItem) && guard < 50) {
+                    guard++;
+                    if (curBin.name && isMainCompNodeBinName(curBin.name)) {
+                        return true;
+                    }
+                    curBin = curBin.nodeId ? origParentBinByNodeId[curBin.nodeId] : null;
+                }
+                return false;
+            }
+
+            function isPresetCategoryBinName(binName) {
+                if (!binName) return false;
+                var cleanB = stripNumericPrefix(binName).toLowerCase();
+                if (binName === unusedFolderName || cleanB === stripNumericPrefix(unusedFolderName).toLowerCase()) return true;
+                for (var i = 0; i < nodeRecords.length; i++) {
+                    var cleanNode = stripNumericPrefix(nodeRecords[i].node.name).toLowerCase();
+                    if (cleanB === cleanNode) return true;
+                }
+                return false;
+            }
+
+            function getUserProjectBinChain(targetItem, fileExt, isSeqItem) {
+                var chain = [];
+                if (!targetItem || !targetItem.nodeId) return chain;
+                var curBin = origParentBinByNodeId[targetItem.nodeId];
+                var guard = 0;
+                while (curBin && !isSameBin(curBin, rootItem) && guard < 50) {
+                    guard++;
+                    if (curBin.name) {
+                        chain.unshift(curBin.name);
+                    }
+                    curBin = curBin.nodeId ? origParentBinByNodeId[curBin.nodeId] : null;
+                }
+                var startIdx = 0;
+                var sawPresetNode = false;
+                var extLower = String(fileExt || "").toLowerCase();
+                while (startIdx < chain.length) {
+                    var seg = chain[startIdx];
+                    var segLower = String(seg || "").toLowerCase();
+                    var cleanSeg = stripNumericPrefix(seg);
+                    if (isPresetCategoryBinName(seg)) {
+                        sawPresetNode = true;
+                        startIdx++;
+                        continue;
+                    }
+                    if (sawPresetNode && isCanonicalAudioRoleName(cleanSeg)) {
+                        startIdx++;
+                        continue;
+                    }
+                    if (sawPresetNode && (segLower === "others" || (extLower && segLower === extLower))) {
+                        startIdx++;
+                        continue;
+                    }
+                    if (sawPresetNode && isSeqItem && (segLower === "geral" || allSeqNamesLower[segLower] === true)) {
+                        startIdx++;
+                        continue;
+                    }
+                    break;
+                }
+                var userChain = [];
+                for (var uc = startIdx; uc < chain.length; uc++) {
+                    userChain.push(chain[uc]);
+                }
+                return userChain;
+            }
+
+            function resolveNodeSourceMode(nodeRules) {
+                if (nodeRules) {
+                    if (nodeRules.groupBySourceFolder === false) return "off";
+                    var rm = nodeRules.sourceFolderMode ? String(nodeRules.sourceFolderMode).toLowerCase() : "";
+                    if (rm === "project" || rm === "disk" || rm === "both") return rm;
+                    if (rm === "off" && nodeRules.groupBySourceFolder !== true) return "off";
+                    if (nodeRules.groupBySourceFolder === true) {
+                        return sourceFolderModeGlobal !== "off" ? sourceFolderModeGlobal : "both";
+                    }
+                }
+                return groupBySourceFolderGlobal ? sourceFolderModeGlobal : "off";
+            }
+
+            function resolveSourceSubBins(sourceMode, userBinChain, diskFolderName) {
+                var out = [];
+                if (sourceMode === "off") return out;
+                if (sourceMode === "project") {
+                    if (userBinChain && userBinChain.length > 0) {
+                        for (var u = 0; u < userBinChain.length; u++) {
+                            out.push(userBinChain[u]);
+                        }
+                    }
+                    return out;
+                }
+                if (sourceMode === "disk") {
+                    if (diskFolderName) out.push(diskFolderName);
+                    return out;
+                }
+                if (userBinChain && userBinChain.length > 0) {
+                    for (var ub = 0; ub < userBinChain.length; ub++) {
+                        out.push(userBinChain[ub]);
+                    }
+                } else if (diskFolderName) {
+                    out.push(diskFolderName);
+                }
+                return out;
+            }
+
             function isTreeRootOrCategoryBin(bin) {
                 if (!bin || !isBin(bin)) return false;
                 var cleanB = stripNumericPrefix(bin.name).toLowerCase();
@@ -1859,7 +1999,13 @@
                                     if (bundleSourceFolder) break;
                                 }
                             }
-                            if (bundleSourceFolder) {
+                            var psdSourceMode = resolveNodeSourceMode(psdBundleNodeRec.node.rules);
+                            var psdUserChain = getUserProjectBinChain(binCandidate, detectedType ? detectedType.toLowerCase() : "");
+                            var psdSourceBins = resolveSourceSubBins(psdSourceMode, psdUserChain, bundleSourceFolder);
+                            for (var psb = 0; psb < psdSourceBins.length; psb++) {
+                                psdSubPath.push(psdSourceBins[psb]);
+                            }
+                            if (false && bundleSourceFolder) {
                                 psdSubPath.push(bundleSourceFolder);
                             }
                         }
@@ -1911,7 +2057,21 @@
                                     if (preMatch && preMatch.rec) {
                                         var preNodeBin = ensureNodeBin(preMatch.rec.id);
                                         var destPreBin = preNodeBin;
+                                        var preSubBins = [];
                                         if (preMatch.rec.node.rules && preMatch.rec.node.rules.groupByMainComp) {
+                                            preSubBins.push(mainSeqName);
+                                        }
+                                        var preSourceMode = resolveNodeSourceMode(preMatch.rec.node.rules);
+                                        if (preSourceMode === "project" || preSourceMode === "both") {
+                                            var preUserChain = getUserProjectBinChain(refItem, "", true);
+                                            for (var puc = 0; puc < preUserChain.length; puc++) {
+                                                preSubBins.push(preUserChain[puc]);
+                                            }
+                                        }
+                                        if (preSubBins.length > 0) {
+                                            destPreBin = getOrCreateSubBin(preNodeBin, preSubBins, preMatch.rec.node.label);
+                                        }
+                                        if (false && preMatch.rec.node.rules && preMatch.rec.node.rules.groupByMainComp) {
                                             destPreBin = getOrCreateSubBin(preNodeBin, [mainSeqName], preMatch.rec.node.label);
                                         }
                                         if (moveItemSafe(refItem, destPreBin)) {
@@ -1937,7 +2097,18 @@
                     var mainMatch = findMatchingNode("MainComp", "", mainCandidates);
                     if (mainMatch && mainMatch.rec) {
                         var outBin = ensureNodeBin(mainMatch.rec.id);
-                        if (moveItemSafe(mainSeqItem, outBin)) {
+                        var destOutBin = outBin;
+                        var mainSourceMode = resolveNodeSourceMode(mainMatch.rec.node.rules);
+                        if (mainSourceMode === "project" || mainSourceMode === "both") {
+                            var mainUserChain = getUserProjectBinChain(mainSeqItem, "", true);
+                            if (mainUserChain.length > 0) {
+                                destOutBin = getOrCreateSubBin(outBin, mainUserChain, mainMatch.rec.node.label);
+                            }
+                        }
+                        if (moveItemSafe(mainSeqItem, destOutBin)) {
+                            movedComps++;
+                        }
+                        if (false && moveItemSafe(mainSeqItem, outBin)) {
                             movedComps++;
                         }
                     }
@@ -1989,11 +2160,30 @@
                         if (origLooseBin && !isSameBin(origLooseBin, rootItem) && origLooseBin.name) {
                             looseCandidates.push(origLooseBin.name);
                         }
-                        var loosePreMatch = findMatchingNode("PreComps", "", looseCandidates);
+                        var targetSeqType = wasOriginallyInsideMainCompBin(item) ? "MainComp" : "PreComps";
+                        var loosePreMatch = findMatchingNode(targetSeqType, "", looseCandidates);
+                        if (!loosePreMatch || !loosePreMatch.rec) {
+                            loosePreMatch = findMatchingNode("PreComps", "", looseCandidates);
+                            targetSeqType = "PreComps";
+                        }
                         if (loosePreMatch && loosePreMatch.rec) {
                             var looseNodeBin = ensureNodeBin(loosePreMatch.rec.id);
                             var targetLooseBin = looseNodeBin;
-                            if (loosePreMatch.rec.node.rules && loosePreMatch.rec.node.rules.groupByMainComp) {
+                            var looseSubBins = [];
+                            if (targetSeqType === "PreComps" && loosePreMatch.rec.node.rules && loosePreMatch.rec.node.rules.groupByMainComp) {
+                                looseSubBins.push("Geral");
+                            }
+                            var looseSourceMode = resolveNodeSourceMode(loosePreMatch.rec.node.rules);
+                            if (looseSourceMode === "project" || looseSourceMode === "both") {
+                                var looseUserChain = getUserProjectBinChain(item, "", true);
+                                for (var luc = 0; luc < looseUserChain.length; luc++) {
+                                    looseSubBins.push(looseUserChain[luc]);
+                                }
+                            }
+                            if (looseSubBins.length > 0) {
+                                targetLooseBin = getOrCreateSubBin(looseNodeBin, looseSubBins, loosePreMatch.rec.node.label);
+                            }
+                            if (false && loosePreMatch.rec.node.rules && loosePreMatch.rec.node.rules.groupByMainComp) {
                                 targetLooseBin = getOrCreateSubBin(looseNodeBin, ["Geral"], loosePreMatch.rec.node.label);
                             }
                             if (moveItemSafe(item, targetLooseBin)) {
@@ -2051,7 +2241,18 @@
                         var solidMatch = findMatchingNode("Solids", "", nameCandidates);
                         if (solidMatch && solidMatch.rec) {
                             var solidBin = ensureNodeBin(solidMatch.rec.id);
-                            if (moveItemSafe(item, solidBin)) {
+                            var destSolidBin = solidBin;
+                            var solidSourceMode = resolveNodeSourceMode(solidMatch.rec.node.rules);
+                            if (solidSourceMode === "project" || solidSourceMode === "both") {
+                                var solidUserChain = getUserProjectBinChain(item, "", false);
+                                if (solidUserChain.length > 0) {
+                                    destSolidBin = getOrCreateSubBin(solidBin, solidUserChain, solidMatch.rec.node.label);
+                                }
+                            }
+                            if (moveItemSafe(item, destSolidBin)) {
+                                movedFootages++;
+                            }
+                            if (false && moveItemSafe(item, solidBin)) {
                                 movedFootages++;
                             }
                             processedNodeIds[item.nodeId] = true;
@@ -2072,7 +2273,11 @@
                                 ? Boolean(targetNode.rules.groupBySourceFolder)
                                 : groupBySourceFolderGlobal;
 
-                            var sourceFolderName = shouldGroupBySource ? diskFolderName : "";
+                            var mediaSourceMode = resolveNodeSourceMode(targetNode.rules);
+                            var shouldGroupBySource = (mediaSourceMode !== "off");
+                            var mediaUserChain = getUserProjectBinChain(item, fileExt);
+                            var mediaSourceBins = resolveSourceSubBins(mediaSourceMode, mediaUserChain, diskFolderName);
+                            var sourceFolderName = "";
 
                             var subPath = [];
 
@@ -2097,7 +2302,7 @@
                                 subPath.push(subBinName);
 
                                 if (
-                                    !shouldGroupBySource &&
+                                    (mediaSourceBins.length === 0) &&
                                     !mediaMatch.matchedViaCatchOthers &&
                                     (fileExt === "psd" || fileExt === "psb" || fileExt === "ai") &&
                                     item.name
@@ -2112,6 +2317,9 @@
                                 }
                             }
 
+                            for (var msb = 0; msb < mediaSourceBins.length; msb++) {
+                                subPath.push(mediaSourceBins[msb]);
+                            }
                             if (sourceFolderName) {
                                 subPath.push(sourceFolderName);
                             }

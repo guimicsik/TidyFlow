@@ -474,6 +474,11 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
     var saveProjectBefore = (settings.saveProjectBefore === true);
     var reduceProject = (settings.reduceProject === true);
     var groupBySourceFolderGlobal = (settings.groupBySourceFolder !== false);
+    var sourceFolderModeGlobal = (settings.groupBySourceFolder === false || settings.sourceFolderMode === "off")
+        ? "off"
+        : ((settings.sourceFolderMode === "project" || settings.sourceFolderMode === "disk" || settings.sourceFolderMode === "both")
+            ? settings.sourceFolderMode
+            : "both");
     var unusedFolderName = settings.unusedFolderName || "Nunca Usadas";
 
     // --- Perfil de execucao (Fase 2): tempo total + varreduras de projeto ---
@@ -825,6 +830,140 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
         }
 
         // Verificar se uma pasta é um nó raiz/estrutural da árvore para não confundir com bundle PSD
+        var origParentFolderById = {};
+        var origFolderNameById = {};
+        var allCompNamesLower = {};
+        for (var opi = 1; opi <= app.project.numItems; opi++) {
+            var opItem = app.project.item(opi);
+            if (!opItem) continue;
+            if (opItem instanceof FolderItem) {
+                origFolderNameById[opItem.id] = opItem.name || "";
+            } else if (opItem instanceof CompItem && opItem.name) {
+                allCompNamesLower[String(opItem.name).toLowerCase()] = true;
+            }
+            var opParent = opItem.parentFolder;
+            if (opParent && opParent !== app.project.rootFolder && opParent.id !== undefined) {
+                origParentFolderById[opItem.id] = opParent.id;
+            }
+        }
+
+        function isMainCompNodeFolderName(folderName) {
+            if (!folderName) return false;
+            var cleanF = stripNumericPrefix(folderName).toLowerCase();
+            for (var i = 0; i < nodeRecords.length; i++) {
+                var r = nodeRecords[i].node.rules;
+                if (r && nodeSupportsType(r, "MainComp")) {
+                    var cleanNode = stripNumericPrefix(nodeRecords[i].node.name).toLowerCase();
+                    if (cleanF === cleanNode) return true;
+                }
+            }
+            return false;
+        }
+
+        function wasOriginallyInsideMainCompNode(targetItem) {
+            if (!targetItem || targetItem.id === undefined) return false;
+            var curParentId = origParentFolderById[targetItem.id];
+            var guard = 0;
+            while (curParentId !== undefined && guard < 50) {
+                guard++;
+                var fName = origFolderNameById[curParentId];
+                if (fName && isMainCompNodeFolderName(fName)) {
+                    return true;
+                }
+                curParentId = origParentFolderById[curParentId];
+            }
+            return false;
+        }
+
+        function isPresetCategoryFolderName(folderName) {
+            if (!folderName) return false;
+            var cleanF = stripNumericPrefix(folderName).toLowerCase();
+            if (folderName === unusedFolderName || cleanF === stripNumericPrefix(unusedFolderName).toLowerCase()) return true;
+            for (var i = 0; i < nodeRecords.length; i++) {
+                var cleanNode = stripNumericPrefix(nodeRecords[i].node.name).toLowerCase();
+                if (cleanF === cleanNode) return true;
+            }
+            return false;
+        }
+
+        function getUserProjectFolderChain(targetItem, fileExt, isCompItem) {
+            var chain = [];
+            if (!targetItem || targetItem.id === undefined) return chain;
+            var curParentId = origParentFolderById[targetItem.id];
+            var guard = 0;
+            while (curParentId !== undefined && guard < 50) {
+                guard++;
+                var fName = origFolderNameById[curParentId];
+                if (fName) {
+                    chain.unshift(fName);
+                }
+                curParentId = origParentFolderById[curParentId];
+            }
+            var startIdx = 0;
+            var sawPresetNode = false;
+            var extLower = String(fileExt || "").toLowerCase();
+            while (startIdx < chain.length) {
+                var seg = chain[startIdx];
+                var segLower = String(seg || "").toLowerCase();
+                if (isPresetCategoryFolderName(seg)) {
+                    sawPresetNode = true;
+                    startIdx++;
+                    continue;
+                }
+                if (sawPresetNode && (segLower === "others" || (extLower && segLower === extLower))) {
+                    startIdx++;
+                    continue;
+                }
+                if (sawPresetNode && isCompItem && (segLower === "geral" || allCompNamesLower[segLower] === true)) {
+                    startIdx++;
+                    continue;
+                }
+                break;
+            }
+            var userChain = [];
+            for (var uc = startIdx; uc < chain.length; uc++) {
+                userChain.push(chain[uc]);
+            }
+            return userChain;
+        }
+
+        function resolveNodeSourceMode(nodeRules) {
+            if (nodeRules) {
+                if (nodeRules.groupBySourceFolder === false) return "off";
+                var rm = nodeRules.sourceFolderMode ? String(nodeRules.sourceFolderMode).toLowerCase() : "";
+                if (rm === "project" || rm === "disk" || rm === "both") return rm;
+                if (rm === "off" && nodeRules.groupBySourceFolder !== true) return "off";
+                if (nodeRules.groupBySourceFolder === true) {
+                    return sourceFolderModeGlobal !== "off" ? sourceFolderModeGlobal : "both";
+                }
+            }
+            return groupBySourceFolderGlobal ? sourceFolderModeGlobal : "off";
+        }
+
+        function resolveSourceSubFolders(sourceMode, userFolderChain, diskFolderName) {
+            var out = [];
+            if (sourceMode === "off") return out;
+            if (sourceMode === "project") {
+                if (userFolderChain && userFolderChain.length > 0) {
+                    for (var u = 0; u < userFolderChain.length; u++) {
+                        out.push(userFolderChain[u]);
+                    }
+                }
+                return out;
+            }
+            if (sourceMode === "disk") {
+                if (diskFolderName) out.push(diskFolderName);
+                return out;
+            }
+            if (userFolderChain && userFolderChain.length > 0) {
+                for (var ub = 0; ub < userFolderChain.length; ub++) {
+                    out.push(userFolderChain[ub]);
+                }
+            } else if (diskFolderName) {
+                out.push(diskFolderName);
+            }
+            return out;
+        }
         function isTreeRootOrCategoryFolder(folder) {
             if (!folder || !(folder instanceof FolderItem)) return false;
             var cleanF = stripNumericPrefix(folder.name).toLowerCase();
@@ -945,7 +1084,13 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                                 if (bundleSourceFolder) break;
                             }
                         }
-                        if (bundleSourceFolder) {
+                        var psdSourceMode = resolveNodeSourceMode(psdBundleNodeRec.node.rules);
+                        var psdUserChain = getUserProjectFolderChain(folder, detectedType ? detectedType.toLowerCase() : "");
+                        var psdSourceFolders = resolveSourceSubFolders(psdSourceMode, psdUserChain, bundleSourceFolder);
+                        for (var psf = 0; psf < psdSourceFolders.length; psf++) {
+                            psdSubPath.push(psdSourceFolders[psf]);
+                        }
+                        if (false && bundleSourceFolder) {
                             psdSubPath.push(bundleSourceFolder);
                         }
                     }
@@ -990,7 +1135,21 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                                 if (preMatch && preMatch.rec) {
                                     var preNodeFolder = ensureNodeFolder(preMatch.rec.id);
                                     var destPreFolder = preNodeFolder;
+                                    var preSubPath = [];
                                     if (preMatch.rec.node.rules && preMatch.rec.node.rules.groupByMainComp) {
+                                        preSubPath.push(mainCompName);
+                                    }
+                                    var preSourceMode = resolveNodeSourceMode(preMatch.rec.node.rules);
+                                    if (preSourceMode === "project" || preSourceMode === "both") {
+                                        var preUserChain = getUserProjectFolderChain(src, "", true);
+                                        for (var puc = 0; puc < preUserChain.length; puc++) {
+                                            preSubPath.push(preUserChain[puc]);
+                                        }
+                                    }
+                                    if (preSubPath.length > 0) {
+                                        destPreFolder = getOrCreateSubFolder(preNodeFolder, preSubPath, preMatch.rec.node.label);
+                                    }
+                                    if (false && preMatch.rec.node.rules && preMatch.rec.node.rules.groupByMainComp) {
                                         destPreFolder = getOrCreateSubFolder(preNodeFolder, [mainCompName], preMatch.rec.node.label);
                                     }
                                     if (!isSameFolder(src.parentFolder, destPreFolder)) {
@@ -1015,7 +1174,19 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                 var mainMatch = findMatchingNode("MainComp", "", mainCandidates);
                 if (mainMatch && mainMatch.rec) {
                     var outFolder = ensureNodeFolder(mainMatch.rec.id);
-                    if (!isSameFolder(mainComp.parentFolder, outFolder)) {
+                    var destOutFolder = outFolder;
+                    var mainSourceMode = resolveNodeSourceMode(mainMatch.rec.node.rules);
+                    if (mainSourceMode === "project" || mainSourceMode === "both") {
+                        var mainUserChain = getUserProjectFolderChain(mainComp, "", true);
+                        if (mainUserChain.length > 0) {
+                            destOutFolder = getOrCreateSubFolder(outFolder, mainUserChain, mainMatch.rec.node.label);
+                        }
+                    }
+                    if (!isSameFolder(mainComp.parentFolder, destOutFolder)) {
+                        mainComp.parentFolder = destOutFolder;
+                        movedComps++;
+                    }
+                    if (false && !isSameFolder(mainComp.parentFolder, outFolder)) {
                         mainComp.parentFolder = outFolder;
                         movedComps++;
                     }
@@ -1049,11 +1220,30 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                     if (item.parentFolder && item.parentFolder !== app.project.rootFolder && item.parentFolder.name) {
                         looseCandidates.push(item.parentFolder.name);
                     }
-                    var loosePreMatch = findMatchingNode("PreComps", "", looseCandidates);
+                    var targetCompType = wasOriginallyInsideMainCompNode(item) ? "MainComp" : "PreComps";
+                    var loosePreMatch = findMatchingNode(targetCompType, "", looseCandidates);
+                    if (!loosePreMatch || !loosePreMatch.rec) {
+                        loosePreMatch = findMatchingNode("PreComps", "", looseCandidates);
+                        targetCompType = "PreComps";
+                    }
                     if (loosePreMatch && loosePreMatch.rec) {
                         var looseNodeFolder = ensureNodeFolder(loosePreMatch.rec.id);
                         var targetLooseFolder = looseNodeFolder;
-                        if (loosePreMatch.rec.node.rules && loosePreMatch.rec.node.rules.groupByMainComp) {
+                        var looseSubPath = [];
+                        if (targetCompType === "PreComps" && loosePreMatch.rec.node.rules && loosePreMatch.rec.node.rules.groupByMainComp) {
+                            looseSubPath.push("Geral");
+                        }
+                        var looseSourceMode = resolveNodeSourceMode(loosePreMatch.rec.node.rules);
+                        if (looseSourceMode === "project" || looseSourceMode === "both") {
+                            var looseUserChain = getUserProjectFolderChain(item, "", true);
+                            for (var luc = 0; luc < looseUserChain.length; luc++) {
+                                looseSubPath.push(looseUserChain[luc]);
+                            }
+                        }
+                        if (looseSubPath.length > 0) {
+                            targetLooseFolder = getOrCreateSubFolder(looseNodeFolder, looseSubPath, loosePreMatch.rec.node.label);
+                        }
+                        if (false && loosePreMatch.rec.node.rules && loosePreMatch.rec.node.rules.groupByMainComp) {
                             targetLooseFolder = getOrCreateSubFolder(looseNodeFolder, ["Geral"], loosePreMatch.rec.node.label);
                         }
                         if (!isSameFolder(item.parentFolder, targetLooseFolder)) {
@@ -1072,7 +1262,19 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                     var solidMatch = findMatchingNode("Solids", "", solidCandidates);
                     if (solidMatch && solidMatch.rec) {
                         var solidFolder = ensureNodeFolder(solidMatch.rec.id);
-                        if (!isSameFolder(item.parentFolder, solidFolder)) {
+                        var destSolidFolder = solidFolder;
+                        var solidSourceMode = resolveNodeSourceMode(solidMatch.rec.node.rules);
+                        if (solidSourceMode === "project" || solidSourceMode === "both") {
+                            var solidUserChain = getUserProjectFolderChain(item, "", false);
+                            if (solidUserChain.length > 0) {
+                                destSolidFolder = getOrCreateSubFolder(solidFolder, solidUserChain, solidMatch.rec.node.label);
+                            }
+                        }
+                        if (!isSameFolder(item.parentFolder, destSolidFolder)) {
+                            item.parentFolder = destSolidFolder;
+                            movedFootages++;
+                        }
+                        if (false && !isSameFolder(item.parentFolder, solidFolder)) {
                             item.parentFolder = solidFolder;
                             movedFootages++;
                         }
@@ -1133,7 +1335,11 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                             ? Boolean(targetNode.rules.groupBySourceFolder)
                             : groupBySourceFolderGlobal;
 
-                        var sourceFolderName = shouldGroupBySource ? diskFolderName : "";
+                        var mediaSourceMode = resolveNodeSourceMode(targetNode.rules);
+                        var shouldGroupBySource = (mediaSourceMode !== "off");
+                        var mediaUserChain = getUserProjectFolderChain(item, fileExt);
+                        var mediaSourceFolders = resolveSourceSubFolders(mediaSourceMode, mediaUserChain, diskFolderName);
+                        var sourceFolderName = "";
 
                         var subPath = [];
                         if (targetNode.rules && targetNode.rules.groupSubfoldersByExt) {
@@ -1143,7 +1349,7 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                             subPath.push(subFolderName);
 
                             if (
-                                !shouldGroupBySource &&
+                                (mediaSourceFolders.length === 0) &&
                                 !mediaMatch.matchedViaCatchOthers &&
                                 (fileExt === "psd" || fileExt === "psb" || fileExt === "ai")
                             ) {
@@ -1157,6 +1363,9 @@ $.global.aeft_organizeWithPreset = function (mainCompId, presetJsonString) {
                             }
                         }
 
+                        for (var msf = 0; msf < mediaSourceFolders.length; msf++) {
+                            subPath.push(mediaSourceFolders[msf]);
+                        }
                         if (sourceFolderName) {
                             subPath.push(sourceFolderName);
                         }

@@ -1,14 +1,20 @@
-param(
+﻿param(
     [int]$Width = 510,
     [int]$Height = 650,
     [switch]$AllowResize = $false,
     [switch]$MainPanel = $false,
     [int]$CollectX = -99999,
-    [int]$CollectY = -99999
+    [int]$CollectY = -99999,
+    [switch]$EnableDebugLog = $false
 )
 
 $logFile = Join-Path $PSScriptRoot "resize_debug.log"
-"=== RUN $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') Target=${Width}x${Height} AllowResize=$AllowResize CollectXY=($CollectX,$CollectY) ===" | Out-File $logFile -Append -Encoding utf8
+function Write-ResizeLog($text) {
+    if ($EnableDebugLog) {
+        $text | Out-File $logFile -Append -Encoding utf8
+    }
+}
+Write-ResizeLog ("=== RUN $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') Target=${Width}x${Height} AllowResize=$AllowResize CollectXY=($CollectX,$CollectY) ===")
 
 $mainRect = $null
 $mainRectFile = Join-Path $PSScriptRoot "main_panel_rect.json"
@@ -193,7 +199,7 @@ $candidates = New-Object System.Collections.Generic.List[PSObject]
             DeltaH         = $deltaH
         }
         $candidates.Add($item)
-        ("CANDIDATE: hwnd={0} top=({1},{2} {3}x{4}) cef=({5},{6} {7}x{8}) delta=({9},{10}) cefCount={11} titleMatch={12}" -f $item.HwndInt, $item.TopLeft, $item.TopTop, $item.OuterW, $item.OuterH, $item.CefLeft, $item.CefTop, $item.InnerW, $item.InnerH, $item.DeltaW, $item.DeltaH, $item.CefCount, $item.HasTitleMatch) | Out-File $logFile -Append -Encoding utf8
+        Write-ResizeLog ("CANDIDATE: hwnd={0} top=({1},{2} {3}x{4}) cef=({5},{6} {7}x{8}) delta=({9},{10}) cefCount={11} titleMatch={12}" -f $item.HwndInt, $item.TopLeft, $item.TopTop, $item.OuterW, $item.OuterH, $item.CefLeft, $item.CefTop, $item.InnerW, $item.InnerH, $item.DeltaW, $item.DeltaH, $item.CefCount, $item.HasTitleMatch)
     }
 
     return $true
@@ -228,17 +234,11 @@ function Unlock-NonCollectWindow($cand) {
     $style = [TidyFlowWinApi]::GetWindowLong($h, -16)
     $unlockedStyle = $style -bor 0x00040000 -bor 0x00010000
     $needsFrameRestore = ($style -ne $unlockedStyle)
-    $needsSizeRestore = ($cand.HwndInt -eq 593328 -and $cand.OuterW -le 560)
 
     if ($needsFrameRestore) {
         [TidyFlowWinApi]::SetWindowLong($h, -16, $unlockedStyle) | Out-Null
         [TidyFlowWinApi]::SetWindowPos($h, [IntPtr]::Zero, 0, 0, 0, 0, 0x0001 -bor 0x0002 -bor 0x0004 -bor 0x0020) | Out-Null
-    }
-    if ($needsSizeRestore) {
-        [TidyFlowWinApi]::SetWindowPos($h, [IntPtr]::Zero, 0, 0, 1104, 679, 0x0002 -bor 0x0004 -bor 0x0020) | Out-Null
-    }
-    if ($needsFrameRestore -or $needsSizeRestore) {
-        ("UNLOCKED MAIN/OTHER: hwnd={0} style={1:X8}->{2:X8} restoredSize={3}" -f $cand.HwndInt, $style, $unlockedStyle, $needsSizeRestore) | Out-File $logFile -Append -Encoding utf8
+        Write-ResizeLog ("UNLOCKED MAIN/OTHER: hwnd={0} style={1:X8}->{2:X8}" -f $cand.HwndInt, $style, $unlockedStyle)
     }
 }
 
@@ -261,8 +261,8 @@ foreach ($cand in $candidates) {
         }
     }
 
-    # Se a janela for identificada como Painel Principal/Workspace (CefCount > 1 ou DeltaW grande ou ID conhecido), NUNCA é o Collect
-    if ($cand.HwndInt -eq 593328 -or $cand.CefCount -gt 1 -or $cand.DeltaW -gt 150) {
+    # Se a janela for identificada como Painel Principal/Workspace (CefCount > 1 ou DeltaW grande), NUNCA é o Collect
+    if ($cand.CefCount -gt 1 -or $cand.DeltaW -gt 150) {
         $isCollect = $false
     }
     if ($null -ne $mainRect -and $null -ne $mainRect.screenX) {
@@ -345,13 +345,13 @@ if ($null -ne $chosenCollect) {
 
     $ok = [TidyFlowWinApi]::SetWindowPos($targetHwnd, [IntPtr]::Zero, 0, 0, $finalW, $finalH, 0x0002 -bor 0x0004 -bor 0x0020)
     $logLine = ("ACTION on hwnd={0} outer={1}x{2} -> final={3}x{4} ok={5} style={6:X8}->{7:X8}" -f $chosenCollect.HwndInt, $outerW, $outerH, $finalW, $finalH, $ok, $style, $newStyle)
-    $logLine | Out-File $logFile -Append -Encoding utf8
+    Write-ResizeLog $logLine
 
     $msg = "SUCCESS: Resized Collect window (hwnd=$($chosenCollect.HwndInt)) to ${Width}x${Height}"
-    $msg | Out-File $logFile -Append -Encoding utf8
+    Write-ResizeLog $msg
     Write-Output $msg
 } else {
     $msg = "WINDOW_NOT_FOUND"
-    $msg | Out-File $logFile -Append -Encoding utf8
+    Write-ResizeLog $msg
     Write-Output $msg
 }

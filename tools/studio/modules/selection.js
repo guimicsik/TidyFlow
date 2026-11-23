@@ -263,7 +263,7 @@ export function openInspectorForElement(el, panelKey, isAdditive) {
   var iconSection = document.getElementById('inspSecIcon');
   if (iconSection) iconSection.style.display = (!isMultiHeader && el.tagName === 'BUTTON' && !el.matches('.tf-select-trigger, .rules-summary-btn, [data-tf-design^="folder-"]')) ? '' : 'none';
   if (inspInputText && !isMultiHeader) {
-    var textTarget = el.querySelector && el.querySelector('.btn-tile-label, .tf-toggle__face, span:not(.toggle-slider):not(.tf-btn-icon):not(.label-option-dot)');
+    var textTarget = el.querySelector && (el.querySelector('.btn-tile-label, .tf-toggle__face') || el.querySelector('span:not(.toggle-slider):not(.tf-btn-icon):not(.label-option-dot)'));
     inspInputText.value = textTarget ? extractReadableTextFromElement(textTarget, '') : elText.replace(/\s*\|\s*/g, '\n');
   }
 
@@ -367,7 +367,7 @@ export function initInspectorEvents() {
       var existingIcon = el.querySelector ? el.querySelector(".tf-btn-icon") : null;
       var labelBox = (el.classList && (el.classList.contains("btn-tile-label") || el.classList.contains("tf-toggle__face")))
         ? el
-        : (el.querySelector ? el.querySelector(".btn-tile-label, .tf-toggle__face, span:not(.toggle-slider):not(.tf-btn-icon):not(.label-option-dot)") : null);
+        : (el.querySelector ? (el.querySelector(".btn-tile-label, .tf-toggle__face") || el.querySelector("span:not(.toggle-slider):not(.tf-btn-icon):not(.label-option-dot)")) : null);
 
       if (labelBox) {
         var textContainer = el.ownerDocument.createElement('span');

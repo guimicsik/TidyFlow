@@ -164,6 +164,7 @@
         "saveProjectBefore": true,
         "reduceProject": false,
         "groupBySourceFolder": true,
+        "sourceFolderMode": "both",
         "unusedFolderName": "Nunca Usadas",
         "separateAudioCategories": true,
         "numberAudioCategories": true
@@ -227,6 +228,7 @@
                 "handlePsdBundles": true,
                 "groupSubfoldersByExt": true,
                 "groupBySourceFolder": true,
+        "sourceFolderMode": "both",
                 "catchOthers": true,
                 "nameFilter": "",
                 "nameFilterMode": "contains"
@@ -246,6 +248,7 @@
                 "handlePsdBundles": false,
                 "groupSubfoldersByExt": true,
                 "groupBySourceFolder": true,
+        "sourceFolderMode": "both",
                 "catchOthers": true,
                 "nameFilter": "",
                 "nameFilterMode": "contains"
@@ -263,6 +266,7 @@
                 "handlePsdBundles": false,
                 "groupSubfoldersByExt": true,
                 "groupBySourceFolder": true,
+        "sourceFolderMode": "both",
                 "catchOthers": true,
                 "nameFilter": "",
                 "nameFilterMode": "contains"
@@ -304,10 +308,21 @@
     "saveProjectBefore",
     "reduceProject",
     "groupBySourceFolder",
+    "sourceFolderMode",
     "unusedFolderName",
     "separateAudioCategories",
     "numberAudioCategories"
   ];
+
+  var SOURCE_FOLDER_MODES = ["both", "project", "disk", "off"];
+
+  function normalizeSourceFolderMode(rawMode, rawBool) {
+    if (rawBool === false) return "off";
+    var m = rawMode ? String(rawMode).trim().toLowerCase() : "";
+    if (m === "project" || m === "disk" || m === "both") return m;
+    if (m === "off" && rawBool !== true) return "off";
+    return "both";
+  }
 
   function collectNodeGroupBySourceFolder(nodes, out) {
     var result = out || {};
@@ -316,7 +331,8 @@
       var node = nodes[i];
       if (!node) continue;
       var rules = node.rules || {};
-      result[String(node.id)] = rules.groupBySourceFolder !== undefined
+      result[String(node.id)] = normalizeSourceFolderMode(rules.sourceFolderMode, rules.groupBySourceFolder);
+      if (false && rules.groupBySourceFolder !== undefined) result[String(node.id)] = rules.groupBySourceFolder !== undefined
         ? Boolean(rules.groupBySourceFolder)
         : true;
       if (node.children && node.children.length) {
@@ -334,7 +350,12 @@
       var key = String(node.id);
       if (overrides[key] !== undefined) {
         if (!node.rules) node.rules = {};
-        node.rules.groupBySourceFolder = Boolean(overrides[key]);
+        var ovVal = overrides[key];
+        var ovMode = typeof ovVal === "string"
+          ? normalizeSourceFolderMode(ovVal, ovVal !== "off")
+          : normalizeSourceFolderMode(undefined, Boolean(ovVal));
+        node.rules.sourceFolderMode = ovMode;
+        node.rules.groupBySourceFolder = (ovMode !== "off");
       }
       if (node.children && node.children.length) {
         applyNodeGroupBySourceFolder(node.children, overrides);
@@ -442,7 +463,9 @@
       groupByMainComp: Boolean(rules.groupByMainComp),
       handlePsdBundles: Boolean(rules.handlePsdBundles),
       groupSubfoldersByExt: Boolean(rules.groupSubfoldersByExt),
-      groupBySourceFolder: rules.groupBySourceFolder !== undefined ? Boolean(rules.groupBySourceFolder) : true,
+      groupSubfoldersByExt: Boolean(rules.groupSubfoldersByExt),
+      sourceFolderMode: normalizeSourceFolderMode(rules.sourceFolderMode, rules.groupBySourceFolder),
+      groupBySourceFolder: normalizeSourceFolderMode(rules.sourceFolderMode, rules.groupBySourceFolder) !== "off",
       catchOthers: Boolean(rules.catchOthers),
       nameFilter: rules.nameFilter ? String(rules.nameFilter) : "",
       nameFilterMode: rules.nameFilterMode === "regex" ? "regex" : "contains"
@@ -487,7 +510,8 @@
         deleteEmptyFolders: s.deleteEmptyFolders !== undefined ? Boolean(s.deleteEmptyFolders) : true,
         saveProjectBefore: s.saveProjectBefore !== undefined ? Boolean(s.saveProjectBefore) : true,
         reduceProject: s.reduceProject !== undefined ? Boolean(s.reduceProject) : false,
-        groupBySourceFolder: s.groupBySourceFolder !== undefined ? Boolean(s.groupBySourceFolder) : true,
+        sourceFolderMode: normalizeSourceFolderMode(s.sourceFolderMode, s.groupBySourceFolder),
+        groupBySourceFolder: normalizeSourceFolderMode(s.sourceFolderMode, s.groupBySourceFolder) !== "off",
         unusedFolderName: (s.unusedFolderName && String(s.unusedFolderName).trim()) ? String(s.unusedFolderName).trim() : "Nunca Usadas",
         separateAudioCategories: s.separateAudioCategories !== undefined ? Boolean(s.separateAudioCategories) : true,
         numberAudioCategories: s.numberAudioCategories !== undefined ? Boolean(s.numberAudioCategories) : true
@@ -519,6 +543,8 @@
   PresetManager.DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS;
   PresetManager.DEFAULT_EXTENSIONS_AE = DEFAULT_EXTENSIONS_AE;
   PresetManager.DEFAULT_EXTENSIONS_PPRO = DEFAULT_EXTENSIONS_PPRO;
+  PresetManager.SOURCE_FOLDER_MODES = SOURCE_FOLDER_MODES;
+  PresetManager.normalizeSourceFolderMode = normalizeSourceFolderMode;
   PresetManager.STORAGE_KEYS = {
     active: STORAGE_KEY_ACTIVE,
     userPresets: STORAGE_KEY_USER_PRESETS,
@@ -668,7 +694,14 @@
             base.settings.reduceProject = Boolean(savedSettings.reduceProject);
           }
           if (savedSettings.groupBySourceFolder !== undefined) {
-            base.settings.groupBySourceFolder = Boolean(savedSettings.groupBySourceFolder);
+            var savedSrcMode = normalizeSourceFolderMode(savedSettings.sourceFolderMode, savedSettings.groupBySourceFolder);
+            base.settings.sourceFolderMode = savedSrcMode;
+            base.settings.groupBySourceFolder = (savedSrcMode !== "off");
+          }
+          if (savedSettings.sourceFolderMode !== undefined && savedSettings.groupBySourceFolder === undefined) {
+            var onlySrcMode = normalizeSourceFolderMode(savedSettings.sourceFolderMode, undefined);
+            base.settings.sourceFolderMode = onlySrcMode;
+            base.settings.groupBySourceFolder = (onlySrcMode !== "off");
           }
           if (savedSettings.unusedFolderName !== undefined) {
             var savedUnusedName = String(savedSettings.unusedFolderName || "").trim();
@@ -1141,6 +1174,7 @@
         handlePsdBundles: false,
         groupSubfoldersByExt: false,
         groupBySourceFolder: true,
+        sourceFolderMode: "both",
         catchOthers: false,
         nameFilter: "",
         nameFilterMode: "contains"
